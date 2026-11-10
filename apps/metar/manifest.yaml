@@ -7,9 +7,10 @@ author: all3fox
 fileName: metar.star
 packageName: metar
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather
   - utility
 published: '2022-07-08T18:02:38Z'
-updated: '2026-08-20T23:08:03Z'
+updated: '2026-10-01T16:46:59Z'

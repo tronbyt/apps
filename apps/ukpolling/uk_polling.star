@@ -8,7 +8,7 @@ Author: dinosaursrarr
 load("bsoup.star", "bsoup")
 load("http.star", "http")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -126,8 +126,9 @@ def draw_series(data, key, days):
     return render.Plot(
         data = averages,
         chart_type = "line",
-        width = 64,
-        height = 32,
+        width = canvas.width(),
+        # the chart is the whole panel: 32 rows on 64x32, 64 on square
+        height = canvas.height(),
         x_lim = (oldest, newest),
         y_lim = (0, 60),
         color = PARTY_COLOURS[key][1],

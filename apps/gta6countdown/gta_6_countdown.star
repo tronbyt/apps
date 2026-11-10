@@ -539,12 +539,14 @@ def main(config):
 
     # The phone widget is a still, so spend nothing on frames it will not play.
     if config.bool("$widget", False):
-        return render.Root(child = build_frame(base, remaining, scale))
+        # The scene is WIDTH x HEIGHT at the 1x/2x scale; bound it to that and centre it on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = WIDTH * scale, height = HEIGHT * scale, child = build_frame(base, remaining, scale))))
 
     # Once it has launched nothing moves any more, so one frame is the whole
     # animation and the encoder is spared fifty-nine copies of it.
     if remaining <= 0:
-        return render.Root(child = build_frame(base, remaining, scale))
+        # The scene is WIDTH x HEIGHT at the 1x/2x scale; bound it to that and centre it on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = WIDTH * scale, height = HEIGHT * scale, child = build_frame(base, remaining, scale))))
 
     frames = []
     for i in range(FRAME_COUNT):
@@ -553,7 +555,8 @@ def main(config):
     return render.Root(
         delay = DELAY_MS,
         max_age = MAX_AGE,
-        child = render.Animation(children = frames),
+        # The scene is WIDTH x HEIGHT at the 1x/2x scale; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = WIDTH * scale, height = HEIGHT * scale, child = render.Animation(children = frames))),
     )
 
 def get_schema():

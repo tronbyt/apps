@@ -7,7 +7,7 @@ Author: tavdog
 
 load("hash.star", "hash")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 # regex to convert tsv to array
@@ -936,8 +936,18 @@ word_array = [
 
 def render_error():
     return render.Root(
-        render.WrappedText("Something went wrong getting today's word!"),
+        # Centre the block on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("Something went wrong getting today's word!")),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     print("Starting")
@@ -970,7 +980,9 @@ def main():
                             ),
                         ],
                     ),
-                    height = 25,
+                    height = canvas.height() - 7,  # 25 above the rule and label on 64x32
+                    # Short entries sit mid-panel on the square; 64x32 keeps its top-aligned look.
+                    align = "center" if is_square() else "start",
                     offset_start = 23,
                     scroll_direction = "vertical",
                 ),

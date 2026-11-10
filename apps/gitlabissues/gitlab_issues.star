@@ -1,7 +1,7 @@
 load("cache.star", "cache")
 load("http.star", "http")
 load("images/icon.png", ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ICON = ICON_ASSET.readall()
@@ -15,12 +15,13 @@ def main(config):
     icon = render.Image(src = ICON)
     text = render.WrappedText(get_issues(token, domain))
     return render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             expanded = True,
             cross_align = "top",
             children =
                 [icon, text],
-        ),
+        )),
     )
 
 def get_issues(accesstoken, domain):

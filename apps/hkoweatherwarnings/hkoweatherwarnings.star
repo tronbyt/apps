@@ -129,14 +129,17 @@ def main(config):
     if not warnings:
         if skip_when_clear:
             return []
-        return render.Root(child = no_warnings_frame(scale))
+
+        # Centre the block on taller panels (64x64).
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = no_warnings_frame(scale)))
 
     frames = [warning_frame(w, scale) for w in warnings]
 
     return render.Root(
         delay = 2000,
         show_full_animation = True,
-        child = render.Animation(children = frames),
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = frames)),
     )
 
 def get_schema():

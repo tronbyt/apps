@@ -9,7 +9,7 @@ Author: tidbytdev
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -115,6 +115,15 @@ def get_schema_options(default_font):
     return opts
 
 # Main app logic
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     """Main applet function."""
 
@@ -323,7 +332,8 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(config.get("scroll", DEFAULT_DELAY)),
-        child = render.Animation(children = frames),
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = frames)))) if is_square() else render.Animation(children = frames),
     )
 
 def get_schema():

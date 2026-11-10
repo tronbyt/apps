@@ -7,9 +7,10 @@ author: Petros Fytilis
 fileName: subreddit.star
 packageName: subreddit
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - news
   - media
 published: '2022-06-09T17:19:26Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T19:49:38Z'

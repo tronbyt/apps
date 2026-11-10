@@ -7,8 +7,9 @@ author: DavidGoldman
 fileName: path_times.star
 packageName: pathtimes
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - real-time
 published: '2025-05-31T12:11:10Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T16:29:58Z'

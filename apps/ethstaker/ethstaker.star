@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/checkmark.png", CHECKMARK_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CHECKMARK = CHECKMARK_ASSET.readall()
@@ -26,7 +26,8 @@ def main(config):
         status_rows = chunk_list(statuses, FULL_ROW_LIMIT)
 
         return render.Root(
-            child = render.Padding(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 child = render.Column(
                     children = [
                         render.Padding(
@@ -51,11 +52,12 @@ def main(config):
                     ],
                 ),
                 pad = 2,
-            ),
+            )),
         )
     else:
         return render.Root(
-            child = render.Padding(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
                 child = render.Column(
                     children = [
                         render.Padding(
@@ -66,7 +68,7 @@ def main(config):
                     ],
                 ),
                 pad = 2,
-            ),
+            )),
         )
 
 def header_status(statuses):

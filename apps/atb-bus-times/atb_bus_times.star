@@ -1,8 +1,11 @@
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 # Entur API endpoint for real-time departures
+# One 8px row per departure under the 8px header: 3 on 64x32, 7 on 64x64.
+DEPARTURES = (canvas.height() - 8) // 8
+
 ENTUR_API_URL = "https://api.entur.io/journey-planner/v3/graphql"
 
 def main(config):
@@ -13,7 +16,7 @@ def main(config):
 
     # Create the header box
     header = render.Box(
-        width = 64,
+        width = canvas.width(),
         height = 8,
         color = "#333333",
         child = render.Text(
@@ -29,7 +32,7 @@ def main(config):
         quays {
           id
           publicCode
-          estimatedCalls(timeRange: 72000, numberOfDepartures: 3) {
+          estimatedCalls(timeRange: 72000, numberOfDepartures: %d) {
             expectedDepartureTime
             destinationDisplay {
               frontText
@@ -42,7 +45,7 @@ def main(config):
           }
         }
       }
-    }""" % stop_id
+    }""" % (stop_id, DEPARTURES)
 
     # Set up headers
     headers = {
@@ -90,7 +93,7 @@ def main(config):
                         # Create a more compact display with proper spacing
                         departures.append(
                             render.Box(
-                                width = 64,
+                                width = canvas.width(),
                                 height = 8,
                                 child = render.Row(
                                     children = [

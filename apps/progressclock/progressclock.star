@@ -9,7 +9,7 @@ v1.1 - Fixed support for custom timezones
 """
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 def main():
@@ -32,14 +32,14 @@ def main():
     time_ratio = elapsed_seconds / total_seconds_in_day
 
     # Scale the time ratio to the width of the box
-    box_width = math.floor(time_ratio * 64)
+    box_width = math.floor(time_ratio * canvas.width())
 
     return render.Root(
         child = render.Stack(
             children = [
                 render.Box(
                     width = box_width,
-                    height = 32,
+                    height = canvas.height(),
                     color = "#cc0000",
                 ),
                 render.Row(

@@ -7,7 +7,7 @@ Author: PMK (@pmk)
 
 load("http.star", "http")
 load("images/background.gif", BACKGROUND_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BACKGROUND = BACKGROUND_ASSET.readall()
@@ -46,22 +46,31 @@ def print_moscowtime(show_msat = DEFAULT_SHOW_MSAT):
 def main(config):
     show_msat = config.bool("show_msat", DEFAULT_SHOW_MSAT)
 
+    # The card is 64x32 artwork; on a taller panel it sits in the middle.
     return render.Root(
         delay = 1000,
-        child = render.Stack(
-            children = [
-                render.Image(
-                    src = BACKGROUND,
-                    width = 64,
-                    height = 32,
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        render.Image(
+                            src = BACKGROUND,
+                            width = 64,
+                            height = 32,
+                        ),
+                        render.Padding(
+                            pad = (3, 5, 0, 0),
+                            child = render.Row(
+                                children = print_moscowtime(show_msat),
+                            ),
+                        ),
+                    ],
                 ),
-                render.Padding(
-                    pad = (3, 5, 0, 0),
-                    child = render.Row(
-                        children = print_moscowtime(show_msat),
-                    ),
-                ),
-            ],
+            ),
         ),
     )
 

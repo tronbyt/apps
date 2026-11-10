@@ -7,10 +7,11 @@ author: Jordan Fitzpatrick
 recommendedInterval: 5
 fileName: neo_tracker.star
 packageName: neotracker
+supports64x64: true
 category: science
 tags:
   - space
   - asteroids
   - tech
 published: '2025-07-10T19:26:12Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T18:52:35Z'

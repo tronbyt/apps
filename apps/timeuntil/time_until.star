@@ -5,7 +5,7 @@ Description: Got an important event coming up? Time Until keeps you on track!
 Author: JeffLac (Recreation of Tidbyt Original)
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -36,6 +36,15 @@ def get_time_components(duration_seconds):
 
     # Return the two largest components
     return components[:2]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     timezone = config.get("timezone") or "America/New_York"
@@ -115,8 +124,11 @@ def main(config):
                         render.Box(width = 1, height = 1),  # Right padding
                     ],
                 ),
-                # Time display grid
+                # Time display grid; on a square panel it expands and spreads
+                # its two rows down the panel instead of sitting under the rule
                 render.Column(
+                    expanded = is_square(),
+                    main_align = "space_evenly" if is_square() else "start",
                     children = [
                         # Top row - fixed height of 10 pixels (half of 20)
                         render.Box(

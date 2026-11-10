@@ -6,16 +6,35 @@ Author: skola28
 """
 
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-def draw_box(color):
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall, but it has the width to keep the score beside the board.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def draw_box(color, size = 5):
     return render.Box(
-        width = 5,
-        height = 5,
+        width = size,
+        height = size,
         color = "#000000",
-        child = render.Box(width = 4, height = 4, color = color),
+        child = render.Box(width = size - 1, height = size - 1, color = color),
     )
+
+def square_box_size(rows):
+    """The biggest tile that fits a 5-wide board plus a line of score text.
+
+    Beside the text the board can only be about 25px wide; above it, it has
+    the whole panel, so the tiles roughly double.
+    """
+    by_height = (canvas.height() - 12) // max(rows, 1)
+    by_width = canvas.width() // 5
+    return max(5, min(by_height, by_width))
 
 def main(config):
     """Intent is to take your Wordle Score and have it display on your Tidbyt"""
@@ -77,6 +96,41 @@ def main(config):
         "🟨": "#b59f3b",
         "⬛": "#3a3a3c",
     }
+
+    # A square panel has the rows to put the score above the board instead of
+    # beside it, which lets the board use the full width rather than the ~25px
+    # left over next to the text.
+    if is_square():
+        size = square_box_size(number_of_guesses)
+        return render.Root(
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Row(
+                        main_align = "center",
+                        cross_align = "center",
+                        children = [
+                            render.Text(content = wordle_title + " ", color = "#FFFFFF"),
+                            render.Text(content = wordle_score_number, color = "#FFFFFF"),
+                        ],
+                    ),
+                    render.Column(
+                        cross_align = "center",
+                        children = [
+                            render.Row(
+                                children = [
+                                    draw_box(colordictionary.get(box, "#3a3a3c"), size)
+                                    for box in board_as_list[row]
+                                ],
+                            )
+                            for row in range(number_of_guesses)
+                        ],
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         child = render.Column(

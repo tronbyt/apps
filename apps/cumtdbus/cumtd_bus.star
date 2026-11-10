@@ -6,7 +6,7 @@ Enter your address to see buses at nearby stops.
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 API_BASE = "https://developer.mtd.org/api/v2.2/json"
@@ -329,7 +329,7 @@ def render_bus_list(departures):
 
     # Vertical marquee to scroll through all buses
     return render.Marquee(
-        height = 25,
+        height = canvas.height() - 7,  # 25 under the header on 64x32
         scroll_direction = "vertical",
         offset_start = 0,
         offset_end = 0,

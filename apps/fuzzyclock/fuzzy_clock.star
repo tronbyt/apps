@@ -305,13 +305,14 @@ def main(config):
 
     return render.Root(
         max_age = 60 * 10,
-        child = render.Padding(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
             pad = (3 * scale, 4 * scale, 3 * scale, 4 * scale),
             child = render.Column(
                 children = texts,
                 main_align = "space_evenly",
             ),
-        ),
+        )),
     )
 
 def get_schema():

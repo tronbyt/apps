@@ -45,7 +45,18 @@ THEMES = {
     "paper": {"text": "#26221C", "top": "#D9D3C7", "bottom": "#C3BCAE", "line": "#00000055", "flash": "#FFFFFF", "bezel": "#0D0D0D"},
 }
 
-COLS, ROWS = 7, 3
+# A square (64x64) board is the same 64px wide as a classic one, so it holds
+# the same 7 columns of 9px flaps at scale 1 -- what it has is twice the rows.
+# Panels are told apart by SHAPE, never by size: the 128x64 wide panel is also
+# 64 tall, and it is a 7x3 board of double-sized flaps, not a 7x6 one.
+COLS = 7
+
+def is_square():
+    """True on a 64x64 panel."""
+    w, h = canvas.size()
+    return h == w
+
+ROWS = 6 if is_square() else 3
 MIN_FLIPS = 15
 
 # The no-re-flip fix: 700 frames @50ms = 35s. The server caps the encoded
@@ -198,9 +209,23 @@ def build_lines(config):
         return ["", t_str, ""]
     return [d_str, t_str, day]
 
+def fill_board(lines):
+    """Centres a layout's lines on a board that may have more rows than lines.
+
+    The clock layouts are written as three lines because that is what a 64x32
+    board holds. A square board has six rows, so they sit in the middle with
+    blank flaps above and below rather than hanging from the top. This also
+    guarantees exactly ROWS lines, which prepare_message relies on: a short
+    message on a tall board would otherwise index past the end of the string.
+    """
+    lines = lines[:ROWS]
+    pad = ROWS - len(lines)
+    top = pad // 2
+    return [""] * top + lines + [""] * (pad - top)
+
 def prepare_message(config):
     message = ""
-    for line in build_lines(config):
+    for line in fill_board(build_lines(config)):
         line = center_text(line, COLS)
         if config.get("filler", "blank") == "color":
             processed = ""
@@ -226,7 +251,10 @@ def main(config):
         r, c = i // COLS, i % COLS
 
         if reveal_type == "row":
-            delay = r * 10
+            # Spread the same total stagger over however many rows there are,
+            # so a six-row board still lands every flap before frame 95 rather
+            # than holding a half-flipped board for the rest of the cycle.
+            delay = r * (30 // ROWS)
         elif reveal_type == "wave":
             delay = c * 5
         elif reveal_type == "center":

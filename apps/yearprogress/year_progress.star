@@ -8,11 +8,24 @@ Author: chrisbateman
 load("animation.star", "animation")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 DEFAULT_COLOR = "#47a"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# The bar is 10 rows on a 64x32 panel and 24 on a square one, where the
+# year label and percentage keep their size and the column spreads them.
+BAR_HEIGHT = 24 if is_square() else 10
 
 def main(config):
     progress_bar_color = config.get("color", DEFAULT_COLOR)
@@ -58,13 +71,13 @@ def main(config):
             animation.Transformation(
                 child = render.Box(
                     render.Box(
-                        render.Box(width = 1, height = 10, color = "#ffffff11"),
+                        render.Box(width = 1, height = BAR_HEIGHT, color = "#ffffff11"),
                         width = 3,
-                        height = 10,
+                        height = BAR_HEIGHT,
                         color = "#ffffff22",
                     ),
                     width = 7,
-                    height = 10,
+                    height = BAR_HEIGHT,
                     color = "#ffffff22",
                 ),
                 duration = int(pulseDuration),
@@ -101,11 +114,11 @@ def main(config):
                             ],
                         ),
                         width = progress_box_width,
-                        height = 10,
+                        height = BAR_HEIGHT,
                         color = "#222",
                     ),
                     padding = 1,
-                    height = 12,
+                    height = BAR_HEIGHT + 2,
                     color = "#ccc",
                 ),
                 render.Box(height = 2),

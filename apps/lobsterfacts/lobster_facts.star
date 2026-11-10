@@ -7,8 +7,7 @@ Author: Marc ten Bosch
 
 load("images/the_icon.png", THE_ICON_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
-load("time.star", "time")
+load("render.star", "canvas", "render")
 
 THE_ICON = THE_ICON_ASSET.readall()
 
@@ -50,7 +49,6 @@ FACTS = [
 ]
 
 def main():
-
     idx = random.number(0, len(FACTS) - 1)
     current_fact = FACTS[idx]
 
@@ -58,7 +56,8 @@ def main():
         child = render.Padding(
             pad = 1,
             child = render.Marquee(
-                height = 30,
+                # the panel less its 1px padding: 30 on 64x32, 62 on square
+                height = canvas.height() - 2,
                 child = render.Column(
                     cross_align = "center",
                     children = [

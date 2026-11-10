@@ -8,7 +8,7 @@ Author: Codex
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -31,6 +31,15 @@ SOIL_VAR_BY_DEPTH = {
     "6cm": "soil_temperature_6cm",
     "18cm": "soil_temperature_18cm",
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = json.decode(config.get("location") or DEFAULT_LOCATION)
@@ -136,6 +145,18 @@ def main(config):
             ]),
         ),
     ]
+
+    # The panel is drawn against 32 rows with hand-placed padding; on a
+    # square panel the whole scene is centred rather than hung from the top.
+    if is_square():
+        return render.Root(
+            child = render.Box(
+                width = 64,
+                height = canvas.height(),
+                color = "#091a13",
+                child = render.Box(width = 64, height = 32, child = render.Stack(children = children)),
+            ),
+        )
 
     return render.Root(
         child = render.Stack(

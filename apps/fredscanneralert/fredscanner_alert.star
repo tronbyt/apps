@@ -1,5 +1,5 @@
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 API_URL = "https://www.frederickscanner.com/fredscannerpro/fredscannertweet.json"
 
@@ -14,7 +14,8 @@ def main():
 
     return render.Root(
         delay = int(config.get("scroll", 25)),
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Text("  FredScanner", color = "#00FFFF"),
                 render.Text("  Latest Alert", color = "#cc0000"),
@@ -24,5 +25,5 @@ def main():
                     child = render.Text("%s" % tweet, color = "#FFFFFF"),
                 ),
             ],
-        ),
+        )),
     )

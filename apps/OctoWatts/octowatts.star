@@ -9,10 +9,10 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/icon.png", ICON_ASSET = "file")
+load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
-load("random.star", "random")
 
 ICON = ICON_ASSET.readall()
 
@@ -359,6 +359,7 @@ def render_content(chart, pixels, pixels_border, demand_text, trend, trend_color
         delay = 100,
         child = render.Column(
             expanded = True,
+            main_align = "center",
             children = [
                 render.Box(height = 1),
                 common_row,

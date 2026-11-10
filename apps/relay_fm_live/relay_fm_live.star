@@ -90,30 +90,30 @@ def get_next_recording(live, timezone, scale, api_key):
         title = render.Text("Check back soon for live streams", font = title_font)
         start_text = render.Text("Relay", font = start_font)
 
-    return render.Box(
-        child = render.Padding(
-            child = render.Column(
-                children = [
-                    header,
-                    render.Marquee(
-                        width = 35 * scale,
-                        child = title,
-                        offset_start = 35 * scale,
-                        offset_end = 35 * scale,
-                    ),
-                    render.Marquee(
-                        width = 35 * scale,
-                        child = start_text,
-                        offset_start = 35 * scale,
-                        offset_end = 35 * scale,
-                    ),
-                ],
+    return header, title, start_text
+
+def render_show(header, title, start_text, width):
+    return render.Column(
+        children = [
+            header,
+            render.Marquee(
+                width = width,
+                child = title,
+                offset_start = width,
+                offset_end = width,
             ),
-            pad = (1 * scale, 0, 0, 0),
-        ),
-        height = 29 * scale,
-        color = "#333F48",
+            render.Marquee(
+                width = width,
+                child = start_text,
+                offset_start = width,
+                offset_end = width,
+            ),
+        ],
     )
+
+def is_square():
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     scale = 2 if canvas.is2x() else 1
@@ -142,14 +142,40 @@ def main(config):
         img = render.Image(src = logo, width = 29 * scale, height = 29 * scale)
     elif live:
         img = generate_qrcode(art, scale)
-    show = get_next_recording(live, timezone, scale, api_key)
-    main_content = render.Row(
-        children = [
-            img,
-            show,
-        ],
-        expanded = True,
-    )
+    header, title, start_text = get_next_recording(live, timezone, scale, api_key)
+
+    if is_square():
+        # Art centred on top, with the show details across the full width
+        # underneath it.
+        main_content = render.Box(
+            height = 61,
+            color = "#333F48",
+            child = render.Column(
+                children = [
+                    render.Box(height = 31, child = img),
+                    render.Padding(
+                        child = render_show(header, title, start_text, 62),
+                        pad = (1, 1, 1, 0),
+                    ),
+                ],
+            ),
+        )
+    else:
+        main_content = render.Row(
+            children = [
+                img,
+                render.Box(
+                    child = render.Padding(
+                        child = render_show(header, title, start_text, 35 * scale),
+                        pad = (1 * scale, 0, 0, 0),
+                    ),
+                    height = 29 * scale,
+                    color = "#333F48",
+                ),
+            ],
+            expanded = True,
+        )
+
     return render.Root(
         child = render.Column(
             children = [

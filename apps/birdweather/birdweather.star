@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -35,7 +35,7 @@ def main(config):
         log(message)
         return render.Root(
             delay = 500,
-            child = render.WrappedText(content = message, font = DEFAULT_FONT),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(content = message, font = DEFAULT_FONT)),
         )
 
     species_json = query(token)
@@ -43,7 +43,8 @@ def main(config):
 
     return render.Root(
         delay = 500,
-        child = render_species(single_species),
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render_species(single_species)),
     )
 
 def get_schema():

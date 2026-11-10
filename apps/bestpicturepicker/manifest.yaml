@@ -7,8 +7,9 @@ author: joshuakopman
 fileName: bestpicturepicker.star
 packageName: bestpicturepicker
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - media
 published: '2023-12-29T13:55:57Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T20:24:07Z'

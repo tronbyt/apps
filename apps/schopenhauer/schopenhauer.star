@@ -6,7 +6,7 @@ Author: nelken
 """
 
 load("images/img_b64.jpg", IMG_B64_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 IMG_B64 = IMG_B64_ASSET.readall()
@@ -424,6 +424,15 @@ quotes = [
     },
 ]
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     # the app design is inspired by the bofh quotes design
 
@@ -435,7 +444,52 @@ def main():
     quote = selected_quote["quote"]
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            expanded = False,
+            children = [
+                render.Row(
+                    children = [
+                        render.Image(src = img),
+                        render.Column(
+                            expanded = False,
+                            children = [
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = "Schopenhauer",
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = " ",
+                                ),
+                                render.Text(
+                                    font = "CG-pixel-3x5-mono",
+                                    color = "#0a0",
+                                    content = "Says:",
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Text(
+                    font = "CG-pixel-4x5-mono",
+                    color = "#0a0",
+                    content = " ",
+                ),
+                render.Marquee(
+                    width = 64,
+                    height = 16,
+                    child = render.WrappedText(
+                        font = "CG-pixel-3x5-mono",
+                        height = 16,
+                        linespacing = -1,
+                        content = ("%s" % quote),
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             expanded = False,
             children = [
                 render.Row(

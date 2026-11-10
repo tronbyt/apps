@@ -7,7 +7,7 @@ Author: LunchBox8484
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -97,9 +97,15 @@ def main(config):
     loc = json.decode(location)
     timezone = loc["timezone"]
     now = time.now().in_location(timezone)
-    datePast = now - time.parse_duration("%dh" % 1 * 24)
-    dateFuture = now + time.parse_duration("%dh" % 6 * 24)
-    league = {LEAGUE: API + "?limit=100" + (selectedTeam == "all" and " " or "&dates=" + datePast.format("20060102") + "-" + dateFuture.format("20060102"))}
+    league = {}
+    if selectedTeam == "all":
+        league[LEAGUE] = API + "?limit=100"
+    else:
+        for d in range(-1, 7):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + "?dates=" + day_str
+
     scores = get_scores(league, selectedTeam)
     if len(scores) > 0:
         for i, s in enumerate(scores):
@@ -226,6 +232,10 @@ def main(config):
                         homeScoreColor = "#fff"
                         awayScoreColor = "#fff"
 
+            # on square panels two games share each animation frame, so the
+            # rotating clock in the top shelf advances per frame, not per game
+            frameIndex = i // 2 if is_square() else i
+
             if displayType == "retro":
                 retroTextColor = "#ffe065"
                 retroBorderColor = "#000"
@@ -242,7 +252,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, retroTextColor, retroBorderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, retroTextColor, retroBorderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Column(
                                     children = [
@@ -278,7 +288,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Column(
                                     children = [
@@ -319,7 +329,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Row(
                                     expanded = True,
@@ -376,7 +386,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Row(
                                     expanded = True,
@@ -419,7 +429,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Row(
                                     expanded = True,
@@ -464,7 +474,7 @@ def main(config):
                                     expanded = True,
                                     main_align = "space_between",
                                     cross_align = "start",
-                                    children = get_date_column(displayTop, now, i, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
+                                    children = get_date_column(displayTop, now, frameIndex, rotationSpeed, textColor, borderColor, displayType, gameTime, timeColor),
                                 ),
                                 render.Row(
                                     expanded = True,
@@ -491,6 +501,19 @@ def main(config):
                         ),
                     ],
                 )
+
+        if is_square():
+            return render.Root(
+                delay = int(rotationSpeed) * 1000,
+                show_full_animation = True,
+                child = render.Column(
+                    children = [
+                        render.Animation(
+                            children = get_square_frames(renderCategory),
+                        ),
+                    ],
+                ),
+            )
 
         return render.Root(
             delay = int(rotationSpeed) * 1000,
@@ -834,29 +857,50 @@ def get_schema():
         ],
     )
 
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
+def get_square_frames(gameCards):
+    """Stack two game cards per frame on a square panel. An odd game out wraps
+    around to pair with the first card so the bottom half never sits empty."""
+    w, h = canvas.size()
+    frames = []
+    for i in range(0, len(gameCards), 2):
+        pair = [render.Box(width = w, height = h // 2, child = gameCards[i])]
+        if i + 1 < len(gameCards):
+            pair.append(render.Box(width = w, height = h // 2, child = gameCards[i + 1]))
+        elif len(gameCards) > 1:
+            pair.append(render.Box(width = w, height = h // 2, child = gameCards[0]))
+        frames.append(render.Column(children = pair))
+    return frames
+
 def get_scores(urls, team):
     allscores = []
-    gameCount = 0
     for i, s in urls.items():
-        print(s)
         data = get_cachable_data(s)
         decodedata = json.decode(data)
         allscores.extend(decodedata["events"])
-        if team != "all" and team != "":
-            newScores = []
-            for _, s in enumerate(allscores):
-                home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
-                away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
-                gameStatus = s["status"]["type"]["state"]
-                if (home == team or away == team) and gameStatus == "post":
-                    newScores.append(s)
-                elif (home == team or away == team) and gameCount == 0:
-                    if gameStatus == "in":
-                        newScores.clear()
-                    newScores.append(s)
-                    gameCount = gameCount + 1
-            allscores = newScores
         all([i, allscores])
+
+    if team != "all" and team != "":
+        newScores = []
+        gameCount = 0
+        for _, s in enumerate(allscores):
+            home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
+            away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
+            gameStatus = s["status"]["type"]["state"]
+            if (home == team or away == team) and gameStatus == "post":
+                newScores.append(s)
+            elif (home == team or away == team) and gameCount == 0:
+                if gameStatus == "in":
+                    newScores.clear()
+                newScores.append(s)
+                gameCount = gameCount + 1
+        allscores = newScores
+
     return allscores
 
 def get_odds(theOdds, theOU, team, homeaway):

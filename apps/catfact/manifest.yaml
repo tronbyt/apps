@@ -7,10 +7,11 @@ author: broepke
 fileName: catfact.star
 packageName: catfact
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - lifestyle
   - nature
   - news
 published: '2023-03-23T12:19:20Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T19:09:45Z'

@@ -2,11 +2,11 @@ load("encoding/csv.star", "csv")
 load("http.star", "http")
 load("qrcode.star", "qrcode")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-HEIGHT = 32
-WIDTH = 64
+HEIGHT = canvas.height()
+WIDTH = canvas.width()
 SAMPLE_CSV_QR_FRAMES = 150  # number of frames to show the QR code for if CSV is default
 SAMPLE_PUBLISHED_SHEET = "https://bit.ly/tidbyt-csv-viewer"  # needed to create a bit.ly because QR's limit is 440 bytes
 SAMPLE_PUBLISHED_CSV = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSkZW0qyS1HpnPh5V51mBPZNjiNFJEZUjrLlwlfrscjDmMHqNyKQ1sjfj791t0f-_XE8g6d5MnSosLE/pub?gid=0&single=true&output=csv"

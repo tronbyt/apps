@@ -69,6 +69,9 @@ def fetch_simulation(seed, layout, generation_id = None):
     y2_max = -MAX_EXTENT
     for point in trajectory:
         if len(point) >= 4:
+            if abs(point[0]) + abs(point[1]) + abs(point[2]) + abs(point[3]) > 100:
+                print("extreme trajectory detected, bailing out")
+                return None
             y2 = point[3]  # y2 is the Y coordinate of the second bob
             if y2 > y2_max:
                 y2_max = y2

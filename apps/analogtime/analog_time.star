@@ -11,7 +11,7 @@ Author: rs7q5
 
 load("encoding/json.star", "json")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -51,19 +51,26 @@ def main(config):
     theta2 = math.radians(minute * (360 // 60))  #angle for minute
 
     #misc. settings for building the clock
-    clock_r = 16.0  #half the height of the tidbyt
+    #The face is square, so it is as big as the shorter side of the canvas
+    #allows, and everything on it is a fraction of that radius. On a 64x32
+    #panel this is the original 32px face with a radius of 16; on a 64x64
+    #square panel it is a 64px face, and on a 128x64 panel a 64px face
+    #centred in the extra width.
+    face = min(canvas.width(), canvas.height())
+    clock_r = face / 2.0
     ax_lims = (-clock_r, clock_r)
-    hour_len = 10.0
-    minute_len = 14.0
+    hour_len = clock_r * 10.0 / 16.0
+    minute_len = clock_r * 14.0 / 16.0
+    side_pad = (canvas.width() - face) // 2
 
     hour_pt = (hour_len * math.sin(theta), hour_len * math.cos(theta))
     minute_pt = (minute_len * math.sin(theta2), minute_len * math.cos(theta2))
 
     #used this to see if coloring the hour hand was better
-    plot_handsa = render.Plot(width = 32, height = 32, data = [(0.0, 0.0), hour_pt], x_lim = ax_lims, y_lim = ax_lims, color = hour_color)
-    plot_handsb = render.Plot(width = 32, height = 32, data = [(0.0, 0.0), minute_pt], x_lim = ax_lims, y_lim = ax_lims, color = minute_color)
-    plot_handsa2 = render.Padding(plot_handsa, pad = (16, 0, 16, 0))
-    plot_handsb2 = render.Padding(plot_handsb, pad = (16, 0, 16, 0))
+    plot_handsa = render.Plot(width = face, height = face, data = [(0.0, 0.0), hour_pt], x_lim = ax_lims, y_lim = ax_lims, color = hour_color)
+    plot_handsb = render.Plot(width = face, height = face, data = [(0.0, 0.0), minute_pt], x_lim = ax_lims, y_lim = ax_lims, color = minute_color)
+    plot_handsa2 = render.Padding(plot_handsa, pad = (side_pad, 0, side_pad, 0))
+    plot_handsb2 = render.Padding(plot_handsb, pad = (side_pad, 0, side_pad, 0))
 
     #add all the parts together
     if config.bool("display_date"):
@@ -76,12 +83,12 @@ def main(config):
         xpt = clock_r * math.sin(x2)
         ypt = clock_r * math.cos(x2)
         plot_marks_tmp = [(xpt, ypt), (xpt, ypt)]
-        plot_marks.append(render.Padding(render.Plot(width = 32, height = 32, data = plot_marks_tmp, x_lim = ax_lims, y_lim = ax_lims, color = tick_color), pad = (16, 0, 16, 0)))
+        plot_marks.append(render.Padding(render.Plot(width = face, height = face, data = plot_marks_tmp, x_lim = ax_lims, y_lim = ax_lims, color = tick_color), pad = (side_pad, 0, side_pad, 0)))
 
     #add hands
     plot_marks.append(plot_handsb2)
     plot_marks.append(plot_handsa2)
-    plot_marks.append(render.Padding(render.Plot(width = 32, height = 32, data = [(0.0, 0.0), (0.0, 0.0)], x_lim = ax_lims, y_lim = ax_lims, color = center_color), pad = (16, 0, 16, 0)))  #adds a mark over the center point of the hands clock
+    plot_marks.append(render.Padding(render.Plot(width = face, height = face, data = [(0.0, 0.0), (0.0, 0.0)], x_lim = ax_lims, y_lim = ax_lims, color = center_color), pad = (side_pad, 0, side_pad, 0)))  #adds a mark over the center point of the hands clock
 
     return render.Root(
         #delay=100, #speed up scroll text

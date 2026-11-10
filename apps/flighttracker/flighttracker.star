@@ -8,7 +8,7 @@ Author: samuelsagarino
 load("encoding/base64.star", "base64")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -356,7 +356,8 @@ def main(config):
         status = "noAPI"
 
     return render.Root(
-        child = render.Row(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Row(
             children = [
                 render.Box(
                     child = render.Column(
@@ -496,6 +497,6 @@ def main(config):
                     ),
                 ),
             ],
-        ),
+        ))),
         delay = 100,
     )

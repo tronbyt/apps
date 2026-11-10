@@ -32,7 +32,7 @@ load("images/whale6.png", WHALE6_ASSET = "file")
 load("images/whale7.png", WHALE7_ASSET = "file")
 load("images/whale8.png", WHALE8_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -70,6 +70,15 @@ DEFAULT_LOCATION = {
 }
 
 # define custom pixel art
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     # get coordinates and current time
@@ -254,7 +263,39 @@ def main(config):
     whale = draw_whale(enable_whale, 29, 13)
 
     # top-level render
-    return render.Root(delay = t_delay_ms, child = render.Stack(children = [
+    # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+    return render.Root(delay = t_delay_ms, child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = [
+        sky,
+        stars,
+        sun,
+        moon,
+        ship,
+        snow,
+        rain_heavy,
+        rain_light,
+        lightning,
+        ocean,
+        wave1,
+        wave2,
+        wave3,
+        wave4,
+        stream1_1,
+        stream1_2,
+        stream2_1,
+        stream2_2,
+        stream3_1,
+        stream3_2,
+        stream4_1,
+        stream4_2,
+        clouds_heavy,
+        clouds_light,
+        whale,
+        text_time,
+        text_low_temp,
+        text_high_temp,
+        text_now_temp,
+        deg,
+    ])))) if is_square() else render.Stack(children = [
         sky,
         stars,
         sun,

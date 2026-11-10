@@ -7,7 +7,7 @@ Author: mattmcquinn
 
 load("http.star", "http")
 load("images/default_image.jpg", DEFAULT_IMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_IMAGE = DEFAULT_IMAGE_ASSET.readall()
@@ -43,7 +43,12 @@ def main(config):
             image = image_rep.body()
 
     return render.Root(
-        child = render.Image(src = image, width = 64, height = 32),
+        # Letterbox the 2:1 photo on taller panels (64x64) rather than stretching it.
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Image(src = image, width = canvas.width(), height = canvas.width() // 2),
+        ),
     )
 
 def get_schema():

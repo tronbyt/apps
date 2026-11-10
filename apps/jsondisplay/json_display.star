@@ -7,8 +7,12 @@ Author: thickey256
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
+
+# Each data line is 8 rows. Three were shown on a 64x32 panel, the third
+# partly clipped; that is left as it was, and a square panel shows seven.
+LINES = 3 if canvas.height() <= 32 else (canvas.height() - 12) // 8
 
 def main(config):
     feed_url = config.get("feed_url") or "https://tidbyt-json-display.s3.eu-west-1.amazonaws.com/example.json"
@@ -53,8 +57,9 @@ def main(config):
         ),
     ]
 
-    #Loop through each line of data (no more than 3 will fit)
-    for item in json_contents["data"]:
+    #Loop through each line of data: three fit under the header on a 64x32
+    #panel, seven on a square one
+    for item in json_contents["data"][:LINES]:
         children_array.append(
             render.Padding(
                 pad = (1, 0, 1, 1),

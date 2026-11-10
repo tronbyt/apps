@@ -8,7 +8,7 @@ Author: siva801
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/pihole_logo.png", PIHOLE_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 PIHOLE_LOGO = PIHOLE_LOGO_ASSET.readall()
@@ -18,6 +18,11 @@ API_KEY = ""
 VERSION = "v5"
 GREEN = "#00cc00"
 RED = "#ff4136"
+
+# The two plots take whatever the panel has left under the header: 14 rows on
+# a 64x32 panel and 46 on a square one -- the difference between a sparkline
+# and a readable 24-hour query graph.
+PLOT_HEIGHT = canvas.height() - 18
 
 TTL_SECONDS = 60
 
@@ -123,7 +128,7 @@ def main(config):
                     main_align = "space_around",
                     children = [
                         render.Marquee(
-                            width = 64,
+                            width = canvas.width(),
                             child = render.Text("Error! Check APP config.", color = RED),
                         ),
                     ],
@@ -189,16 +194,16 @@ def main(config):
                                 children = [
                                     render.Plot(
                                         data = list(enumerate(query_plot)),
-                                        width = 64,
-                                        height = 14,
+                                        width = canvas.width(),
+                                        height = PLOT_HEIGHT,
                                         color = GREEN,
                                         fill = True,
                                         y_lim = (0, max(query_plot)),
                                     ),
                                     render.Plot(
                                         data = list(enumerate(ad_plot)),
-                                        width = 64,
-                                        height = 14,
+                                        width = canvas.width(),
+                                        height = PLOT_HEIGHT,
                                         color = RED,
                                         fill = True,
                                         fill_color = "#660500",

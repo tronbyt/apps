@@ -6,10 +6,11 @@ desc: Status of latest execution of pipeline in CircleCI.
 author: barbosa
 fileName: circleci.star
 packageName: circleci
+supports64x64: true
 category: utilities
 tags:
   - tech
   - tracking
   - gaming
 published: '2023-09-15T18:40:14Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T20:31:47Z'

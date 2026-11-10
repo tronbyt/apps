@@ -7,9 +7,10 @@ author: Andy Day (@adayNU)
 fileName: divvy.star
 packageName: divvy
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - utility
   - real-time
 published: '2023-09-05T17:44:18Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T19:09:45Z'

@@ -7,6 +7,7 @@ author: dinosaursrarr
 fileName: hieroglyphs.star
 packageName: hieroglyphs
 recommendedInterval: 5
+supports64x64: true
 category: education
 tags:
   - ancient
@@ -15,4 +16,4 @@ tags:
   - news
   - utility
 published: '2024-01-07T17:22:35Z'
-updated: '2025-12-01T21:50:01Z'
+updated: '2026-10-01T21:23:34Z'

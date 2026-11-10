@@ -5,7 +5,7 @@ Description: Toggle U.S. states by abbreviation and render a recognizable 64x32 
 Author: apollonyc
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 GRID_WIDTH = 64
@@ -735,7 +735,8 @@ def _render_matrix(matrix):
 
 def _render_error_screen():
     return render.Root(
-        child = render.Box(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
             width = GRID_WIDTH,
             height = GRID_HEIGHT,
             color = "#110000",
@@ -744,7 +745,7 @@ def _render_error_screen():
                 font = "5x8",
                 color = "#ff7777",
             ),
-        ),
+        )),
     )
 
 def main(config):
@@ -762,7 +763,8 @@ def main(config):
         _paint_state(matrix, STATE_PIXELS[code], color)
         state_index += 1
 
-    return render.Root(child = _render_matrix(matrix))
+        # Centre the block on taller panels (64x64).
+    return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = _render_matrix(matrix)))
 
 def get_schema():
     fields = [

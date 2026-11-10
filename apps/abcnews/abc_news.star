@@ -12,7 +12,7 @@ Added handling for when less than 5 stories in the feed
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -51,9 +51,10 @@ def main(config):
                     child = render.Text("ABC NEWS", color = "#fff", font = "CG-pixel-4x5-mono", offset = 0),
                 ),
                 render.Marquee(
-                    height = 24,
+                    # the rows under the 7px title: 24 on 64x32, 56 on square
+                    height = canvas.height() - 8,
                     scroll_direction = "vertical",
-                    offset_start = 24,
+                    offset_start = canvas.height() - 8,
                     child =
                         render.Column(
                             main_align = "space_between",

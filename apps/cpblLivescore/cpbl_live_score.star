@@ -7,7 +7,7 @@ Author: yuping917
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -223,13 +223,8 @@ def main(config):
         return render.Root(
             delay = int(rotationSpeed) * 1000,
             show_full_animation = True,
-            child = render.Column(
-                children = [
-                    render.Animation(
-                        children = renderCategory,
-                    ),
-                ],
-            ),
+            # Frames are laid out for 64x32; bound them and centre them on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = renderCategory))),
         )
     elif len(scores) == 0:
         if apikey != "":
@@ -310,13 +305,8 @@ def main(config):
         return render.Root(
             delay = int(rotationSpeed) * 1000,
             show_full_animation = True,
-            child = render.Column(
-                children = [
-                    render.Animation(
-                        children = renderCategory,
-                    ),
-                ],
-            ),
+            # Frames are laid out for 64x32; bound them and centre them on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Animation(children = renderCategory))),
         )
     else:
         return []

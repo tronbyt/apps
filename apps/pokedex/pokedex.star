@@ -29,6 +29,15 @@ def get_schema():
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     id_ = random.number(1, NUM_POKEMON)
     pokemon = get_pokemon(id_)
@@ -50,7 +59,25 @@ def main(config):
     sprite_width *= 2 if canvas.is2x() else 1
 
     return render.Root(
-        child = render.Stack(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
+            children = [
+                render.Row(
+                    children = [
+                        render.Box(width = canvas.width() // 2),
+                        render.Box(render.Image(sprite, width = sprite_width)),
+                    ],
+                ),
+                render.Column(
+                    children = [
+                        render.Text(name),
+                        render.Text("# " + str(id_)),
+                        render.Text(height),
+                        render.Text(weight),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Stack(
             children = [
                 render.Row(
                     children = [

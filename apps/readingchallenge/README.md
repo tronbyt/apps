@@ -1,4 +1,4 @@
-# Goodreads yearly reading challenge progress 
+# Goodreads yearly reading challenge progress
 
 Displays the progress of your reading challenge along with different icons to illustrate how many books you've read thus far.
 
@@ -6,6 +6,22 @@ Displays the progress of your reading challenge along with different icons to il
 
 ## Goodreads.com
 
-Goodreads had killed off its public API in 2020. Given what I am calling a challenge ID (not a user ID) https://www.goodreads.com/user_challenges/{challenge_id} will serve up any public profile's yearly reading challenge. Schema takes a challenge ID from the user. The app makes a GET request to https://www.goodreads.com/user_challenges/{challenge_id and parses the returned HTML using starlark's regex libary to pull reading progress and goals from a div entitled 'progressText'.
+Configure the numeric challenge ID from
+`https://www.goodreads.com/user_challenges/{challenge_id}` (not the user ID).
+These URLs remain valid even when Goodreads redirects them to a redesigned
+page at `/readingchallenges/gr/annual/{year}/{opaque_id}`.
+
+The app reads `readingProgress` and `readingGoal` from the redesigned page's
+`window.urcData` JSON. Older pages with a `progressText` HTML block are also
+supported. No Goodreads authentication is required for public challenges.
 
 Parsing HTML is more fragile than making a real API call.
+
+## Testing
+
+With Pixlet installed, run the parser regression tests without contacting
+Goodreads:
+
+```sh
+python3 -m unittest discover -s apps/readingchallenge/tests -v
+```

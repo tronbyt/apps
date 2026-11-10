@@ -10,8 +10,8 @@ load("images/five_book_icon.png", FIVE_BOOK_ICON_ASSET = "file")
 load("images/one_closed_book_icon.png", ONE_CLOSED_BOOK_ICON_ASSET = "file")
 load("images/one_open_book_icon.png", ONE_OPEN_BOOK_ICON_ASSET = "file")
 load("images/three_book_icon.png", THREE_BOOK_ICON_ASSET = "file")
-load("re.star", "re")
-load("render.star", "render")
+load("progress.star", "parse_progress")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 FIVE_BOOK_ICON = FIVE_BOOK_ICON_ASSET.readall()
@@ -98,6 +98,15 @@ def gen_book_image(progress):
 
     return images
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     CHALLENGE_ID = config.str("user_challenge_id", "38950148")
 
@@ -107,14 +116,7 @@ def main(config):
         fail("Request failed with status %d", challenge_page.status_code)
 
     body = challenge_page.body()
-    progress_div = re.findall(r"<div class='progressText'>([\s\S]*?)</div>", body)
-
-    if not progress_div:
-        fail("No challenge found at {}".format(config.str("user_challenge_id", CHALLENGE_ID)))
-
-    progress_nums = re.findall(r"\d+", progress_div[0])
-    progress = progress_nums[0]
-    goal = progress_nums[1]
+    progress, goal = parse_progress(body)
 
     progress_text = " ".join(["Read:", str(progress), "books."])
     goal_text = " ".join(["Goal:", str(goal), "books."])
@@ -128,7 +130,10 @@ def main(config):
     ]
 
     return render.Root(
+        # On a square panel the column expands so space_around spreads the
+        # figures and the shelf down the panel.
         child = render.Column(
+            expanded = is_square(),
             main_align = "space_around",
             children = lines,
         ),

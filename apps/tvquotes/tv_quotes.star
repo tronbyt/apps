@@ -10,10 +10,24 @@ Author: rs7q5
 #Last Modified 20230516 RIS
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 font = "CG-pixel-3x5-mono"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# The quote scrolls under an 8px header. On a 64x32 panel the marquee was
+# always 32 rows and clipped by the panel, which is left exactly as it was;
+# on a square panel it is the 56 rows the header leaves.
+QUOTE_HEIGHT = canvas.height() - 8 if is_square() else 32
 
 def main(config):
     if config.bool("hide_app", False):
@@ -215,9 +229,9 @@ def format_quote(quote):
         frame_data.append(line_format)
 
     return render.Marquee(
-        height = 32,
-        offset_start = 32,
-        offset_end = 32,
+        height = QUOTE_HEIGHT,
+        offset_start = QUOTE_HEIGHT,
+        offset_end = QUOTE_HEIGHT,
         scroll_direction = "vertical",
         child = render.Column(
             children = frame_data,

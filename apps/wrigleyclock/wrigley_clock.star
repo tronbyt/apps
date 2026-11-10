@@ -6,7 +6,7 @@ Author: Garrett W
 """
 
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 def main():
@@ -91,9 +91,16 @@ def main():
 
     return render.Root(
         delay = 500,
+        # The marquee is drawn as 70 plots in a fixed 64x32 coordinate space and
+        # is as wide as a panel gets, so it cannot be scaled up uniformly -- a
+        # taller-only scale would turn the clock face into an ellipse. Sizing
+        # the backing box to the canvas instead centres the scene on a panel
+        # with rows to spare, rather than hanging it from the top edge above a
+        # black half. It is letterboxed there, not filling the panel, so this
+        # does not claim supports64x64.
         child = render.Box(
-            width = 64,
-            height = 32,
+            width = canvas.width(),
+            height = canvas.height(),
             color = c,
             child = render.Stack(
                 children = [

@@ -182,6 +182,15 @@ def get_display_config():
         "icon_height": display_defaults["icon_height"],
     }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     display = get_display_config()
     display_type = config.get("type", display_options[0].value)
@@ -209,7 +218,8 @@ def main(config):
 
     return render.Root(
         delay = speed,
-        child = get_smooth_scroll(display_text, display),
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = get_smooth_scroll(display_text, display))) if is_square() else get_smooth_scroll(display_text, display),
     )
 
 def get_random_phrases():

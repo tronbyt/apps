@@ -7,6 +7,7 @@ author: Chris Jones (@IPv6Freely)
 fileName: analog_clock.star
 packageName: analogclock
 recommendedInterval: 0
+supports64x64: true
 category: clocks
 tags:
   - clock
@@ -15,4 +16,4 @@ tags:
   - art
   - utility
 published: '2022-02-04T18:24:43Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T18:46:01Z'

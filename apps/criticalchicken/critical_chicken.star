@@ -46,7 +46,7 @@ load("images/switch2.png", IMGBGSWITCH2_ASSET = "file", IMGTAGSWITCH2_ASSET = "f
 load("images/update.png", IMGTAGUPDATE_ASSET = "file")
 load("images/updated.png", IMGTAGUPDATED_ASSET = "file")
 load("images/video.png", IMGTAGVIDEO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # IMAGES
@@ -426,8 +426,9 @@ def main():
 
     return render.Root(
         show_full_animation = True,
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
         delay = 50,
-        child = render.Stack(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 animation.Transformation(
                     child = render.Box(width = 64, height = 9, color = txColour),
@@ -642,7 +643,7 @@ def main():
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 # ERROR MESSAGE
@@ -650,8 +651,9 @@ def main():
 def connectionError():
     return render.Root(
         show_full_animation = True,
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
         delay = 50,
-        child = render.Stack(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 animation.Transformation(
                     child = render.Box(width = 64, height = 9, color = "#717070"),
@@ -866,7 +868,7 @@ def connectionError():
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 # SCHEMA

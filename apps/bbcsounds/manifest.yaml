@@ -7,10 +7,11 @@ author: Andrew Westling
 recommendedInterval: 10
 fileName: bbc_sounds.star
 packageName: bbcsounds
+supports64x64: true
 category: entertainment
 tags:
   - music
   - real-time
   - news
 published: '2025-06-12T12:18:16Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T20:09:53Z'

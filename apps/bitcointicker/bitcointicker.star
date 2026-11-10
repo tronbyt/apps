@@ -8,7 +8,7 @@ Author: PMK (@pmk)
 load("animation.star", "animation")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_CURRENCY = "usd"
@@ -76,7 +76,7 @@ def print_market_chart(data, start_price):
             render.Plot(
                 data = [(p[0], (p[1] - start_price)) for p in data],
                 width = 64,
-                height = 19,
+                height = CHART_HEIGHT,
                 color = COLOR_GREEN,
                 color_inverted = COLOR_RED,
                 fill = True,
@@ -84,7 +84,7 @@ def print_market_chart(data, start_price):
             animation.Transformation(
                 child = render.Box(
                     width = 64,
-                    height = 20,
+                    height = CHART_HEIGHT + 1,
                     color = "#000",
                 ),
                 duration = 1500,
@@ -165,6 +165,10 @@ def get_start_price(currency, period, market_data):
     change = market_data["price_change_percentage_{}_in_currency".format(period)][currency] / 100
     price_change = int(price * change * 100) / 100
     return price - price_change
+
+# The chart takes the rows under the two header lines: 19 on a 64x32 panel,
+# 51 on a square one.
+CHART_HEIGHT = canvas.height() - 13
 
 def main(config):
     currency = config.str("currency", DEFAULT_CURRENCY)

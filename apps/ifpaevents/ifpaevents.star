@@ -7,7 +7,7 @@ Author: coreyhulse
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_TIME_IN_SECONDS = 3600
@@ -22,6 +22,15 @@ DEFAULT_LOCATION = json.encode({
     "place_id": "ChIJTR1tUdj3NIgRtGxUcq5Luk4",
     "timezone": "America/New_York",
 })
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location_cfg = config.str("location", DEFAULT_LOCATION)
@@ -75,7 +84,25 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    children = [
+                        render.Text("IFPA", font = "tom-thumb", color = "#ff0"),
+                        render.Text(" %s " % location["locality"], font = "tom-thumb", color = "#c50"),
+                    ],
+                    main_align = "center",
+                    expanded = True,
+                ),
+                render.Column(
+                    children = upcoming_events,
+                    expanded = True,
+                    main_align = "space_evenly",
+                    cross_align = "center",
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     children = [

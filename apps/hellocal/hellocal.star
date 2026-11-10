@@ -27,7 +27,7 @@ LAYOUT (64x32, origin top-left)
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -261,12 +261,14 @@ def render_event(event, now, alert_enabled, alert_window_mins):
         # accumulates their delays, so static titles produce 2 stored frames × 1s.
         frames = [nf for _ in range(20)] + [inv for _ in range(20)]
         return render.Root(
-            child = render.Animation(children = frames),
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Animation(children = frames)),
             delay = 50,
         )
 
     return render.Root(
-        child = render.Stack(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
             children = [
                 # Background fixes the canvas at 64x32 so the Padding offsets
                 # below are measured from the true top-left corner.
@@ -293,12 +295,13 @@ def render_event(event, now, alert_enabled, alert_window_mins):
                     child = render.Text(content = time_str, color = YELLOW, font = FONT),
                 ),
             ],
-        ),
+        )),
     )
 
 def render_no_url():
     return render.Root(
-        child = render.Stack(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
             children = [
                 render.Box(width = 64, height = 32, color = BLACK),
 
@@ -325,7 +328,7 @@ def render_no_url():
                     ),
                 ),
             ],
-        ),
+        )),
     )
 
 def render_empty_day(now):
@@ -333,7 +336,8 @@ def render_empty_day(now):
     idx = days_from_civil(now.year, now.month, now.day) % 6
     phrase = QUIET_PHRASES[idx]
     return render.Root(
-        child = render.Stack(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(
             children = [
                 render.Box(width = 64, height = 32, color = BLACK),
 
@@ -359,7 +363,7 @@ def render_empty_day(now):
                     child = render.Text(content = phrase[1], color = WHITE, font = FONT),
                 ),
             ],
-        ),
+        )),
     )
 
 def render_no_events(tz):
@@ -420,7 +424,8 @@ def render_no_events(tz):
             ]),
         ))
 
-    return render.Root(child = render.Stack(children = kids), delay = 150)
+        # Centre the block on taller panels (64x64).
+    return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Stack(children = kids)), delay = 150)
 
 # ---------------------------------------------------------------------------
 # Event selection

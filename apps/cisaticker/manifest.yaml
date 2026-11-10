@@ -6,6 +6,7 @@ desc: Displays the top 3 CISA cybersecurity alert titles simultaneously on your 
 author: Rosie Domenech
 fileName: cisaticker.star
 packageName: cisaticker
+supports64x64: true
 category: news
 tags:
   - news
@@ -13,4 +14,4 @@ tags:
   - cybersecurity
   - alerts
 published: '2026-04-04T08:25:41Z'
-updated: '2026-04-14T21:24:42Z'
+updated: '2026-10-01T16:40:47Z'

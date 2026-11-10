@@ -9,9 +9,8 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/bg_image.jpg", BG_IMAGE_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("time.star", "time")
 load("xpath.star", "xpath")
 
 BG_IMAGE = BG_IMAGE_ASSET.readall()
@@ -47,7 +46,7 @@ def get_image(api_url, base_url, response_path, request_headers, debug_output, f
         message = "API IMAGE"
 
         row = render.Stack([
-            render.Image(src = BG_IMAGE),
+            render.Box(width = canvas.width(), height = canvas.height(), child = render.Image(src = BG_IMAGE)),
             render.Box(
                 render.Row(
                     main_align = "space_evenly",
@@ -207,13 +206,13 @@ def get_image(api_url, base_url, response_path, request_headers, debug_output, f
                 if img != None:
                     imgRender = render.Image(
                         src = img,
-                        height = 32,
+                        height = canvas.height(),
                     )
 
                     if fit_screen == True:
                         imgRender = render.Image(
                             src = img,
-                            width = 64,
+                            width = canvas.width(),
                         )
 
                     return render.Root(
@@ -248,11 +247,11 @@ def get_image(api_url, base_url, response_path, request_headers, debug_output, f
 
     if debug_output == True:
         row = render.Marquee(
-            offset_start = 32,
-            offset_end = 32,
-            height = 32,
+            offset_start = canvas.height(),
+            offset_end = canvas.height(),
+            height = canvas.height(),
             scroll_direction = "vertical",
-            width = 64,
+            width = canvas.width(),
             child = render.WrappedText(content = message, font = "tom-thumb", color = "#FF0000"),
         )
 

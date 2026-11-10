@@ -7,6 +7,7 @@ author: '@jtinel'
 fileName: librenms_alerts.star
 packageName: librenmsalerts
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - nms
@@ -14,4 +15,4 @@ tags:
   - notification
   - tech
 published: '2023-05-18T18:16:29Z'
-updated: '2025-11-29T23:55:39Z'
+updated: '2026-10-01T21:41:49Z'

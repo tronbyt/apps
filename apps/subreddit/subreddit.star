@@ -8,13 +8,13 @@ Author: Petros Fytilis
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/reddit_icon.png", REDDIT_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 REDDIT_ICON = REDDIT_ICON_ASSET.readall()
 
-SCREEN_WIDTH = 64
+SCREEN_WIDTH = canvas.width()
 STATUS_OK = 200
 MAX_DURATION_SECONDS = 60
 CACHE_TTL_SECONDS = 300
@@ -32,6 +32,15 @@ DEFAULT_LOCATION = """
 """
 
 REDDIT_API_URL_TEMPLATE = "https://www.reddit.com/r/{}/hot.json?limit=1"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = config.get("location", DEFAULT_LOCATION)
@@ -109,6 +118,13 @@ def _render_subreddit(subreddit):
 
 def _render_post_title(subreddit):
     post_title = _fetch_post_title(subreddit)
+    if is_square():
+        # Square panel: wrap the title into the lower half instead of a one-line ticker.
+        return render.Marquee(
+            height = canvas.height() - 28,
+            scroll_direction = "vertical",
+            child = render.WrappedText(content = post_title, font = "tb-8", width = SCREEN_WIDTH),
+        )
     return render.Marquee(
         child = render.Text(
             content = post_title,

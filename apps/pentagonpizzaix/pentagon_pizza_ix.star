@@ -6,7 +6,7 @@ Author: eSoLu
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 # ---- Hardcoded settings ----
@@ -125,7 +125,9 @@ def buildPizzaRates():
     chartDisplay = render.Plot(
         series,
         width = 64,
-        height = 21,
+        # the rows under the 10px marquee and its spacer: 21 on 64x32, 53
+        # on a square panel
+        height = canvas.height() - 11,
         color = ppi_up_color,
         y_lim = (-100, 100),
         color_inverted = ppi_down_color,

@@ -9,6 +9,17 @@ load("images/round_brighter/7.png", ROUND_BRIGHTER_7 = "file")
 load("images/round_brighter/8.png", ROUND_BRIGHTER_8 = "file")
 load("images/round_brighter/9.png", ROUND_BRIGHTER_9 = "file")
 load("images/round_brighter/sep.png", ROUND_BRIGHTER_SEP = "file")
+load("images/round_brighter_2x/0.png", ROUND_BRIGHTER_2X_0 = "file")
+load("images/round_brighter_2x/1.png", ROUND_BRIGHTER_2X_1 = "file")
+load("images/round_brighter_2x/2.png", ROUND_BRIGHTER_2X_2 = "file")
+load("images/round_brighter_2x/3.png", ROUND_BRIGHTER_2X_3 = "file")
+load("images/round_brighter_2x/4.png", ROUND_BRIGHTER_2X_4 = "file")
+load("images/round_brighter_2x/5.png", ROUND_BRIGHTER_2X_5 = "file")
+load("images/round_brighter_2x/6.png", ROUND_BRIGHTER_2X_6 = "file")
+load("images/round_brighter_2x/7.png", ROUND_BRIGHTER_2X_7 = "file")
+load("images/round_brighter_2x/8.png", ROUND_BRIGHTER_2X_8 = "file")
+load("images/round_brighter_2x/9.png", ROUND_BRIGHTER_2X_9 = "file")
+load("images/round_brighter_2x/sep.png", ROUND_BRIGHTER_2X_SEP = "file")
 load("images/round_darker/0.png", ROUND_DARKER_0 = "file")
 load("images/round_darker/1.png", ROUND_DARKER_1 = "file")
 load("images/round_darker/2.png", ROUND_DARKER_2 = "file")
@@ -20,6 +31,17 @@ load("images/round_darker/7.png", ROUND_DARKER_7 = "file")
 load("images/round_darker/8.png", ROUND_DARKER_8 = "file")
 load("images/round_darker/9.png", ROUND_DARKER_9 = "file")
 load("images/round_darker/sep.png", ROUND_DARKER_SEP = "file")
+load("images/round_darker_2x/0.png", ROUND_DARKER_2X_0 = "file")
+load("images/round_darker_2x/1.png", ROUND_DARKER_2X_1 = "file")
+load("images/round_darker_2x/2.png", ROUND_DARKER_2X_2 = "file")
+load("images/round_darker_2x/3.png", ROUND_DARKER_2X_3 = "file")
+load("images/round_darker_2x/4.png", ROUND_DARKER_2X_4 = "file")
+load("images/round_darker_2x/5.png", ROUND_DARKER_2X_5 = "file")
+load("images/round_darker_2x/6.png", ROUND_DARKER_2X_6 = "file")
+load("images/round_darker_2x/7.png", ROUND_DARKER_2X_7 = "file")
+load("images/round_darker_2x/8.png", ROUND_DARKER_2X_8 = "file")
+load("images/round_darker_2x/9.png", ROUND_DARKER_2X_9 = "file")
+load("images/round_darker_2x/sep.png", ROUND_DARKER_2X_SEP = "file")
 load("images/tall_brighter/0.png", TALL_BRIGHTER_0 = "file")
 load("images/tall_brighter/1.png", TALL_BRIGHTER_1 = "file")
 load("images/tall_brighter/2.png", TALL_BRIGHTER_2 = "file")
@@ -31,6 +53,17 @@ load("images/tall_brighter/7.png", TALL_BRIGHTER_7 = "file")
 load("images/tall_brighter/8.png", TALL_BRIGHTER_8 = "file")
 load("images/tall_brighter/9.png", TALL_BRIGHTER_9 = "file")
 load("images/tall_brighter/sep.png", TALL_BRIGHTER_SEP = "file")
+load("images/tall_brighter_2x/0.png", TALL_BRIGHTER_2X_0 = "file")
+load("images/tall_brighter_2x/1.png", TALL_BRIGHTER_2X_1 = "file")
+load("images/tall_brighter_2x/2.png", TALL_BRIGHTER_2X_2 = "file")
+load("images/tall_brighter_2x/3.png", TALL_BRIGHTER_2X_3 = "file")
+load("images/tall_brighter_2x/4.png", TALL_BRIGHTER_2X_4 = "file")
+load("images/tall_brighter_2x/5.png", TALL_BRIGHTER_2X_5 = "file")
+load("images/tall_brighter_2x/6.png", TALL_BRIGHTER_2X_6 = "file")
+load("images/tall_brighter_2x/7.png", TALL_BRIGHTER_2X_7 = "file")
+load("images/tall_brighter_2x/8.png", TALL_BRIGHTER_2X_8 = "file")
+load("images/tall_brighter_2x/9.png", TALL_BRIGHTER_2X_9 = "file")
+load("images/tall_brighter_2x/sep.png", TALL_BRIGHTER_2X_SEP = "file")
 load("images/tall_darker/0.png", TALL_DARKER_0 = "file")
 load("images/tall_darker/1.png", TALL_DARKER_1 = "file")
 load("images/tall_darker/2.png", TALL_DARKER_2 = "file")
@@ -42,6 +75,17 @@ load("images/tall_darker/7.png", TALL_DARKER_7 = "file")
 load("images/tall_darker/8.png", TALL_DARKER_8 = "file")
 load("images/tall_darker/9.png", TALL_DARKER_9 = "file")
 load("images/tall_darker/sep.png", TALL_DARKER_SEP = "file")
+load("images/tall_darker_2x/0.png", TALL_DARKER_2X_0 = "file")
+load("images/tall_darker_2x/1.png", TALL_DARKER_2X_1 = "file")
+load("images/tall_darker_2x/2.png", TALL_DARKER_2X_2 = "file")
+load("images/tall_darker_2x/3.png", TALL_DARKER_2X_3 = "file")
+load("images/tall_darker_2x/4.png", TALL_DARKER_2X_4 = "file")
+load("images/tall_darker_2x/5.png", TALL_DARKER_2X_5 = "file")
+load("images/tall_darker_2x/6.png", TALL_DARKER_2X_6 = "file")
+load("images/tall_darker_2x/7.png", TALL_DARKER_2X_7 = "file")
+load("images/tall_darker_2x/8.png", TALL_DARKER_2X_8 = "file")
+load("images/tall_darker_2x/9.png", TALL_DARKER_2X_9 = "file")
+load("images/tall_darker_2x/sep.png", TALL_DARKER_2X_SEP = "file")
 
 IMAGE_SETS = {
     "round_brighter": {
@@ -59,6 +103,21 @@ IMAGE_SETS = {
             ROUND_BRIGHTER_9,
         ],
     },
+    "round_brighter_2x": {
+        "sep": ROUND_BRIGHTER_2X_SEP,
+        "digits": [
+            ROUND_BRIGHTER_2X_0,
+            ROUND_BRIGHTER_2X_1,
+            ROUND_BRIGHTER_2X_2,
+            ROUND_BRIGHTER_2X_3,
+            ROUND_BRIGHTER_2X_4,
+            ROUND_BRIGHTER_2X_5,
+            ROUND_BRIGHTER_2X_6,
+            ROUND_BRIGHTER_2X_7,
+            ROUND_BRIGHTER_2X_8,
+            ROUND_BRIGHTER_2X_9,
+        ],
+    },
     "round_darker": {
         "sep": ROUND_DARKER_SEP,
         "digits": [
@@ -72,6 +131,21 @@ IMAGE_SETS = {
             ROUND_DARKER_7,
             ROUND_DARKER_8,
             ROUND_DARKER_9,
+        ],
+    },
+    "round_darker_2x": {
+        "sep": ROUND_DARKER_2X_SEP,
+        "digits": [
+            ROUND_DARKER_2X_0,
+            ROUND_DARKER_2X_1,
+            ROUND_DARKER_2X_2,
+            ROUND_DARKER_2X_3,
+            ROUND_DARKER_2X_4,
+            ROUND_DARKER_2X_5,
+            ROUND_DARKER_2X_6,
+            ROUND_DARKER_2X_7,
+            ROUND_DARKER_2X_8,
+            ROUND_DARKER_2X_9,
         ],
     },
     "tall_brighter": {
@@ -89,6 +163,21 @@ IMAGE_SETS = {
             TALL_BRIGHTER_9,
         ],
     },
+    "tall_brighter_2x": {
+        "sep": TALL_BRIGHTER_2X_SEP,
+        "digits": [
+            TALL_BRIGHTER_2X_0,
+            TALL_BRIGHTER_2X_1,
+            TALL_BRIGHTER_2X_2,
+            TALL_BRIGHTER_2X_3,
+            TALL_BRIGHTER_2X_4,
+            TALL_BRIGHTER_2X_5,
+            TALL_BRIGHTER_2X_6,
+            TALL_BRIGHTER_2X_7,
+            TALL_BRIGHTER_2X_8,
+            TALL_BRIGHTER_2X_9,
+        ],
+    },
     "tall_darker": {
         "sep": TALL_DARKER_SEP,
         "digits": [
@@ -102,6 +191,21 @@ IMAGE_SETS = {
             TALL_DARKER_7,
             TALL_DARKER_8,
             TALL_DARKER_9,
+        ],
+    },
+    "tall_darker_2x": {
+        "sep": TALL_DARKER_2X_SEP,
+        "digits": [
+            TALL_DARKER_2X_0,
+            TALL_DARKER_2X_1,
+            TALL_DARKER_2X_2,
+            TALL_DARKER_2X_3,
+            TALL_DARKER_2X_4,
+            TALL_DARKER_2X_5,
+            TALL_DARKER_2X_6,
+            TALL_DARKER_2X_7,
+            TALL_DARKER_2X_8,
+            TALL_DARKER_2X_9,
         ],
     },
 }

@@ -7,10 +7,11 @@ author: Andrew Hill
 fileName: comed_price.star
 packageName: comedprice
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - utility
   - electricity
   - tracking
 published: '2023-07-10T13:40:58Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T20:41:22Z'

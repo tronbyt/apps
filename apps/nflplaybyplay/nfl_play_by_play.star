@@ -23,7 +23,7 @@ load("cache.star", "cache")
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -91,6 +91,15 @@ ALT_COLOR = {
     "TEN": "#0C2340",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     team = config.str("team", "PHI")
     tz = config.get("$tz") or "America/New_York"
@@ -102,13 +111,15 @@ def main(config):
     if game != None:
         kick = time.parse_time(game["date"], format = "2006-01-02T15:04Z").in_location(tz)
         if game["state"] == "in":
-            return render.Root(child = live_view(game, final = False))
+            # Centre the block on the square (64x64); other panels unchanged.
+            return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = live_view(game, final = False))) if is_square() else live_view(game, final = False))
         if game["state"] == "post" and game["status_name"] == "STATUS_FINAL":
             # Genuinely final (postponed/canceled also report state "post" —
             # those fall through to idle rather than faking a 0-0 FIN).
             # Show the final for a day, then fall back to idle.
             if now - kick < time.parse_duration("24h"):
-                return render.Root(child = live_view(game, final = True))
+                # Centre the block on the square (64x64); other panels unchanged.
+                return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = live_view(game, final = True))) if is_square() else live_view(game, final = True))
         if game["state"] == "pre" and same_day(kick, now):
             return pregame_root(game, team, kick, base)
 
@@ -468,7 +479,9 @@ def pregame_root(game, team, kick, base):
             marquee_strip(st, focus["color"]),
         ],
     )
-    return render.Root(child = body, show_full_animation = True)
+
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = body)) if is_square() else body, show_full_animation = True)
 
 def pre_panel(team):
     return render.Box(
@@ -515,7 +528,9 @@ def idle_root(team, base):
             marquee_strip(st, team_idle_color(team, base)),
         ],
     )
-    return render.Root(child = body, show_full_animation = True)
+
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = body)) if is_square() else body, show_full_animation = True)
 
 def team_idle_color(team, base):
     """Focus team's primary color for the marquee strip when the team isn't

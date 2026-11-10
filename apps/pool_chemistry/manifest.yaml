@@ -7,7 +7,7 @@ desc: 'Displays pH, free chlorine, temperature, alkalinity, CYA, and calcium har
   '
 author: scottmay
 recommendedInterval: 300
-category: environment
+category: smart-home
 tags:
   - pool
   - chemistry

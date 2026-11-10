@@ -6,7 +6,7 @@ Author: samshapiro13
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -195,6 +195,15 @@ def render_no_arrival_predications_data_available(widgetMode):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     widgetMode = config.bool("$widget")
     selected_station = config.get("station", DEFAULT_STATION)
@@ -203,7 +212,7 @@ def main(config):
     api_key = config.get("api_key")
 
     if not api_key:
-        return render.Root(child = render.Text("CTA API Key not set"))
+        return render.Root(child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("CTA API Key not set")))
 
     arrival_predictions = fetch_cta_arrival_estimates(selected_station, api_key)
     filter_arrivals = filter_arrival_predictions(arrival_predictions, destination_station, time_delay)
@@ -212,7 +221,7 @@ def main(config):
         return render.Root(
             delay = 75,
             max_age = 60,
-            child = render_no_arrival_predications_data_available(widgetMode),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render_no_arrival_predications_data_available(widgetMode)),
         )
 
     if len(filter_arrivals) == 1:
@@ -221,7 +230,7 @@ def main(config):
             max_age = 60,
             child = render.Column(
                 expanded = True,
-                main_align = "start",
+                main_align = "center" if is_square() else "start",
                 children = [
                     render_arrival_prediction(filter_arrivals[0], widgetMode),
                     render.Box(
@@ -238,7 +247,7 @@ def main(config):
         max_age = 60,
         child = render.Column(
             expanded = True,
-            main_align = "start",
+            main_align = "center" if is_square() else "start",
             children = [
                 render_arrival_prediction(filter_arrivals[0], widgetMode),
                 render.Box(

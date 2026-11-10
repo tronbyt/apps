@@ -7,9 +7,10 @@ author: PMK (@pmk)
 fileName: btchalving.star
 packageName: btchalving
 recommendedInterval: 1
+supports64x64: true
 category: technology
 tags:
   - crypto
   - finance
 published: '2023-09-15T18:55:09Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T19:34:09Z'

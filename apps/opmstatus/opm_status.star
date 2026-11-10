@@ -11,7 +11,7 @@ Reference: https://www.opm.gov/policy-data-oversight/snow-dismissal-procedures/c
 load("http.star", "http")
 
 # load some modules
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 # -------------------------
 
@@ -52,6 +52,15 @@ def format_opm_url_data(opm_status_summary, opm_applies_to_date):
     return opm_status_summary, opm_applies_to_date
 
 # -------------------------
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     print("-- opm_status_v1.star::main() START")
@@ -104,7 +113,8 @@ def main():
 
     # return the rendered rows widget
     return render.Root(
-        child = all_rows,
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = all_rows)) if is_square() else all_rows,
     )
 
 # -------------------------

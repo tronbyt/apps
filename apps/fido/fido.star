@@ -10,7 +10,7 @@ load("images/fence.png", FENCE_ASSET = "file")
 load("images/grass.png", GRASS_ASSET = "file")
 load("images/sky.png", SKY_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -70,23 +70,28 @@ def main(config):
         )
     else:
         # Main Render for the the dog and environment.
+        # The yard is 64x32 artwork; on a taller panel it sits in the middle.
         return render.Root(
             delay = 150,
-            child = render.Stack(
-                children = [
-                    render.Image(src = SKY),  # Furthest Background
-                    render.Image(src = FENCE),  # Background Element
-                    render.Image(src = action),  # Your Pet
-                    interacting_object(action_config),
-                    render.Image(src = GRASS),  # Foreground Element
-                    # Pet Name and Age Banner
-                    render.Box(
-                        height = 7,
-                        width = 64 if stats_config else 32,
-                        color = "#000",
-                        child = pet_info(pet_name.upper(), pet_age) if stats_config else return_pal(pet_name.upper()),
-                    ),
-                ],
+            child = render.Box(
+                width = 64,
+                height = canvas.height(),
+                child = render.Stack(
+                    children = [
+                        render.Image(src = SKY),  # Furthest Background
+                        render.Image(src = FENCE),  # Background Element
+                        render.Image(src = action),  # Your Pet
+                        interacting_object(action_config),
+                        render.Image(src = GRASS),  # Foreground Element
+                        # Pet Name and Age Banner
+                        render.Box(
+                            height = 7,
+                            width = 64 if stats_config else 32,
+                            color = "#000",
+                            child = pet_info(pet_name.upper(), pet_age) if stats_config else return_pal(pet_name.upper()),
+                        ),
+                    ],
+                ),
             ),
         )
 

@@ -6,7 +6,7 @@ Author: carmineguida
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 API_URL = "http://api.open-notify.org/iss-now.json"
@@ -97,10 +97,20 @@ def get_iss_dict(api_key):
 
 ################################################################################
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("api_key")
     if (api_key == None):
-        return render.Root(child = render.Text("Need api_key."))
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Need api_key."))) if is_square() else render.Text("Need api_key."))
 
     iss_dict = get_iss_dict(api_key)
 
@@ -116,7 +126,8 @@ def main(config):
     render_sep = render.Box(color = "#222222", width = 64, height = 1)
     render_loc = render.Padding(pad = (1, 0, 1, 1), child = render.WrappedText(content = content, font = LOC_FONT, color = iss_dict["color"]))
 
-    return render.Root(child = render.Column(children = [render_top, render_sep, render_loc]))
+    # Centre the block on the square (64x64); other panels unchanged.
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(children = [render_top, render_sep, render_loc]))) if is_square() else render.Column(children = [render_top, render_sep, render_loc]))
 
 ################################################################################
 

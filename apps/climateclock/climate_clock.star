@@ -8,7 +8,7 @@ Author: Rob Kimball
 load("images/bg_renewables.png", BG_RENEWABLES_ASSET = "file")
 load("images/bg_warming.png", BG_WARMING_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -306,7 +306,7 @@ def renewables(DATA):
 
     return render.Root(
         delay = 1000 // fps,
-        child = render.Stack(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Image(BG_RENEWABLES),
                 # render.Box(width = 64, height = 32, color = "#0006"),
@@ -317,7 +317,7 @@ def renewables(DATA):
                     children = [render.Animation(children = frames)],
                 ),
             ],
-        ),
+        ))),
     )
 
 def global_warming(DATA):
@@ -368,7 +368,7 @@ def global_warming(DATA):
 
     return render.Root(
         delay = 1000 // fps,
-        child = render.Stack(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Image(BG_WARMING),
                 # render.Box(width = 64, height = 32, color = "#0003"),
@@ -379,7 +379,7 @@ def global_warming(DATA):
                     children = [render.Animation(children = frames)],
                 ),
             ],
-        ),
+        ))),
     )
 
 SCREENS = {

@@ -7,7 +7,7 @@ Version: 2.0 - Add option to show bus route details (Show Details)
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 NEXTBUS_URL = "https://api.wmata.com/NextBusService.svc/json/jPredictions"
@@ -23,10 +23,10 @@ def main(config):
 
     if not apiKey:
         return render.Root(
-            child = render.WrappedText(
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
                 content = "Please configure API Key",
                 color = "#f00",
-            ),
+            )),
         )
 
     Bus = [render.Row(
@@ -166,7 +166,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -191,7 +191,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 0,
                     offset_end = 32,
@@ -211,7 +211,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -239,7 +239,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 0,
                     offset_end = 32,
@@ -260,7 +260,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -291,7 +291,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,
@@ -313,7 +313,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -347,7 +347,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,
@@ -370,7 +370,7 @@ def main(config):
                 show_full_animation = True,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 3,
                     offset_end = 32,
@@ -407,7 +407,7 @@ def main(config):
                 delay = 500,
                 child = render.Marquee(
                     scroll_direction = "vertical",
-                    height = 32,
+                    height = canvas.height(),
                     align = "start",
                     offset_start = 2,
                     offset_end = 32,

@@ -7,6 +7,7 @@ author: eanplatter
 fileName: feels_like.star
 packageName: feelslike
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - weather
@@ -14,4 +15,4 @@ tags:
   - nature
   - art
 published: '2023-05-11T21:14:05Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:00:02Z'

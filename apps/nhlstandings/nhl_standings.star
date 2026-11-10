@@ -7,7 +7,7 @@ Author: LunchBox8484
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -38,6 +38,11 @@ ALT_LOGO = """
 }
 """
 
+# The table has 24 rows under its 8px header on a 64x32 panel and 56 on a
+# square one, so a square panel shows twice as many teams per page at the
+# same row height.
+ROW_SCALE = 2 if canvas.height() >= 64 and canvas.width() == canvas.height() else 1
+
 def main(config):
     renderCategory = []
     rotationSpeed = config.get("rotationSpeed", "5")
@@ -59,7 +64,7 @@ def main(config):
             entries = s["standings"]["entries"]
 
             if entries:
-                entriesToDisplay = teamsToShow
+                entriesToDisplay = teamsToShow * ROW_SCALE
                 divisionName = s["name"].replace(" Division", "")
 
                 entries = sorted(entries, get_games_behind, reverse = True)
@@ -330,7 +335,7 @@ def get_team(x, s, entriesToDisplay, i, now, rotationSpeed, timeColor, divisionN
         ]
 
     output.extend(topColumn)
-    containerHeight = int(24 / entriesToDisplay)
+    containerHeight = int(24 * ROW_SCALE / entriesToDisplay)
     for i in range(0, entriesToDisplay):
         if i + x < len(s):
             mainFont = "CG-pixel-3x5-mono"

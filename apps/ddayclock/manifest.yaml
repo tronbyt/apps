@@ -4,9 +4,10 @@ name: DDayClock
 summary: Displays current DD Clock
 desc: Gets the current Doomsday Clock data from https://www.doomsdayclock.net/ daily.
 author: LLarry
+supports64x64: true
 category: news
 tags:
   - clock
   - news
 published: '2026-03-12T21:38:25Z'
-updated: '2026-03-17T09:45:52Z'
+updated: '2026-10-01T20:48:26Z'

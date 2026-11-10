@@ -6,6 +6,7 @@ desc: Supports both Standard (Gen 1) and Wide (Gen 2) Tidbyt displays. Fetches l
 author: Nick Enslinger
 filename: brewfather.star
 supports2x: true
+supports64x64: true
 category: utilities
 tags:
   - lifestyle
@@ -13,4 +14,4 @@ tags:
   - real-time
   - wide 2x support
 published: '2026-01-10T21:30:29Z'
-updated: '2026-01-16T20:12:24Z'
+updated: '2026-10-01T20:24:07Z'

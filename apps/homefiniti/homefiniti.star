@@ -10,7 +10,7 @@ load("http.star", "http")
 load("images/envelope_icon.png", ENVELOPE_ICON_ASSET = "file")
 load("images/oneil.png", ONEIL_ICON_ASSET = "file")
 load("images/person_icon.png", PERSON_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 ENVELOPE_ICON = ENVELOPE_ICON_ASSET.readall()
@@ -51,7 +51,8 @@ def main(config):
         logo = ONEIL_ICON
 
     return render.Root(
-        child = render.Row(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
             expanded = True,
             main_align = "space_between",
             children = [
@@ -93,7 +94,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

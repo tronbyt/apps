@@ -763,7 +763,7 @@ load("images/glyph_Z92.png", GLYPH_Z92_ASSET = "file")
 load("images/glyph_Z93.png", GLYPH_Z93_ASSET = "file")
 load("images/glyph_Z94.png", GLYPH_Z94_ASSET = "file")
 load("images/glyph_Z95.png", GLYPH_Z95_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -824,7 +824,8 @@ def main():
         )
 
     return render.Root(
-        child = render.Padding(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Padding(
             pad = (1, 1, 1, 1),
             child = render.Stack(
                 children = [
@@ -851,7 +852,7 @@ def main():
                     ),
                 ],
             ),
-        ),
+        ))),
     )
 
 def get_schema():

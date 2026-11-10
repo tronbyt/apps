@@ -11,7 +11,7 @@ load("http.star", "http")
 load("images/nhl_logo.png", NHL_LOGO_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -83,6 +83,15 @@ TEAMS_LIST = {
 }
 
 # Main App
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     # Get timezone and set today date
     currDate = get_current_date(config)
@@ -150,7 +159,26 @@ def main(config):
     if game_info["gameId"] == None:
         print("  - ERROR: No Games Found. Displaying NHL Logo.")
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                child = render.Column(
+                    expanded = True,
+                    main_align = "space_around",
+                    cross_align = "center",
+                    children = [
+                        render.Image(
+                            src = NHL_LOGO,
+                            width = 20,
+                            height = 20,
+                        ),
+                        render.Text(
+                            content = "No %s Games" % team_abbr,
+                            font = FONT_STYLE,
+                            color = "#ababab",
+                        ),
+                    ],
+                ),
+            ))) if is_square() else render.Box(
                 child = render.Column(
                     expanded = True,
                     main_align = "space_around",
@@ -188,7 +216,89 @@ def main(config):
 
     # Main Display Render
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    expanded = True,
+                    main_align = "space_around",
+                    cross_align = "center",
+                    children = [
+                        render.Column(
+                            cross_align = "center",
+                            children = [
+                                render.Image(width = 18, height = 18, src = logo_away),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = TEAMS_LIST[game_info["teamId_away"]]["abbreviation"] + " " + game_info["goals_away"],
+                                    font = FONT_STYLE,
+                                    color = score_color_away,
+                                ),
+                            ],
+                        ),
+                        render.Column(
+                            cross_align = "center",
+                            main_align = "space evenly",
+                            children = [
+                                render.Box(height = 2, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["game_time"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                                render.Text(
+                                    content = "vs",
+                                    font = FONT_STYLE,
+                                    color = "#525252",
+                                ),
+                                render.Text(
+                                    content = game_info["game_period"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["is_intermission"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                            ],
+                        ),
+                        render.Column(
+                            cross_align = "center",
+                            children = [
+                                render.Image(width = 18, height = 18, src = logo_home),
+                                render.Box(height = 1, width = 5, color = "#000000"),
+                                render.Text(
+                                    content = game_info["goals_home"] + " " + TEAMS_LIST[game_info["teamId_home"]]["abbreviation"],
+                                    font = FONT_STYLE,
+                                    color = score_color_home,
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+                render.Box(
+                    height = 9,
+                    child = render.Row(
+                        expanded = True,
+                        main_align = "end",
+                        children = [
+                            render.Marquee(
+                                offset_start = 16,
+                                offset_end = 16,
+                                width = 64,
+                                child = render.Text(
+                                    content = game_info["game_update"],
+                                    font = FONT_STYLE,
+                                    color = "#ffbe0a",
+                                ),
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     expanded = True,

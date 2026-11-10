@@ -7,10 +7,11 @@ author: LukiLeu
 recommendedInterval: 60
 packageName: meteoschweiz
 supports2x: true
+supports64x64: true
 category: weather
 tags:
   - weather
   - local
   - wide 2x support
 published: '2026-01-11T00:59:10Z'
-updated: '2026-06-21T06:18:05Z'
+updated: '2026-10-01T21:54:45Z'

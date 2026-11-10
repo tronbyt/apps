@@ -8,7 +8,7 @@ Author: jspeigner
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -146,6 +146,15 @@ def dotted_divider():
     return render.Row(children = cells)
 
 # ── Main ─────────────────────────────────────────────────────────────
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     data = fetch_latest()
     if not data:
@@ -252,8 +261,11 @@ def main(config):
         bottom,
     ])
     if animate or show_ticker:
-        return render.Root(delay = 100, child = stack)
-    return render.Root(child = stack)
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        return render.Root(delay = 100, child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = stack))) if is_square() else stack)
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+
+    return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = stack))) if is_square() else stack)
 
 def get_schema():
     return schema.Schema(

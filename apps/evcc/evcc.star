@@ -29,7 +29,7 @@ load("images/nuclear_outline_icon.png", NUCLEAR_OUTLINE_ICON_ASSET = "file")
 load("images/nuclear_solid_icon.png", NUCLEAR_SOLID_ICON_ASSET = "file")
 load("images/solarenergy_icon.png", SOLARENERGY_ICON_ASSET = "file")
 load("images/sun_icon.png", SUN_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CAR0_ICON = CAR0_ICON_ASSET.readall()
@@ -378,13 +378,14 @@ def main(config):
     return render.Root(
         delay = 7 * 1000,
         show_full_animation = True,
-        child = render.Column(
+        # Both screens are laid out for 64x32; bound them to that and centre them on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Column(
             children = [
                 render.Animation(
                     children = [screen_1, screen_2],
                 ),
             ],
-        ),
+        ))),
     )
 
 # https://github.com/evcc-io/docs/blob/main/docs/reference/configuration/messaging.md?plain=1#L156

@@ -11,7 +11,6 @@ load("images/the_logo.png", THE_LOGO_ASSET = "file")
 load("random.star", "random")
 load("render.star", "render")
 load("schema.star", "schema")
-load("time.star", "time")
 
 THE_LOGO = THE_LOGO_ASSET.readall()
 
@@ -169,7 +168,7 @@ def main(config):
     quotes_list, delay_speed, root = [], 40, ""
 
     for person in QUOTES:
-        if config.get("enableQuotesBy" + person.replace(".", "").replace(" ", ""), True) == "true":
+        if config.bool("enableQuotesBy" + person.replace(".", "").replace(" ", ""), True):
             for quote in QUOTES[person]:
                 quote_str = quote if "\"" in quote else ("\"" + quote + "\"\n-" + person)
                 quotes_list.append(quote_str)

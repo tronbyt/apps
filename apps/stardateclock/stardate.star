@@ -9,7 +9,7 @@ Author: Christian Dannie Storgaard (Cybolic)
 
 load("encoding/json.star", "json")
 load("images/background_img.png", BACKGROUND_IMG_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -32,6 +32,15 @@ DEFAULT_LOCATION = json.encode({
     "timezone": DEFAULT_TIMEZONE,
     "locality": "Earth",
 })
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     location = json.decode(config.get("location", DEFAULT_LOCATION))
@@ -70,7 +79,25 @@ def main(config):
         else:
             location_text = location["name"] if "name" in location else "Earth"
 
+    # The frame is a 64x32 graphic and the figures are placed against it, so
+    # on a taller panel the whole scene is centred rather than stretched or
+    # hung from the top edge.
+    scene_h = 32
+    if is_square():
+        scene_h = canvas.height()
+
     return render.Root(
+        child = render.Box(
+            width = canvas.width(),
+            height = scene_h,
+            child = stardate_scene(stardate_display, location_text, color_epoch),
+        ),
+    )
+
+def stardate_scene(stardate_display, location_text, color_epoch):
+    return render.Box(
+        width = 64,
+        height = 32,
         child = render.Stack(
             children = [
                 render.Image(

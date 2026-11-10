@@ -1,7 +1,7 @@
 """IsClaudeUp — Live Anthropic/Claude.ai service status on your Tidbyt."""
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 VERSION = "1.0"
@@ -85,20 +85,20 @@ def logo_frame(i, dot_color):
 
     return render.Stack(children = [
         # Background
-        render.Box(width = 16, height = 32, color = BG_LEFT),
+        render.Box(width = 16, height = canvas.height(), color = BG_LEFT),
         # Vertical rays
-        render.Padding(pad = (7, 2, 0, 0), child = render.Box(width = 2, height = 9, color = c)),
-        render.Padding(pad = (7, 21, 0, 0), child = render.Box(width = 2, height = 9, color = c)),
+        render.Padding(pad = (7, 2 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 9, color = c)),
+        render.Padding(pad = (7, 21 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 9, color = c)),
         # Horizontal rays
-        render.Padding(pad = (1, 14, 0, 0), child = render.Box(width = 5, height = 2, color = c)),
-        render.Padding(pad = (10, 14, 0, 0), child = render.Box(width = 5, height = 2, color = c)),
+        render.Padding(pad = (1, 14 + ICON_DROP, 0, 0), child = render.Box(width = 5, height = 2, color = c)),
+        render.Padding(pad = (10, 14 + ICON_DROP, 0, 0), child = render.Box(width = 5, height = 2, color = c)),
         # Diagonal corner accents (alternate frames)
-        render.Padding(pad = (3, 5, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
-        render.Padding(pad = (11, 5, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
-        render.Padding(pad = (3, 25, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
-        render.Padding(pad = (11, 25, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
+        render.Padding(pad = (3, 5 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
+        render.Padding(pad = (11, 5 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
+        render.Padding(pad = (3, 25 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
+        render.Padding(pad = (11, 25 + ICON_DROP, 0, 0), child = render.Box(width = 2, height = 2, color = diag)),
         # Center 4x4 status dot — pulses between status color and clay
-        render.Padding(pad = (6, 13, 0, 0), child = render.Box(width = 4, height = 4, color = dot)),
+        render.Padding(pad = (6, 13 + ICON_DROP, 0, 0), child = render.Box(width = 4, height = 4, color = dot)),
     ])
 
 def logo_animation(dot_color):
@@ -147,6 +147,19 @@ def incident_scroll(incidents, width):
 # Entry point
 # ---------------------------------------------------------------------------
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+# The status icon is drawn against a 32-row panel; on a taller one the
+# left panel runs the full height and the icon drops to its middle.
+ICON_DROP = (canvas.height() - 32) // 2
+
 def main(_):
     data = fetch_status()
     if data == None:
@@ -190,9 +203,12 @@ def main(_):
     if scroll:
         right_rows.append(render.Padding(pad = (0, 2, 0, 0), child = scroll))
 
+    # On a square panel the right column expands to the panel height so
+    # its rows sit in the middle beside the icon rather than at the top.
     right_panel = render.Column(
         children = right_rows,
-        main_align = "start",
+        expanded = is_square(),
+        main_align = "center" if is_square() else "start",
         cross_align = "start",
     )
 
@@ -201,7 +217,7 @@ def main(_):
         child = render.Row(
             children = [
                 logo_animation(s_color),
-                render.Box(width = 1, height = 32, color = "#1A1A2E"),
+                render.Box(width = 1, height = canvas.height(), color = "#1A1A2E"),
                 right_panel,
             ],
             main_align = "start",

@@ -1,0 +1,19 @@
+---
+id: airgradientgraphs
+name: Air Gradient Graphs
+summary: AirGradient history bar charts
+desc: Bar charts of recent readings from an AirGradient ONE or Open Air monitor via the AirGradient cloud API. Show up to six metrics on one screen, or one full-screen chart per slide, colored by air quality level or highlighted above an average.
+author: tscott98
+fileName: airgradient_graphs.star
+packageName: airgradientgraphs
+recommendedInterval: 5
+supports2x: true
+supports64x64: false
+category: smart-home
+tags:
+  - smart-home
+  - health
+  - weather
+  - charts
+published: '2026-11-08T06:19:43Z'
+updated: '2026-11-08T23:33:15Z'

@@ -12,6 +12,17 @@ load("schema.star", "schema")
 load("xpath.star", "xpath")
 
 VERSION = 23318
+
+# Devices reject a webp over 460,000 bytes (firmware HTTP_BUFFER_SIZE_MAX) and
+# show an "oversize" screen instead. File size grows with scroll length, so cap
+# the marquee at a frame budget: ~690 bytes/frame worst case at 2x and ~430 on
+# 64x64 keeps the render under ~400 KB.
+MAX_SCROLL_FRAMES = 500 if canvas.is2x() else 900
+
+# pixlet's marquee silently clips content taller than 20x its height, so treat
+# that as not fitting either and drop whole items instead of cutting mid-list.
+MARQUEE_MAX_SCALE = 20
+
 # jvivoan - 20231114 - added more articles as per request ** NOTE:  Marquee is limited to 320px high - so text will get cut off after about 40 total lines of text regardless of what you select here  **
 
 # cache data for 15 minutes
@@ -48,6 +59,9 @@ def main(config):
 def render_1x(articles, selected_feed):
     # 64x32 layout (unchanged): feed shortName title bar over the scrolling
     # body (description shown per the feed's showdesc flag).
+    show_desc = selected_feed["showdesc"]
+    articles = fit_articles(articles, lambda a: render_article(a, show_desc), canvas.height() - TITLE_HEIGHT)
+
     return render.Root(
         delay = 100,
         show_full_animation = True,
@@ -61,13 +75,14 @@ def render_1x(articles, selected_feed):
                     child = render.Text(selected_feed["shortName"], color = TITLE_TEXT_COLOR, font = TITLE_FONT, offset = 0),
                 ),
                 render.Marquee(
-                    height = ARTICLE_AREA_HEIGHT,
+                    # the rows under the title: 24 on 64x32, 56 on square
+                    height = canvas.height() - TITLE_HEIGHT,
                     scroll_direction = "vertical",
-                    offset_start = 24,
+                    offset_start = canvas.height() - TITLE_HEIGHT,
                     child =
                         render.Column(
                             main_align = "space_between",
-                            children = render_article(articles, selected_feed["showdesc"]),
+                            children = render_article(articles, show_desc),
                         ),
                 ),
             ],
@@ -78,14 +93,7 @@ def render_2x(articles, selected_feed):
     # 128x64 layout: fixed feed-name header, then each article as a white
     # headline; the description is shown when the feed opts in (showdesc).
     show_desc = selected_feed["showdesc"]
-    body = []
-    for article in articles:
-        body.append(render.WrappedText(content = clean_text(article[0]), color = TEXT_COLOR, font = ARTICLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
-        body.append(render.Box(width = 128, height = 2, color = SPACER_COLOR))
-        desc = clean_text(article[1])
-        if show_desc and desc != "":
-            body.append(render.WrappedText(content = desc, color = ARTICLE_COLOR, font = ARTICLE_SUB_TITLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
-        body.append(render.Box(width = 128, height = 9, color = SPACER_COLOR))
+    articles = fit_articles(articles, lambda a: rows_2x(a, show_desc), 55)
 
     return render.Root(
         delay = 100,
@@ -102,7 +110,7 @@ def render_2x(articles, selected_feed):
                     height = 55,
                     scroll_direction = "vertical",
                     offset_start = 55,
-                    child = render.Column(children = body),
+                    child = render.Column(children = rows_2x(articles, show_desc)),
                 ),
             ],
         ),
@@ -119,6 +127,35 @@ def render_article(news, showDesc):
         news_text.append(render.Box(width = 64, height = 8, color = SPACER_COLOR))
 
     return (news_text)
+
+def rows_2x(articles, show_desc):
+    body = []
+    for article in articles:
+        body.append(render.WrappedText(content = clean_text(article[0]), color = TEXT_COLOR, font = ARTICLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 2, color = SPACER_COLOR))
+        desc = clean_text(article[1])
+        if show_desc and desc != "":
+            body.append(render.WrappedText(content = desc, color = ARTICLE_COLOR, font = ARTICLE_SUB_TITLE_FONT, width = 128, linespacing = ARTICLE_LINESPACING))
+        body.append(render.Box(width = 128, height = 9, color = SPACER_COLOR))
+    return body
+
+def fit_articles(articles, rows_for, height):
+    # Drop trailing articles until the scroll fits MAX_SCROLL_FRAMES (always
+    # keeping the first), so the render stays under the device's webp size cap.
+    budget = min(MAX_SCROLL_FRAMES, MARQUEE_MAX_SCALE * height)
+    for _ in range(len(articles) - 1):
+        marquee = render.Marquee(
+            height = height,
+            scroll_direction = "vertical",
+            offset_start = height,
+            child = render.Column(children = rows_for(articles)),
+        )
+
+        # frame_count() lays out on a 64x32 canvas unless given real bounds
+        if marquee.frame_count((0, 0, canvas.width(), canvas.height())) <= budget:
+            break
+        articles = articles[:-1]
+    return articles
 
 def clean_text(s):
     if not s:

@@ -5,6 +5,7 @@ Description: Displays live and upcoming CFL scores from a data feed.
 Author: LunchBox8484
 """
 
+load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("render.star", "render")
@@ -70,6 +71,10 @@ ALT_LOGO = """
     "WBB": "https://tsnimages.tsn.ca/ImageProvider/TeamLogo?seoId=winnipeg-blue-bombers&width=40&height=40"
 }
 """
+
+# Shown when neither logo source responds, so a missing logo never stops the app rendering
+TRANSPARENT_PNG = base64.decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIAAAUAAeImBZsAAAAASUVORK5CYII=")
+
 MAGNIFY_LOGO = """
 {
 }
@@ -87,9 +92,15 @@ def main(config):
     loc = json.decode(location)
     timezone = loc["timezone"]
     now = time.now().in_location(timezone)
-    datePast = now - time.parse_duration("%dh" % 1 * 24)
-    dateFuture = now + time.parse_duration("%dh" % 30 * 24)
-    league = {LEAGUE: API + "?limit=100" + (selectedTeam == "all" and " " or "&dates=" + datePast.format("20060102") + "-" + dateFuture.format("20060102"))}
+    league = {}
+    if selectedTeam == "all":
+        league[LEAGUE] = API + "?limit=100"
+    else:
+        for d in range(-1, 7):
+            day_time = now + time.parse_duration("%dh" % (d * 24))
+            day_str = day_time.format("20060102")
+            league[day_str] = API + "?limit=100&dates=" + day_str
+
     scores = get_scores(league, selectedTeam)
     if len(scores) > 0:
         for i, s in enumerate(scores):
@@ -731,26 +742,28 @@ def get_schema():
 
 def get_scores(urls, team):
     allscores = []
-    gameCount = 0
     for i, s in urls.items():
         data = get_cachable_data(s)
         decodedata = json.decode(data)
         allscores.extend(decodedata["events"])
-        if team != "all" and team != "":
-            newScores = []
-            for _, s in enumerate(allscores):
-                home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
-                away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
-                gameStatus = s["status"]["type"]["state"]
-                if (home == team or away == team) and gameStatus == "post":
-                    newScores.append(s)
-                elif (home == team or away == team) and gameCount == 0:
-                    if gameStatus == "in":
-                        newScores.clear()
-                    newScores.append(s)
-                    gameCount = gameCount + 1
-            allscores = newScores
         all([i, allscores])
+
+    if team != "all" and team != "":
+        newScores = []
+        gameCount = 0
+        for _, s in enumerate(allscores):
+            home = s["competitions"][0]["competitors"][0]["team"]["abbreviation"]
+            away = s["competitions"][0]["competitors"][1]["team"]["abbreviation"]
+            gameStatus = s["status"]["type"]["state"]
+            if (home == team or away == team) and gameStatus == "post":
+                newScores.append(s)
+            elif (home == team or away == team) and gameCount == 0:
+                if gameStatus == "in":
+                    newScores.clear()
+                newScores.append(s)
+                gameCount = gameCount + 1
+        allscores = newScores
+
     return allscores
 
 def get_odds(theOdds, theOU, team, homeaway):
@@ -801,15 +814,24 @@ def get_background_color(team, displayType, color):
     return color
 
 def get_logoType(team, logo):
+    # Prefer the alternative logo if there is one, then ESPN's. Logo servers sometimes fail (TSN's often returns
+    # errors), so a failed logo falls back rather than stopping the whole app.
     usealtlogo = json.decode(ALT_LOGO)
     usealt = usealtlogo.get(team, "NO")
     if usealt != "NO":
-        logo = get_cachable_data(usealt, 36000)
-    else:
-        logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
-        logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
-        logo = get_cachable_data(logo + "&h=50&w=50")
-    return logo
+        image = get_optional_image(usealt, 36000)
+        if image:
+            return image
+    logo = logo.replace("500/scoreboard", "500-dark/scoreboard")
+    logo = logo.replace("https://a.espncdn.com/", "https://a.espncdn.com/combiner/i?img=", 36000)
+    return get_optional_image(logo + "&h=50&w=50", CACHE_TTL_SECONDS) or TRANSPARENT_PNG
+
+def get_optional_image(url, ttl_seconds):
+    res = http.get(url = url, ttl_seconds = ttl_seconds)
+    if res.status_code != 200:
+        print("Couldn't load logo %s (status %d)" % (url, res.status_code))
+        return None
+    return res.body()
 
 def get_logoSize(team):
     usealtsize = json.decode(MAGNIFY_LOGO)

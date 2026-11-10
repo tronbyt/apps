@@ -5,8 +5,8 @@ Description: Display Wikipedia's Featured Article of the Day in a Tidbyt format.
 Author: UnBurn
 """
 
-load("http.star", "http")
 load("encoding/base64.star", "base64")
+load("http.star", "http")
 load("render.star", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -25,7 +25,7 @@ rkJggg==
 """)
 
 WIKIPEDIA_URL = "https://api.wikimedia.org/feed/v1/wikipedia/%s/featured/%s"
-WIKIPEDIA_HEADER = { "Accept": "application/json", "User-Agent": "WikiPageToday/Application" }
+WIKIPEDIA_HEADER = {"Accept": "application/json", "User-Agent": "WikiPageToday/Application"}
 
 TTL_TIME = 86400
 MARQUEE_DELAY = 150

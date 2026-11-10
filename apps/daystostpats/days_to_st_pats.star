@@ -9,7 +9,7 @@ load("humanize.star", "humanize")
 load("images/clover.png", CLOVER_ASSET = "file")
 load("images/gold_pot.png", GOLD_POT_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 CLOVER = CLOVER_ASSET.readall()
@@ -175,7 +175,10 @@ def main(config):
         frame_stack.append(st_pat_day)
         frame_stack.append(render_rainbow(rainbow, wave, timestamp_ms))
         frame_stack.append(pot)
-        frames.append(render.Stack(children = frame_stack))
+
+        # everything is placed against 32 rows; on a taller panel the
+        # frame sits in the middle
+        frames.append(render.Box(width = 64, height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(children = frame_stack))))
         timestamp_ms += FRAME_DELAY
 
     return render.Root(

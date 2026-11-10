@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/coinbase_logo.png", COINBASE_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 
@@ -18,10 +18,19 @@ COINBASE_LOGO = COINBASE_LOGO_ASSET.readall()
 COINBASE_CLIENT_SECRET = secret.decrypt("AV6+xWcEIOP/Rql2nyueyFjL9f51E2W1wDvcqtKyvXWRuSZwf7pNagbGLNridKAHG4Nw4oW2FZssbHNfsGwWAmSqXG3VN8oSvw0UY+4AB2LU3HMl5eEN9A139V08wU3/vOX7ouCUtHWwNkhHRngkQHqQiZSTK0KNOYTaIO9aeb7uzFwLdMdATDEQ2ypUjrvOt4l8UM1HIpXaIjn8T5bE+q7AYgaLww==")
 COINBASE_CLIENT_ID = secret.decrypt("AV6+xWcEVIfI5lKs4wUCRh+CyWiA2VJ8Jngv8g/klexY7x7qR4KGIopsbZOIq/syABtfSToDA/nx5J8Mhy+XakIUjxESmr3V9fKOeymlJd7G/0VImVbAJYoZoTU2PMgzHcr7+HUV3SVUGrmZk62eMH5y77pWPb6MXIeLXAwTYFL6ZBk3NQCkP6EIN0dOP9h+ubvvBWMLE1U3Imc9ZdqxC4XPEQmPPg==")
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     if config.get("token") == None:
         return render.Root(
-            child = render.Text("Please login"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Please login")),
         )
 
     AUTH_TOKEN = config.get("token")
@@ -32,7 +41,7 @@ def main(config):
 
     if res.status_code != 200:
         return render.Root(
-            child = render.Text("Rates unavailable!"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Rates unavailable!")),
         )
     else:
         # cache for 15 minutes
@@ -45,7 +54,7 @@ def main(config):
 
     if res.status_code != 200:
         return render.Root(
-            child = render.Text("Accounts unavailable!"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Accounts unavailable!")),
         )
     else:
         # cache for 15 minutes
@@ -53,7 +62,7 @@ def main(config):
 
     if accounts == None:
         return render.Root(
-            child = render.Text("Accounts unavailable!"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Accounts unavailable!")),
         )
 
     # for display
@@ -71,6 +80,7 @@ def main(config):
 
     return render.Root(
         child = render.Column(
+            expanded = is_square(),
             main_align = "center",
             cross_align = "center",
             children = [

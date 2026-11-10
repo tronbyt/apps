@@ -1,24 +1,37 @@
 load("http.star", "http")
+load("humanize.star", "humanize")
 load("images/pokt_icon.png", POKT_ICON_ASSET = "file")
 load("render.star", "render")
 
 POKT_ICON = POKT_ICON_ASSET.readall()
 
-COINSTATS_PRICE_URL = "https://api.coinstats.app/public/v1/coins/pocket-network"
-PNI_HEIGHT_URL = "https://supply.research.pokt.network:8192/height"
+# The price is from CoinGecko (free, no key). Pocket Network moved to its Shannon chain in 2025, so the block height
+# comes from Polkachu's public Shannon RPC node; the old PNI height endpoint and CoinStats' public API have gone.
+PRICE_URL = "https://api.coingecko.com/api/v3/simple/price?ids=pocket-network&vs_currencies=usd"
+HEIGHT_URL = "https://pocket-rpc.polkachu.com/status"
+
+def get_price():
+    rep = http.get(PRICE_URL, ttl_seconds = 1800)
+    if rep.status_code != 200:
+        print("CoinGecko request failed with status %d" % rep.status_code)
+        return None
+    price = rep.json().get("pocket-network", {}).get("usd")
+    return humanize.float("#.####", price) if price != None else None
+
+def get_height():
+    rep = http.get(HEIGHT_URL, ttl_seconds = 600)
+    if rep.status_code != 200:
+        print("Pocket Network RPC request failed with status %d" % rep.status_code)
+        return None
+    return rep.json().get("result", {}).get("sync_info", {}).get("latest_block_height")
 
 def main():
-    print("calling coinstats API")
-    rep = http.get(COINSTATS_PRICE_URL, ttl_seconds = 7200)
-    if rep.status_code != 200:
-        fail("Coinstats request failed with status %d", rep.status_code)
-    price = rep.json().get("coin", {}).get("price", "0.00")
-
-    print("calling PNI API")
-    rep = http.get(PNI_HEIGHT_URL, ttl_seconds = 600)
-    if rep.status_code != 200:
-        fail("PNI Height request failed with status %d", rep.status_code)
-    height = rep.body()
+    price = get_price()
+    height = get_height()
+    if price == None and height == None:
+        return []
+    price = price or "--"
+    height = height or "--"
 
     return render.Root(
         child = render.Box(
@@ -40,7 +53,7 @@ def main():
                         children = [
                             render.Text(content = "POKT", font = "Dina_r400-6"),
                             render.Text("$%s" % price),
-                            render.Text("%s" % height),
+                            render.Text(height),
                         ],
                     ),
                 ],

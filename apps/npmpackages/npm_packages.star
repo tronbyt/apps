@@ -10,7 +10,7 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/download_logo.png", DOWNLOAD_LOGO_ASSET = "file")
 load("images/npm_logo.png", NPM_LOGO_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DOWNLOAD_LOGO = DOWNLOAD_LOGO_ASSET.readall()
@@ -102,7 +102,9 @@ def main(config):
                 render.Plot(
                     data = chart_data,
                     width = 64,
-                    height = 8,
+                    # the rows under the two 12px header rows: 8 on 64x32,
+                    # 40 on a square panel
+                    height = canvas.height() - 24,
                     color = "#8258f6",
                     color_inverted = "#d96d66",
                     fill = True,

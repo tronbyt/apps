@@ -7,7 +7,7 @@ Author: Aaron Brace
 
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -70,7 +70,8 @@ def main(config):
 
     if (config.str("metal") == "version"):
         return render.Root(
-            child = render.Column(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
                 children = [
                     render.Marquee(
                         child = render.Text("Goldpriceticker version " + GOLDPRICETICKER_VERSION + "."),
@@ -85,7 +86,7 @@ def main(config):
                         width = 64,
                     ),
                 ],
-            ),
+            )),
         )
 
     # Precious metal markets are open almost 24x5, so its hard to determine what a closing price is. However according to Kitco, its 5PM
@@ -132,10 +133,11 @@ def main(config):
 
     if (httpresponse.status_code == 401):
         return render.Root(
-            child = render.Marquee(
+            # Centre the block on taller panels (64x64).
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Marquee(
                 child = render.Text("API Key Invalid"),
                 width = 64,
-            ),
+            )),
         )
     if httpresponse.status_code != 200:
         fail("Could not fetch " + GRAPH_PERIOD + " spot price history for URL " + PRICE_HISTORY_URL + GRAPH_PERIOD + "/" + PRECIOUS_METAL + " Error code %d" % (httpresponse.status_code))
@@ -261,7 +263,8 @@ def main(config):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             cross_align = "start",
             children = [
                 render.Box(
@@ -307,7 +310,7 @@ def main(config):
                 PLOT_SECTION,
                 # ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

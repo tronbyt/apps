@@ -8,17 +8,27 @@ Description: Display an International Flipper Pinball Association (IFPA) World R
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("images/pin_icon.png", PIN_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 PIN_ICON = PIN_ICON_ASSET.readall()
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     apiKey = config.get("ifpa_api_key")
     playerId = config.str("playerId", "1")  # Default to KME, also specified in schema
     if apiKey == None:
         return render.Root(
-            child = render.Text("No IFPA API Key provided.", font = "5x8"),
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("No IFPA API Key provided.", font = "5x8"))) if is_square() else render.Text("No IFPA API Key provided.", font = "5x8"),
         )
     IFPA_URL = "https://api.ifpapinball.com/v1/player/" + playerId + "?api_key=" + apiKey
 
@@ -37,7 +47,25 @@ def main(config):
     ifpa_rank = j["player_stats"]["current_wppr_rank"]
 
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            render.Row(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Image(src = PIN_ICON),
+                    render.Column(
+                        cross_align = "center",
+                        children = [
+                            render.Text("IFPA", color = "#fc6203", font = "tb-8"),
+                            render.Text("#%s" % ifpa_rank, color = "#fc6203", font = "6x13"),
+                            render.Text(ifpa_initial, color = "#fc6203", font = "tb-8"),
+                        ],
+                    ),
+                ],
+            ),
+        ))) if is_square() else render.Box(
             render.Row(
                 expanded = True,
                 main_align = "space_evenly",

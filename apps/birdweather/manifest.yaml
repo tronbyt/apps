@@ -5,6 +5,7 @@ summary: Sightings from Birdweather
 desc: Display recent sightings from a Birdweather station using their API. Requires an API token.
 author: marstonstudio
 recommendedInterval: 5
+supports64x64: true
 category: weather
 tags:
   - nature
@@ -12,4 +13,4 @@ tags:
   - tech
   - utility
 published: '2025-04-05T18:31:38Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T20:24:07Z'

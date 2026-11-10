@@ -6,7 +6,7 @@ Author: imcnaugh
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -106,7 +106,7 @@ def map_to_render(combined_properties):
 
 def render_error_message():
     return render.Root(
-        child = render.WrappedText(content = "I seem to be having some issues finding CTA trains :( "),
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(content = "I seem to be having some issues finding CTA trains :( ")),
     )
 
 def main(config):
@@ -137,7 +137,8 @@ def main(config):
 
     return render.Root(
         child = render.Column(
-            children = children_to_render[:4],
+            # One 8px row per train: 4 on 64x32, 8 on 64x64.
+            children = children_to_render[:canvas.height() // 8],
         ),
     )
 

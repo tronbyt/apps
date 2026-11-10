@@ -8,11 +8,20 @@ Author: flynnt
 load("hash.star", "hash")
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 BASE_URL = "https://gateway.marvel.com/v1/public/characters"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """
@@ -43,7 +52,27 @@ def main(config):
 
 def render_data(image, name):
     return render.Root(
-        render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Box(
+                    height = 32,
+                    width = 28,
+                    child = render.Image(
+                        src = image,
+                        height = 28,
+                    ),
+                ),
+                render.Box(
+                    height = 32,
+                    child = render.Marquee(
+                        align = "center",
+                        width = 35,
+                        child = render.Text(name),
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render.Box(
                     height = 32,

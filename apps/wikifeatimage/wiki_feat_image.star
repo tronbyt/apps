@@ -100,6 +100,7 @@ def retrieve_image(json_dict):
     image_url = json_dict["image"]["thumbnail"]["source"]
 
     # Retrieve the actual image data from the source URL and cache the results for 4 hours
-    image = http.get(image_url, ttl_seconds = CACHE_DURATION).body()
+    # Wikimedia refuses image requests without a User-Agent, like the feed request above
+    image = http.get(image_url, ttl_seconds = CACHE_DURATION, headers = {"User-Agent": "TidbytApp/1.0"}).body()
 
     return image

@@ -5,65 +5,35 @@ Description: Track your Colorado 14ers.
 Author: Robert Ison
 """
 
+load("cache.star", "cache")
+load("colorado14ers_data.star", "MOUNTAIN_OUTLINES")
+load("encoding/json.star", "json")
 load("humanize.star", "humanize")
-load("images/blanca_peak.png", BLANCA_PEAK_ASSET = "file")
-load("images/capitol_peak.png", CAPITOL_PEAK_ASSET = "file")
-load("images/castle_peak.png", CASTLE_PEAK_ASSET = "file")
-load("images/challenger_point.png", CHALLENGER_POINT_ASSET = "file")
-load("images/crestone_needle.png", CRESTONE_NEEDLE_ASSET = "file")
-load("images/crestone_peak.png", CRESTONE_PEAK_ASSET = "file")
-load("images/culebra_peak.png", CULEBRA_PEAK_ASSET = "file")
-load("images/ellingwood_point.png", ELLINGWOOD_POINT_ASSET = "file")
-load("images/grays_peak.png", GRAYS_PEAK_ASSET = "file")
-load("images/handies_peak.png", HANDIES_PEAK_ASSET = "file")
-load("images/humboldt_peak.png", HUMBOLDT_PEAK_ASSET = "file")
-load("images/huron_peak.png", HURON_PEAK_ASSET = "file")
-load("images/kit_carson_peak.png", KIT_CARSON_PEAK_ASSET = "file")
-load("images/la_plata_peak.png", LA_PLATA_PEAK_ASSET = "file")
-load("images/little_bear_peak.png", LITTLE_BEAR_PEAK_ASSET = "file")
-load("images/longs_peak.png", LONGS_PEAK_ASSET = "file")
-load("images/maroon_peak.png", MAROON_PEAK_ASSET = "file")
-load("images/missouri_mountain.png", MISSOURI_MOUNTAIN_ASSET = "file")
-load("images/mt_antero.png", MT_ANTERO_ASSET = "file")
-load("images/mt_belford.png", MT_BELFORD_ASSET = "file")
-load("images/mt_bierstadt.png", MT_BIERSTADT_ASSET = "file")
-load("images/mt_blue_sky.png", MT_BLUE_SKY_ASSET = "file")
-load("images/mt_bross.png", MT_BROSS_ASSET = "file")
-load("images/mt_columbia.png", MT_COLUMBIA_ASSET = "file")
-load("images/mt_democrat.png", MT_DEMOCRAT_ASSET = "file")
-load("images/mt_elbert.png", MT_ELBERT_ASSET = "file")
-load("images/mt_eolus.png", MT_EOLUS_ASSET = "file")
-load("images/mt_harvard.png", MT_HARVARD_ASSET = "file")
-load("images/mt_holy_cross.png", MT_HOLY_CROSS_ASSET = "file")
-load("images/mt_lincoln.png", MT_LINCOLN_ASSET = "file")
-load("images/mt_lindsey.png", MT_LINDSEY_ASSET = "file")
-load("images/mt_massive.png", MT_MASSIVE_ASSET = "file")
-load("images/mt_oxford.png", MT_OXFORD_ASSET = "file")
-load("images/mt_princeton.png", MT_PRINCETON_ASSET = "file")
-load("images/mt_shavano.png", MT_SHAVANO_ASSET = "file")
-load("images/mt_sherman.png", MT_SHERMAN_ASSET = "file")
-load("images/mt_sneffels.png", MT_SNEFFELS_ASSET = "file")
-load("images/mt_wilson.png", MT_WILSON_ASSET = "file")
-load("images/mt_yale.png", MT_YALE_ASSET = "file")
-load("images/pikes_peak.png", PIKES_PEAK_ASSET = "file")
-load("images/pyramid_peak.png", PYRAMID_PEAK_ASSET = "file")
-load("images/quandary_peak.png", QUANDARY_PEAK_ASSET = "file")
-load("images/redcloud_peak.png", REDCLOUD_PEAK_ASSET = "file")
-load("images/san_luis_peak.png", SAN_LUIS_PEAK_ASSET = "file")
-load("images/snowmass_mountain.png", SNOWMASS_MOUNTAIN_ASSET = "file")
-load("images/sunlight_peak.png", SUNLIGHT_PEAK_ASSET = "file")
-load("images/sunshine_peak.png", SUNSHINE_PEAK_ASSET = "file")
-load("images/tabeguache_peak.png", TABEGUACHE_PEAK_ASSET = "file")
-load("images/torreys_peak.png", TORREYS_PEAK_ASSET = "file")
-load("images/uncompahgre_peak.png", UNCOMPAHGRE_PEAK_ASSET = "file")
-load("images/wetterhorn_peak.png", WETTERHORN_PEAK_ASSET = "file")
-load("images/wilson_peak.png", WILSON_PEAK_ASSET = "file")
-load("images/windom_peak.png", WINDOM_PEAK_ASSET = "file")
 load("math.star", "math")
 load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
-load("time.star", "time")
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def center_on_square(child, width = None, height = None):
+    """Centre `child` on the square (64x64); other panels get it unchanged.
+
+    A scene hand-laid for 64x32 passes its size so the Box that centres it
+    has the scene's bounds rather than the panel's.
+    """
+    if not is_square():
+        return child
+    if width != None and height != None:
+        child = render.Box(width = width, height = height, child = child)
+    return render.Box(width = canvas.width(), height = canvas.height(), child = child)
 
 display_options = [
     schema.Option(value = "random", display = "Random 14er"),
@@ -125,8 +95,7 @@ mountain_data = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1981.2,
         "Class": "2+",
-        "Outline": BLANCA_PEAK_ASSET.readall(),
-        "Description": "Mt. Blanca is a challenging climb to the highest peak in the Sangre de Cristo and Sierra Blanca Massif Mountains.",
+        "Description": "Highest summit in the Sangre de Cristo Range.",
     },
     {
         "Name": "Capitol Peak",
@@ -140,8 +109,7 @@ mountain_data = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1615.44,
         "Class": "4",
-        "Outline": CAPITOL_PEAK_ASSET.readall(),
-        "Description": "A stunning mountain in the Maroon Bells-Snowmass Wilderness; said to be the most difficult 14er. It has one of the tallest northern mountain walls in Colorado.",
+        "Description": "A rugged Elk Mountains summit in the Maroon Bells-Snowmass Wilderness.",
     },
     {
         "Name": "Castle Peak",
@@ -155,8 +123,7 @@ mountain_data = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1402.08,
         "Class": "2+",
-        "Outline": CASTLE_PEAK_ASSET.readall(),
-        "Description": "Found near Aspen, this is the tallest summit in the Maroon Bells-Snowmass Wilderness and the Elk Mountains. It's said to be the \"easiest\" 14er in the Elk Range.",
+        "Description": "Highest summit in the Elk Mountains, near Aspen.",
     },
     {
         "Name": "Challenger Point",
@@ -170,8 +137,7 @@ mountain_data = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1645.92,
         "Class": "2+",
-        "Outline": CHALLENGER_POINT_ASSET.readall(),
-        "Description": "Lying in front and to the west of Kit Carson Peak, the trail to the top of this high-rising peak includes a waterfall, lake, and awesome views. It was named for the crew of Space Shuttle Challenger.",
+        "Description": "Named in memory of the Space Shuttle Challenger crew.",
     },
     {
         "Name": "Crestone Needle",
@@ -185,8 +151,7 @@ mountain_data = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1341.12,
         "Class": "4",
-        "Outline": CRESTONE_NEEDLE_ASSET.readall(),
-        "Description": "One of the top 5 toughest and most rugged, this peak was one of the last 14ers climbed. The route is difficult to navigate and there are sections where class 3 technical climbing is required.",
+        "Description": "A rugged, sharply sculpted summit beside Crestone Peak.",
     },
     {
         "Name": "Crestone Peak",
@@ -200,12 +165,11 @@ mountain_data = [
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1737.36,
         "Class": "3",
-        "Outline": CRESTONE_PEAK_ASSET.readall(),
-        "Description": "Often called \"The Peak,\" this remote mountain is the second highest summit in the Sangre de Cristo Range. It has two summits, with the western one being 34 ft. higher.",
+        "Description": "Second-highest summit in the Sangre de Cristo Range.",
     },
     {
         "Name": "Culebra Peak",
-        "Range": "Culebra Range",
+        "Range": "Sangre de Cristo Range",
         "XCoord": 35,
         "YCoord": 31,
         "Elevation": 4283,
@@ -215,8 +179,7 @@ mountain_data = [
         "Hiking Distance": 8,
         "Hiking Elevation Gain": 822.96,
         "Class": "2",
-        "Outline": CULEBRA_PEAK_ASSET.readall(),
-        "Description": "This is the most historic 14er (dating back to the late 1600s) and the highest peak in the Culebra Range. It is also the only privately owned 14er.",
+        "Description": "A privately owned summit in the Culebra Range.",
     },
     {
         "Name": "Ellingwood Point",
@@ -230,8 +193,7 @@ mountain_data = [
         "Hiking Distance": 27.4,
         "Hiking Elevation Gain": 1889.76,
         "Class": "2+",
-        "Outline": ELLINGWOOD_POINT_ASSET.readall(),
-        "Description": "Named after famous Colorado climber, Albert Ellingwood, this hike includes long exposure areas and a lake. The trail gets tricky, so best keep a detailed map at hand.",
+        "Description": "Named for Colorado mountaineer Albert Ellingwood.",
     },
     {
         "Name": "Grays Peak",
@@ -245,8 +207,7 @@ mountain_data = [
         "Hiking Distance": 12.1,
         "Hiking Elevation Gain": 914.4,
         "Class": "1",
-        "Outline": GRAYS_PEAK_ASSET.readall(),
-        "Description": "Tallest point in the Front Range and the Continental Divide, this mountain peak is easily spotted from the Great Plains.",
+        "Description": "Highest summit in the Front Range.",
     },
     {
         "Name": "Handies Peak",
@@ -260,8 +221,7 @@ mountain_data = [
         "Hiking Distance": 9.3,
         "Hiking Elevation Gain": 762,
         "Class": "1",
-        "Outline": HANDIES_PEAK_ASSET.readall(),
-        "Description": "From American Basin, a steady climb reveals views of the Grenadier, La Garita, and Needle Mountains, plus the Mt. Sneffels Wilderness.",
+        "Description": "A San Juan summit reached from American Basin.",
     },
     {
         "Name": "Humboldt Peak",
@@ -275,8 +235,7 @@ mountain_data = [
         "Hiking Distance": 17.7,
         "Hiking Elevation Gain": 1280.16,
         "Class": "2",
-        "Outline": HUMBOLDT_PEAK_ASSET.readall(),
-        "Description": "This is one of the easier 14ers to hike in the area. There are views of Needle, Crestone Peak, and the Wet Valley on the way up.",
+        "Description": "Overlooks the neighboring Crestone peaks and the Wet Mountain Valley.",
     },
     {
         "Name": "Huron Peak",
@@ -290,8 +249,7 @@ mountain_data = [
         "Hiking Distance": 11.3,
         "Hiking Elevation Gain": 1066.8,
         "Class": "2",
-        "Outline": HURON_PEAK_ASSET.readall(),
-        "Description": "Located along the western side of the Sawatch Range, this trail is a moderately steady hike with a more rugged climb to its summit.",
+        "Description": "A western Sawatch summit with a rugged final climb.",
     },
     {
         "Name": "Kit Carson Peak",
@@ -305,8 +263,7 @@ mountain_data = [
         "Hiking Distance": 24.1,
         "Hiking Elevation Gain": 1905,
         "Class": "3-",
-        "Outline": KIT_CARSON_PEAK_ASSET.readall(),
-        "Description": "The fourth tallest point in the Sangre de Cristo Range, this peak has several sub-summits.",
+        "Description": "A Sangre de Cristo summit with several subsidiary peaks.",
     },
     {
         "Name": "La Plata Peak",
@@ -320,8 +277,7 @@ mountain_data = [
         "Hiking Distance": 14.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": LA_PLATA_PEAK_ASSET.readall(),
-        "Description": "Found in the Collegiate Peaks Wilderness in the San Isabel National forest, you can spot this mountain by its rocky summit and wide-spreading western flank.",
+        "Description": "A rocky summit in the Collegiate Peaks Wilderness.",
     },
     {
         "Name": "Little Bear Peak",
@@ -335,8 +291,7 @@ mountain_data = [
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1889.76,
         "Class": "4",
-        "Outline": LITTLE_BEAR_PEAK_ASSET.readall(),
-        "Description": "One of the toughest and most dangerous 14ers to scale, this monster stretches 6,000 ft. above the rest of the San Luis Valley. Climbers—beware of loose falling rock.",
+        "Description": "A rugged summit rising above the San Luis Valley.",
     },
     {
         "Name": "Longs Peak",
@@ -350,8 +305,7 @@ mountain_data = [
         "Hiking Distance": 23.3,
         "Hiking Elevation Gain": 1554.48,
         "Class": "3",
-        "Outline": LONGS_PEAK_ASSET.readall(),
-        "Description": "One of the hardest yet most popular 14ers, Longs Peak is 90 minutes outside of Denver. The climb is difficult, requiring endurance and experienced scrambling and mountaineering skills.",
+        "Description": "Known for the Diamond, its dramatic east face.",
     },
     {
         "Name": "Maroon Peak",
@@ -365,8 +319,7 @@ mountain_data = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1463.04,
         "Class": "3",
-        "Outline": MAROON_PEAK_ASSET.readall(),
-        "Description": "Maroon Peak connects to nearby North Maroon Peak, together called The Maroon Bells. Maroon Peak is the main point, and this set is known for its brilliant colors each Fall.",
+        "Description": "With North Maroon Peak, it forms the Maroon Bells.",
     },
     {
         "Name": "Missouri Mountain",
@@ -380,8 +333,7 @@ mountain_data = [
         "Hiking Distance": 16.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": MISSOURI_MOUNTAIN_ASSET.readall(),
-        "Description": "In the Collegiate Peaks Wilderness, this mountain is popular for beginners and families with a summit granting some of the best views around.",
+        "Description": "A Sawatch summit in the Collegiate Peaks Wilderness.",
     },
     {
         "Name": "Mt. Antero",
@@ -395,8 +347,7 @@ mountain_data = [
         "Hiking Distance": 24.9,
         "Hiking Elevation Gain": 1584.96,
         "Class": "2",
-        "Outline": MT_ANTERO_ASSET.readall(),
-        "Description": "Highest mountain out of the southern Sawatch Range, located in the San Isabel National Forest. There are several moderately rated hiking routes on the mountain.",
+        "Description": "A southern Sawatch summit in San Isabel National Forest.",
     },
     {
         "Name": "Mt. Belford",
@@ -410,8 +361,7 @@ mountain_data = [
         "Hiking Distance": 12.9,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": MT_BELFORD_ASSET.readall(),
-        "Description": "Sits close to Mt. Oxford and Mt. Missouri. Its location and extravagant views make it a favorite among the 14ers.",
+        "Description": "A Sawatch summit near Mt. Oxford and Missouri Mountain.",
     },
     {
         "Name": "Mt. Bierstadt",
@@ -425,8 +375,7 @@ mountain_data = [
         "Hiking Distance": 11.7,
         "Hiking Elevation Gain": 868.68,
         "Class": "2",
-        "Outline": MT_BIERSTADT_ASSET.readall(),
-        "Description": "In the Pike National Forest, this moderately rated peak is more accessible than other 14ers with its well-maintained trail and close vicinity to Denver.",
+        "Description": "A Front Range summit near Denver.",
     },
     {
         "Name": "Mt. Blue Sky",
@@ -440,8 +389,7 @@ mountain_data = [
         "Hiking Distance": 8.9,
         "Hiking Elevation Gain": 609.6,
         "Class": "2",
-        "Outline": MT_BLUE_SKY_ASSET.readall(),
-        "Description": "On the Rockies’ eastern edge, this peak offers a 14-mile scenic drive to its summit with wildlife and sweeping views.",
+        "Description": "A Front Range summit reached by the Mount Blue Sky Scenic Byway.",
     },
     {
         "Name": "Mt. Bross",
@@ -455,8 +403,7 @@ mountain_data = [
         "Hiking Distance": 5.2,
         "Hiking Elevation Gain": 685.8,
         "Class": "2",
-        "Outline": MT_BROSS_ASSET.readall(),
-        "Description": "In Pike National Forest, this is the easiest of three 14ers sharing a trailhead with Mt. Democrat and Mt. Lincoln.",
+        "Description": "A Mosquito Range summit near Mt. Democrat and Mt. Lincoln.",
     },
     {
         "Name": "Mt. Columbia",
@@ -470,8 +417,7 @@ mountain_data = [
         "Hiking Distance": 19.3,
         "Hiking Elevation Gain": 1295.4,
         "Class": "2",
-        "Outline": MT_COLUMBIA_ASSET.readall(),
-        "Description": "This Collegiate Peak overlooks the Arkansas River Valley and several fellow collegiate peaks. It's unpopular among hikers because of its battered, steep, and slippery trail.",
+        "Description": "A Collegiate Peak overlooking the Arkansas River Valley.",
     },
     {
         "Name": "Mt. Democrat",
@@ -485,8 +431,7 @@ mountain_data = [
         "Hiking Distance": 6.4,
         "Hiking Elevation Gain": 655.32,
         "Class": "2",
-        "Outline": MT_DEMOCRAT_ASSET.readall(),
-        "Description": "The first mountain in the DeCaliBron Loop, the climb to the summit is short and steep, granting 360-degree views of fellow 14ers.",
+        "Description": "A Mosquito Range summit on the DeCaLiBron Loop.",
     },
     {
         "Name": "Mt. Elbert",
@@ -500,8 +445,7 @@ mountain_data = [
         "Hiking Distance": 15.7,
         "Hiking Elevation Gain": 1371.6,
         "Class": "1",
-        "Outline": MT_ELBERT_ASSET.readall(),
-        "Description": "Highest peak in Colorado and the Rocky Mountains and the second-highest in the lower 48. Climb to the summit is reasonably moderate and suitable for a variety of skill levels.",
+        "Description": "Highest summit in Colorado and the Rocky Mountains.",
     },
     {
         "Name": "Mt. Eolus",
@@ -515,8 +459,7 @@ mountain_data = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 944.88,
         "Class": "3",
-        "Outline": MT_EOLUS_ASSET.readall(),
-        "Description": "This mountain has 2 summits with the southern point as the larger. It's in the Needle Mountains and was named after the Greek God of the winds.",
+        "Description": "A Chicago Basin summit in the Needle Mountains.",
     },
     {
         "Name": "Mt. Harvard",
@@ -530,8 +473,7 @@ mountain_data = [
         "Hiking Distance": 22.5,
         "Hiking Elevation Gain": 1402.08,
         "Class": "2",
-        "Outline": MT_HARVARD_ASSET.readall(),
-        "Description": "The highest summit of the Collegiate Peaks and the fourth highest peak in the contiguous U.S., the climb begins gradually, steepens the closer you get to the summit.",
+        "Description": "Highest summit of the Collegiate Peaks.",
     },
     {
         "Name": "Mt. Lincoln",
@@ -545,8 +487,7 @@ mountain_data = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 792.48,
         "Class": "2",
-        "Outline": MT_LINCOLN_ASSET.readall(),
-        "Description": "This towering peak is the highest in the Mosquito Range and Park County, and the mountain was given its name in honor of President Lincoln.",
+        "Description": "Highest summit in the Mosquito Range, named for President Lincoln.",
     },
     {
         "Name": "Mt. Lindsey",
@@ -560,8 +501,7 @@ mountain_data = [
         "Hiking Distance": 13.3,
         "Hiking Elevation Gain": 1066.8,
         "Class": "3-",
-        "Outline": MT_LINDSEY_ASSET.readall(),
-        "Description": "Most of the mountain is moderately easy to climb until you reach the ridge scramble that gets technical. Gear and helmet required.",
+        "Description": "A Sangre de Cristo summit with a rocky upper ridge.",
     },
     {
         "Name": "Mt. Massive",
@@ -575,8 +515,7 @@ mountain_data = [
         "Hiking Distance": 23.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": MT_MASSIVE_ASSET.readall(),
-        "Description": "Difficult but not technical, though best suited for experienced hikers. Second-highest peak in the Rockies and it has five summits along 3 miles that reach above 14,000 ft.",
+        "Description": "Its long summit ridge includes five summits above 14,000 feet.",
     },
     {
         "Name": "Mt. of the Holy Cross",
@@ -590,12 +529,11 @@ mountain_data = [
         "Hiking Distance": 18.1,
         "Hiking Elevation Gain": 1706.88,
         "Class": "2",
-        "Outline": MT_HOLY_CROSS_ASSET.readall(),
-        "Description": "Northernmost mountain in the Sawatch, its northeastern side is often covered in snow that creates a crucifix design (hence the name given by Herbert Hoover.)",
+        "Description": "Named for the cross-shaped snowfield on its northeast face.",
     },
     {
         "Name": "Mt. Oxford",
-        "Range": "Collegiate Peaks",
+        "Range": "Sawatch Range",
         "XCoord": 25,
         "YCoord": 15,
         "Elevation": 4315.9,
@@ -605,8 +543,7 @@ mountain_data = [
         "Hiking Distance": 17.7,
         "Hiking Elevation Gain": 1798.32,
         "Class": "2",
-        "Outline": MT_OXFORD_ASSET.readall(),
-        "Description": "This mountain is only 1.5 miles from Mt. Belford, and the two are often hiked as a set. The climb to its peak isn't technical, although it's steep with a long-exposed ridgeline.",
+        "Description": "Often climbed together with nearby Mt. Belford.",
     },
     {
         "Name": "Mt. Princeton",
@@ -620,8 +557,7 @@ mountain_data = [
         "Hiking Distance": 10.5,
         "Hiking Elevation Gain": 975.36,
         "Class": "2",
-        "Outline": MT_PRINCETON_ASSET.readall(),
-        "Description": "In the San Isabel National Forest, this peak grants breathtaking views of both the Arkansas Valley and the rest of the Sawatch Range. The hike requires no technical skills.",
+        "Description": "Overlooks the Arkansas River Valley from the Sawatch Range.",
     },
     {
         "Name": "Mt. Shavano",
@@ -635,8 +571,7 @@ mountain_data = [
         "Hiking Distance": 15.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "2",
-        "Outline": MT_SHAVANO_ASSET.readall(),
-        "Description": "Named for a Tabeguache Ute chief, this Sawatch Range peak in San Isabel National Forest features snowy eastern valleys resembling an angel with outstretched wings, the 'Angel of Shavano.'",
+        "Description": "Known for the angel-shaped snowfield called the Angel of Shavano.",
     },
     {
         "Name": "Mt. Sherman",
@@ -650,12 +585,11 @@ mountain_data = [
         "Hiking Distance": 8.4,
         "Hiking Elevation Gain": 640.08,
         "Class": "1",
-        "Outline": MT_SHERMAN_ASSET.readall(),
-        "Description": "This peak easily blends into its neighboring ones. There are 2 routes to its summit, both featuring gentle ridgelines that make for a kinder climb.",
+        "Description": "A Mosquito Range summit with broad, gentle ridgelines.",
     },
     {
         "Name": "Mt. Sneffels",
-        "Range": "Sneffels Range",
+        "Range": "San Juan Mountains",
         "XCoord": 11,
         "YCoord": 23,
         "Elevation": 4315.4,
@@ -665,12 +599,11 @@ mountain_data = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 883.92,
         "Class": "3-",
-        "Outline": MT_SNEFFELS_ASSET.readall(),
-        "Description": "The highest peak in the Sneffels Range, the 'Queen of the San Juans' is a popular subject in photography and film.",
+        "Description": "Known as the Queen of the San Juans.",
     },
     {
         "Name": "Mt. Wilson",
-        "Range": "San Miguel Mountains",
+        "Range": "San Juan Mountains",
         "XCoord": 9,
         "YCoord": 25,
         "Elevation": 4344,
@@ -680,8 +613,7 @@ mountain_data = [
         "Hiking Distance": 20.1,
         "Hiking Elevation Gain": 1341.12,
         "Class": "3",
-        "Outline": MT_WILSON_ASSET.readall(),
-        "Description": "The highest San Miguel Range peak, this Lizard Head Wilderness 14er sits near two others outside Telluride.",
+        "Description": "A San Miguel Mountains summit in the Lizard Head Wilderness.",
     },
     {
         "Name": "Mt. Yale",
@@ -695,8 +627,7 @@ mountain_data = [
         "Hiking Distance": 15.3,
         "Hiking Elevation Gain": 1310.64,
         "Class": "2",
-        "Outline": MT_YALE_ASSET.readall(),
-        "Description": "Eighth tallest peak in the Sawatch Range, it is one of the only 14ers in the area that has a paved road leading to the trailhead.",
+        "Description": "A Collegiate Peak with a paved road to its Denny Creek trailhead.",
     },
     {
         "Name": "Pikes Peak",
@@ -710,8 +641,7 @@ mountain_data = [
         "Hiking Distance": 38.6,
         "Hiking Elevation Gain": 2316.48,
         "Class": "1",
-        "Outline": PIKES_PEAK_ASSET.readall(),
-        "Description": "There is a road to this mountain peak. As for hiking, the climb is long and steep, filled with difficult terrain.",
+        "Description": "A Front Range landmark with a road to its summit.",
     },
     {
         "Name": "Pyramid Peak",
@@ -725,12 +655,11 @@ mountain_data = [
         "Hiking Distance": 13.3,
         "Hiking Elevation Gain": 1371.6,
         "Class": "4",
-        "Outline": PYRAMID_PEAK_ASSET.readall(),
-        "Description": "13 miles outside Aspen, technical mountain is made of sedimentary loose rugged rock. A helmet is required to scale its last 1,000 ft.",
+        "Description": "A rugged Elk Mountains summit near Aspen.",
     },
     {
         "Name": "Quandary Peak",
-        "Range": "Mosquito Range",
+        "Range": "Tenmile Range",
         "XCoord": 26,
         "YCoord": 11,
         "Elevation": 4349.9,
@@ -740,8 +669,7 @@ mountain_data = [
         "Hiking Distance": 10.9,
         "Hiking Elevation Gain": 1051.56,
         "Class": "1",
-        "Outline": QUANDARY_PEAK_ASSET.readall(),
-        "Description": "The highest summit of the Tenmile Range in the Rocky Mountains, this is one of the most climbed 14ers.",
+        "Description": "Highest summit in the Tenmile Range.",
     },
     {
         "Name": "Redcloud Peak",
@@ -755,12 +683,11 @@ mountain_data = [
         "Hiking Distance": 14.5,
         "Hiking Elevation Gain": 1127.76,
         "Class": "2",
-        "Outline": REDCLOUD_PEAK_ASSET.readall(),
-        "Description": "Named after the visible red coloring of its peak, this picturesque mountain is often hiked alongside Sunshine peak.",
+        "Description": "Named for its red summit rocks; often climbed with Sunshine Peak.",
     },
     {
         "Name": "San Luis Peak",
-        "Range": "La Garita Mountains",
+        "Range": "San Juan Mountains",
         "XCoord": 19,
         "YCoord": 24,
         "Elevation": 4273.8,
@@ -770,8 +697,7 @@ mountain_data = [
         "Hiking Distance": 21.7,
         "Hiking Elevation Gain": 1097.28,
         "Class": "1",
-        "Outline": SAN_LUIS_PEAK_ASSET.readall(),
-        "Description": "Highest point in the La Garita Mountains, this remote and often desolate peak is tricky to reach as it sits 2 hours from any paved roads.",
+        "Description": "Highest summit in the remote La Garita Mountains.",
     },
     {
         "Name": "Snowmass Mountain",
@@ -785,8 +711,7 @@ mountain_data = [
         "Hiking Distance": 35.4,
         "Hiking Elevation Gain": 1767.84,
         "Class": "3",
-        "Outline": SNOWMASS_MOUNTAIN_ASSET.readall(),
-        "Description": "The Elk Mountains’ fourth-highest peak has one of Colorado’s largest eastern snowfields and is invisible from roads.",
+        "Description": "Known for the broad snowfield on its eastern slopes.",
     },
     {
         "Name": "Sunlight Peak",
@@ -800,8 +725,7 @@ mountain_data = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 914.4,
         "Class": "4",
-        "Outline": SUNLIGHT_PEAK_ASSET.readall(),
-        "Description": "A lofty peak tucked in the Chicago Basin in the Needle Mountains, there's an extensive amount of exposure, scrambling and a summit block on the way to its top.",
+        "Description": "A Chicago Basin summit with an exposed summit block.",
     },
     {
         "Name": "Sunshine Peak",
@@ -815,8 +739,7 @@ mountain_data = [
         "Hiking Distance": 19.7,
         "Hiking Elevation Gain": 1463.04,
         "Class": "2",
-        "Outline": SUNSHINE_PEAK_ASSET.readall(),
-        "Description": "Often paired with Redcloud, Sunshine has a red-rock summit and mixed trail-and-scree terrain.",
+        "Description": "Often climbed together with neighboring Redcloud Peak.",
     },
     {
         "Name": "Tabeguache Peak",
@@ -830,8 +753,7 @@ mountain_data = [
         "Hiking Distance": 18.5,
         "Hiking Elevation Gain": 1706.88,
         "Class": "2",
-        "Outline": TABEGUACHE_PEAK_ASSET.readall(),
-        "Description": "In the southern Sawatch, this lesser-known 14er lies beside Mt. Shavano, with the climbing route now reversed to protect eroded trails.",
+        "Description": "A southern Sawatch summit beside Mt. Shavano.",
     },
     {
         "Name": "Torreys Peak",
@@ -845,8 +767,7 @@ mountain_data = [
         "Hiking Distance": 12.5,
         "Hiking Elevation Gain": 914.4,
         "Class": "1",
-        "Outline": TORREYS_PEAK_ASSET.readall(),
-        "Description": "Near Denver and neighboring Grays Peak. It is the only 14er on the Continental Divide.",
+        "Description": "Neighbors Grays Peak on the Continental Divide.",
     },
     {
         "Name": "Uncompahgre Peak",
@@ -860,8 +781,7 @@ mountain_data = [
         "Hiking Distance": 12.1,
         "Hiking Elevation Gain": 914.4,
         "Class": "2",
-        "Outline": UNCOMPAHGRE_PEAK_ASSET.readall(),
-        "Description": "This peak is the highest point in the San Juan Mountain Range and Colorado's largest Western Slope. It is one of the easier 14ers in its area.",
+        "Description": "Highest summit in the San Juan Mountains.",
     },
     {
         "Name": "Wetterhorn Peak",
@@ -875,8 +795,7 @@ mountain_data = [
         "Hiking Distance": 11.3,
         "Hiking Elevation Gain": 1005.84,
         "Class": "3",
-        "Outline": WETTERHORN_PEAK_ASSET.readall(),
-        "Description": "A beloved 14er that's great for hikers trying their hand at scree and scrambling, this rock-faced mountain can be found just outside of Lake City.",
+        "Description": "A rocky San Juan summit near Lake City.",
     },
     {
         "Name": "Wilson Peak",
@@ -890,12 +809,11 @@ mountain_data = [
         "Hiking Distance": 16.1,
         "Hiking Elevation Gain": 1188.72,
         "Class": "3",
-        "Outline": WILSON_PEAK_ASSET.readall(),
-        "Description": "This gorgeous rocky mountain is the highest peak in San Miguel County, and it's the face of all Coors products!",
+        "Description": "Known for its appearance on Coors branding.",
     },
     {
         "Name": "Windom Peak",
-        "Range": "Needle Mountains",
+        "Range": "San Juan Mountains",
         "XCoord": 14,
         "YCoord": 27,
         "Elevation": 4296,
@@ -905,37 +823,118 @@ mountain_data = [
         "Hiking Distance": 9.7,
         "Hiking Elevation Gain": 914.4,
         "Class": "2+",
-        "Outline": WINDOM_PEAK_ASSET.readall(),
-        "Description": "In the Weminuche Wilderness’ Needle Mountains, this popular multi-day hike requires no technical gear.",
+        "Description": "A Chicago Basin summit in the Needle Mountains.",
     },
 ]
 
 denver = [-104.88111, 39.7618]
 
-def get_layout():
-    marquee_height = 8
+# Preserve one-pixel markers on both display resolutions.
+REVEAL_STEPS = 32
+CLASS_ORDER = {"1": 10, "1+": 11, "2-": 19, "2": 20, "2+": 21, "3-": 29, "3": 30, "3+": 31, "4-": 39, "4": 40, "4+": 41, "5": 50}
 
-    if canvas.is2x():
-        display_width = 128
-        display_height = 64
-        map_width = 128
-        map_height = display_height - marquee_height
-        marquee_y = map_height
+def choose_unseen_mountain(candidates):
+    if len(candidates) == 0:
+        fail("Cannot choose from an empty mountain list.")
+
+    names = sorted([
+        mountain["Name"]
+        for mountain in candidates
+    ])
+
+    # Each eligible mountain set has its own selection history.
+    cache_key = (
+        "colorado14ers_shuffle_v1:" +
+        json.encode(names)
+    )
+
+    raw = cache.get(cache_key)
+
+    if raw != None:
+        state = json.decode(raw)
     else:
-        display_width = 64
-        display_height = 32
-        map_width = 64
-        map_height = 24
-        marquee_y = 24
+        state = {}
 
+    remaining = [
+        name
+        for name in state.get("remaining", [])
+        if name in names
+    ]
+
+    last = state.get("last", "")
+
+    # Refill only after every eligible mountain has been shown.
+    starting_new_cycle = len(remaining) == 0
+
+    if starting_new_cycle:
+        remaining = list(names)
+
+    # Avoid an immediate repeat across the cycle boundary,
+    # unless only one mountain is eligible.
+    choices = list(remaining)
+
+    if starting_new_cycle and len(choices) > 1:
+        choices = [
+            name
+            for name in choices
+            if name != last
+        ]
+
+    selected_name = choices[random_index(len(choices))]
+
+    remaining = [
+        name
+        for name in remaining
+        if name != selected_name
+    ]
+
+    cache.set(
+        cache_key,
+        json.encode({
+            "remaining": remaining,
+            "last": selected_name,
+        }),
+        ttl_seconds = 2592000,
+    )
+
+    for mountain in candidates:
+        if mountain["Name"] == selected_name:
+            return mountain
+
+    fail("Selected mountain was not found: " + selected_name)
+
+def get_layout():
+    double_size = canvas.is2x()
+    width = canvas.width()
+    height = canvas.height()
+    bar_height = 16 if double_size else 8
     return {
-        "display_width": display_width,
-        "display_height": display_height,
-        "map_width": map_width,
-        "map_height": map_height,
-        "marquee_height": marquee_height,
-        "marquee_y": marquee_y,
+        "display_width": width,
+        "display_height": height,
+        "map_width": width,
+        "map_height": height - bar_height,
+        "marquee_height": bar_height,
+        "marquee_y": height - bar_height,
+        "font": "terminus-16" if double_size else "5x8",
+        "character_width": 8 if double_size else 5,
     }
+
+def get_delay(config):
+    value = config.str("scroll", "60")
+    return int(value) if value in ["60", "45", "30"] else 60
+
+def get_screen_coordinates_from_actual(map_points, location, screen_width, screen_height):
+    longitudes = [point[0] for point in map_points]
+    latitudes = [point[1] for point in map_points]
+    min_long = min(longitudes)
+    max_long = max(longitudes)
+    min_lat = min(latitudes)
+    max_lat = max(latitudes)
+    if max_long == min_long or max_lat == min_lat:
+        return [0, 0]
+    x = int((location[0] - min_long) / (max_long - min_long) * (screen_width - 1))
+    y = int((max_lat - location[1]) / (max_lat - min_lat) * (screen_height - 1))
+    return [max(0, min(x, screen_width - 1)), max(0, min(y, screen_height - 1))]
 
 def get_mountain_position(mountain, layout):
     return get_screen_coordinates_from_actual(
@@ -945,276 +944,326 @@ def get_mountain_position(mountain, layout):
         layout["map_height"],
     )
 
-def main(config):
-    random.seed(time.now().unix // 15)
-    layout = get_layout()
+def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
+    return render.Padding(pad = (left, top, right, bottom), child = element)
 
-    show_instructions = config.bool("instructions", False)
-
-    if show_instructions == True:
-        return show_instructions_screen(config, layout)
-
-    show_mountain_outline = config.bool("outline", False)
-
-    is_metric_system = config.get("measurement", measurement_options[0].value) == measurement_options[0].value
-
-    display_candidates = []
-    display_type = config.get("display", display_options[0].value)
-
-    i = 0
-
-    for mountain in mountain_data:
-        if (display_type == "random" or (display_type == "visited" and config.bool("_%s" % mountain["Name"])) or (display_type == "unvisited" and not config.bool("_%s" % mountain["Name"]))):
-            display_candidates.append(i)
-        i = i + 1
-
-    random_mountain = mountain_data[random.number(0, len(mountain_data) - 1)]
-
-    if (len(display_candidates) > 0):
-        random_mountain = mountain_data[display_candidates[random.number(0, len(display_candidates) - 1)]]
-
-    random_mountain_position = get_mountain_position(random_mountain, layout)
-
-    denver_position = get_screen_coordinates_from_actual(
-        colorado,
-        denver,
-        layout["map_width"],
-        layout["map_height"],
+def point_widget(position, color):
+    return add_padding_to_child_element(
+        render.Circle(color = color, diameter = 1),
+        position[0],
+        position[1],
     )
 
-    hiking_distance = float(random_mountain["Hiking Distance"])
-    hiking_elevation = float(random_mountain["Hiking Elevation Gain"])
-    elevation_units = "meters"
-    distance_label = "km"
-
-    if is_metric_system == False:
-        hiking_distance = math.round(hiking_distance * km_to_miles)
-        hiking_elevation = math.round(hiking_elevation * meters_to_feet)
-        elevation_units = "feet"
-        distance_label = "mile"
-
-    if random.number(0, 1) == 1:
-        mountain_description = "%s in the %s - %s %s is a class %s mountain.             " % (random_mountain["Name"], random_mountain["Range"], random_mountain["Description"], random_mountain["Name"], random_mountain["Class"])
-    else:
-        mountain_description = "%s is a class %s mountain. Expect a %s %s hike that has an elevation gain of %s %s.           " % (random_mountain["Name"], random_mountain["Class"], humanize.float("#,###.", hiking_distance), distance_label, humanize.float("#,###.", hiking_elevation), elevation_units)
-
-    animation_frames = []
-    stacked_items = []
-
-    base_layer = render.Box(color = "#000", height = 1, width = 1)
-
-    if show_mountain_outline:
-        animation_frames = get_mountain_outline(random_mountain, layout)
-        base_layer = render.Stack(children = animation_frames)
-        stacked_items.append(base_layer)
-        add_copies_of_frame_to_frames(animation_frames, stacked_items, 5)
-
-    stacked_items.append(
-        render.Padding(
-            pad = (denver_position[0], denver_position[1], 0, 0),
-            child =
-                render.Circle(
-                    color = config.get("denver_color", default_colors[1]),
-                    diameter = 1,
-                ),
-        ),
+def fitted_outline(mountain, layout):
+    key = (
+        mountain["Name"].lower()
+            .replace(".", "")
+            .replace(" ", "_")
     )
 
-    visited_mountain_points = get_positions(config, True, mountain_data, layout)
-    for item in visited_mountain_points:
-        stacked_items.append(item)
-        animation_frames.append(render.Stack(children = list(stacked_items)))
+    if key == "mt_of_the_holy_cross":
+        key = "mt_holy_cross"
 
-    add_copies_of_frame_to_frames(animation_frames, stacked_items, 10)
+    if key not in MOUNTAIN_OUTLINES:
+        fail("No outline pixel map found for: " + mountain["Name"])
 
-    unvisited_mountain_points = get_positions(config, False, mountain_data, layout)
-    for item in unvisited_mountain_points:
-        stacked_items.append(item)
-        animation_frames.append(render.Stack(children = list(stacked_items)))
+    data = MOUNTAIN_OUTLINES[key]
 
-    add_copies_of_frame_to_frames(animation_frames, stacked_items, 10)
+    source_height = len(data)
+    source_width = len(data[0])
 
-    animation_frames.append(render.Stack(children = list(stacked_items)))
+    width = layout["map_width"]
+    height = layout["map_height"]
 
-    stacked_items.append(
-        render.Padding(
-            pad = (random_mountain_position[0], random_mountain_position[1], 0, 0),
-            child =
-                render.Circle(
-                    color = config.get("selected_color", default_colors[0]),
-                    diameter = 1,
-                ),
-        ),
-    )
+    outline_color = "#fbbc28"
 
-    add_copies_of_frame_to_frames(animation_frames, stacked_items, 60)
+    # Extract only the uppermost pixel in each source column.
+    # Interior mountain details are intentionally excluded.
+    source_tops = []
 
-    all_elements = [
-        render.Animation(children = animation_frames),
+    for x in range(source_width):
+        top_y = None
+
+        for y in range(source_height):
+            if data[y][x] != 0:
+                top_y = y
+                break
+
+        source_tops.append(top_y)
+
+    visible_columns = [
+        x
+        for x in range(source_width)
+        if source_tops[x] != None
     ]
 
-    show_information_bar = config.bool("information_bar", False)
+    if len(visible_columns) == 0:
+        return render.Box(
+            width = width,
+            height = height,
+        )
 
-    if show_information_bar:
-        all_elements.append(
+    # Fill any empty source columns using the nearest column
+    # that contains a contour pixel.
+    filled_tops = []
+
+    for x in range(source_width):
+        if source_tops[x] != None:
+            filled_tops.append(source_tops[x])
+        else:
+            nearest_x = visible_columns[0]
+
+            for candidate_x in visible_columns:
+                if abs(candidate_x - x) < abs(nearest_x - x):
+                    nearest_x = candidate_x
+
+            filled_tops.append(source_tops[nearest_x])
+
+    # Calculate the skyline height at every output column.
+    # Scale coordinates rather than resampling a thin bitmap.
+    output_tops = []
+
+    for x in range(width):
+        if width > 1:
+            source_x = (
+                x * (source_width - 1) +
+                (width - 1) // 2
+            ) // (width - 1)
+        else:
+            source_x = 0
+
+        source_y = filled_tops[source_x]
+
+        if source_height > 1:
+            output_y = (
+                source_y * (height - 1) +
+                (source_height - 1) // 2
+            ) // (source_height - 1)
+        else:
+            output_y = 0
+
+        output_tops.append(output_y)
+
+    # Move the entire contour upward until its highest
+    # point reaches row zero. Nothing is cropped.
+    upward_shift = min(output_tops)
+
+    skyline = [
+        y - upward_shift
+        for y in output_tops
+    ]
+
+    layers = [
+        render.Box(
+            width = width,
+            height = height,
+        ),
+    ]
+
+    # Draw each column and bridge changes in height.
+    # These short vertical sections belong to the contour;
+    # they are not interior ridgelines.
+    for x in range(width):
+        current_y = skyline[x]
+
+        if x == 0:
+            previous_y = current_y
+        else:
+            previous_y = skyline[x - 1]
+
+        top = min(previous_y, current_y)
+        bottom = max(previous_y, current_y)
+
+        layers.append(
             render.Padding(
-                pad = (0, layout["marquee_y"], 0, 0),
-                child =
-                    render.Marquee(
-                        width = layout["display_width"],
-                        offset_start = 15,
-                        child = render.Text(content = mountain_description, color = config.get("marquee_color", default_colors[2]), offset = 0),
-                    ),
-            ),
-        )
-
-    return render.Root(
-        child = render.Stack(children = all_elements),
-        show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
-    )
-
-def get_screen_coordinates_from_actual(map, location, screen_width, screen_height):
-    max_long = None
-    min_long = None
-    max_lat = None
-    min_lat = None
-
-    for dot in map:
-        if max_long == None or max_long < dot[0]:
-            max_long = dot[0]
-        if min_long == None or min_long > dot[0]:
-            min_long = dot[0]
-        if max_lat == None or max_lat < dot[1]:
-            max_lat = dot[1]
-        if min_lat == None or min_lat > dot[1]:
-            min_lat = dot[1]
-
-    range_x = abs(max_long - min_long)
-    range_y = abs(max_lat - min_lat)
-
-    coords = [0, 0]
-    coords[0] = int((location[0] - min_long) / range_x * (screen_width - 1))
-    coords[1] = int((-(location[1] - max_lat)) / range_y * (screen_height - 1))
-
-    return coords
-
-def get_mountain_outline(mountain, layout):
-    image = mountain["Outline"]
-    img_width = layout["map_width"]
-    img_height = layout["map_height"]
-    frames = []
-
-    for reveal_w in range(1, img_width + 1):
-        cover_w = img_width - reveal_w
-
-        frames.append(
-            render.Stack(
-                children = [
-                    render.Image(src = image, width = img_width),
-                    add_padding_to_child_element(
-                        render.Box(
-                            width = cover_w,
-                            height = img_height,
-                            color = "#000",
-                        ),
-                        reveal_w,
-                    ),
-                ],
-            ),
-        )
-
-    return frames
-
-def get_positions(config, visited, mountains, layout):
-    children = []
-    current_location = ""
-    color = config.get("visited_color", default_colors[3])
-
-    if visited == False:
-        color = config.get("unvisited_color", default_colors[4])
-
-    for item in mountains:
-        if config.bool("_%s" % item["Name"], False) == visited:
-            current_location = get_mountain_position(item, layout)
-            children.append(
-                render.Padding(
-                    pad = (current_location[0], current_location[1], 0, 0),
-                    child =
-                        render.Circle(
-                            color = color,
-                            diameter = 1,
-                        ),
+                pad = (x, top, 0, 0),
+                child = render.Box(
+                    width = 1,
+                    height = bottom - top + 1,
+                    color = outline_color,
                 ),
-            )
+            ),
+        )
 
-    return children
+    return render.Stack(children = layers)
+
+def outline_reveal_frames(outline, layout):
+    frames = []
+    for step in range(1, REVEAL_STEPS + 1):
+        revealed = (layout["map_width"] * step + REVEAL_STEPS - 1) // REVEAL_STEPS
+        children = [outline]
+        if revealed < layout["map_width"]:
+            children.append(add_padding_to_child_element(
+                render.Box(width = layout["map_width"] - revealed, height = layout["map_height"], color = "#000000"),
+                revealed,
+            ))
+        frames.append(render.Stack(children = children))
+    return frames
 
 def add_copies_of_frame_to_frames(frames, items, number_of_frames):
     for _ in range(number_of_frames):
         frames.append(render.Stack(children = list(items)))
 
-def show_instructions_screen(config, layout):
-    ##############################################################################################################################################################################################################################
-    header = "Colorado 14ers"
-    instructions_1 = "Screen represents State of Colorado. Random mountain is picked from a group (visited, unvisited, or all peaks). You decide if the selected mountain's outline appears."
-    instructions_2 = " You check peaks you've visited. All peaks are displayed and color-coded based on your choices. Default Red is Denver, yellow is visited, grey is unvisited."
-    instructions_3 = " You can sort the list of peaks by name, range, distance, elevation or class. "
+def get_positions(config, visited, mountains, layout):
+    color = config.str("visited_color", default_colors[3]) if visited else config.str("unvisited_color", default_colors[4])
+    return [
+        point_widget(get_mountain_position(mountain, layout), color)
+        for mountain in mountains
+        if config.bool("_%s" % mountain["Name"], False) == visited
+    ]
+
+def random_index(count):
+    return 0 if count <= 1 else min(int(random.float() * count), count - 1)
+
+def mountain_message(mountain, metric):
+    distance = mountain["Hiking Distance"]
+    gain = mountain["Hiking Elevation Gain"]
+    elevation = mountain["Elevation"]
+    distance_unit = "km"
+    height_unit = "m"
+    if not metric:
+        distance *= km_to_miles
+        gain *= meters_to_feet
+        elevation *= meters_to_feet
+        distance_unit = "mi"
+        height_unit = "ft"
+    distance_text = humanize.float("#,###.#", distance)
+    gain_text = humanize.float("#,###.", math.round(gain))
+    elevation_text = humanize.float("#,###.", math.round(elevation))
+
+    statistics = "%s - %s. Summit %s %s. Listed hike: Class %s, %s %s, gain %s %s." % (
+        mountain["Name"],
+        mountain["Range"],
+        elevation_text,
+        height_unit,
+        mountain["Class"],
+        distance_text,
+        distance_unit,
+        gain_text,
+        height_unit,
+    )
+
+    # Retain source descriptions as descriptive text, not route instructions.
+    if random.float() >= 0.5:
+        return statistics + " " + mountain["Description"]
+    return statistics
+
+def message_screen(config, layout, message):
     return render.Root(
-        render.Column(
-            children = [
-                render.Marquee(
-                    width = layout["display_width"],
-                    offset_start = 15,
-                    child = render.Text(header, color = "#65d0e6"),
-                ),
-                render.Marquee(
-                    width = layout["display_width"],
-                    offset_start = len(header) * 5,
-                    child = render.Text(instructions_1, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = len(instructions_1) * 5,
-                    width = layout["display_width"],
-                    child = render.Text(instructions_2, color = "#f4a306"),
-                ),
-                render.Marquee(
-                    offset_start = (len(instructions_2) + len(instructions_1)) * 5,
-                    width = layout["display_width"],
-                    child = render.Text(instructions_3, color = "#f4a306"),
-                ),
-            ],
-        ),
+        child = center_on_square(render.Column(children = [
+            render.Text("Colorado 14ers", font = layout["font"], color = "#65D0E6"),
+            render.Marquee(width = layout["display_width"], child = render.Text(message, font = layout["font"], color = "#FFAA00")),
+        ])),
         show_full_animation = True,
-        delay = int(config.get("scroll", 45)),
+        delay = get_delay(config),
     )
 
-def add_padding_to_child_element(element, left = 0, top = 0, right = 0, bottom = 0):
-    padded_element = render.Padding(
-        pad = (left, top, right, bottom),
-        child = element,
-    )
+def main(config):
+    layout = get_layout()
+    if config.bool("instructions", False):
+        return show_instructions_screen(config, layout)
+    display_type = config.str("display", "random")
+    if display_type not in ["random", "visited", "unvisited"]:
+        display_type = "random"
+    candidates = [
+        mountain
+        for mountain in mountain_data
+        if display_type == "random" or
+           (display_type == "visited" and config.bool("_%s" % mountain["Name"], False)) or
+           (display_type == "unvisited" and not config.bool("_%s" % mountain["Name"], False))
+    ]
+    if not candidates:
+        message = "No peaks marked visited. Mark your visited peaks in settings." if display_type == "visited" else "All tracked peaks marked visited!"
+        return message_screen(config, layout, message)
 
-    return padded_element
+    selected = choose_unseen_mountain(candidates)
+
+    frames = []
+    layers = []
+    if config.bool("outline", False):
+        outline = fitted_outline(selected, layout)
+        frames.extend(outline_reveal_frames(outline, layout))
+        layers.append(outline)
+        add_copies_of_frame_to_frames(frames, layers, 5)
+    denver_position = get_screen_coordinates_from_actual(colorado, denver, layout["map_width"], layout["map_height"])
+    layers.append(point_widget(denver_position, config.str("denver_color", default_colors[1])))
+    for visited in [True, False]:
+        for marker in get_positions(config, visited, mountain_data, layout):
+            layers.append(marker)
+            frames.append(render.Stack(children = list(layers)))
+        add_copies_of_frame_to_frames(frames, layers, 10)
+    selected_marker = point_widget(get_mountain_position(selected, layout), config.str("selected_color", default_colors[0]))
+    selected_layers = list(layers) + [selected_marker]
+
+    # A one-pixel selected marker pulses without increasing its footprint.
+    for _ in range(3):
+        add_copies_of_frame_to_frames(frames, selected_layers, 8)
+        add_copies_of_frame_to_frames(frames, layers, 4)
+    add_copies_of_frame_to_frames(frames, selected_layers, 24)
+    elements = [render.Animation(children = frames)]
+    if config.bool("information_bar", False):
+        message = mountain_message(selected, config.str("measurement", "metric") != "imperial")
+        elements.append(add_padding_to_child_element(
+            render.Marquee(
+                width = layout["display_width"],
+                offset_start = 15,
+                child = render.Text(message, font = layout["font"], color = config.str("marquee_color", default_colors[2])),
+            ),
+            0,
+            layout["marquee_y"],
+        ))
+
+    return render.Root(child = render.Stack(children = elements), show_full_animation = True, delay = get_delay(config))
+
+def show_instructions_screen(config, layout):
+    messages = [
+        "Colorado 14ers",
+        "Pick a random peak from all, visited, or unvisited. Mark your visited peaks in settings. No matches produces a message rather than selecting an unrelated peak.",
+        "Red marks Denver; yellow is visited; grey is unvisited. The selected peak pulses in its selected color. Every marker stays one pixel on either display.",
+        "Optional mountain silhouettes are fitted and centered without stretching. Sort the checklist by name, range, elevation, hiking distance, or class. Listed hike figures do not identify a route or trailhead; verify current details before a trip.",
+    ]
+    children = []
+    offset = 15
+    for index in range(len(messages)):
+        message = messages[index]
+        children.append(render.Marquee(
+            width = layout["display_width"],
+            offset_start = offset,
+            child = render.Text(message, font = layout["font"], color = "#65D0E6" if index == 0 else "#F4A306"),
+        ))
+        offset += len(message) * layout["character_width"]
+    return render.Root(child = center_on_square(render.Column(children = children)), show_full_animation = True, delay = get_delay(config))
 
 def get_sorted_mountain_toggles(sort_key):
-    display_data = sorted(mountain_data, key = lambda m: m[sort_key], reverse = False)
-
-    description_type = sort_key
-    description_info = ""
-
-    #Override in a couple cases
-    if sort_key == "Name":
-        description_type = "Range"
-    elif sort_key == "Class":
-        description_info = "Class: "
-    elif sort_key == "Elevation":
-        description_type = "Range"
-
-    return [
-        schema.Toggle(id = "_%s" % (mountain["Name"]), name = mountain["Name"], desc = "%s%s" % (description_info, mountain[description_type]), icon = "mountain")
-        for mountain in display_data
-    ]
+    if sort_key not in ["Name", "Range", "Elevation", "Hiking Distance", "Class"]:
+        sort_key = "Name"
+    if sort_key == "Class":
+        display_data = sorted(mountain_data, key = lambda mountain: (CLASS_ORDER.get(mountain["Class"], 999), mountain["Name"]))
+    else:
+        display_data = sorted(mountain_data, key = lambda mountain: (mountain[sort_key], mountain["Name"]))
+    toggles = []
+    for mountain in display_data:
+        description = mountain["Range"]
+        if sort_key == "Class":
+            description = "Listed route class: " + mountain["Class"]
+        elif sort_key == "Elevation":
+            description = "Summit: %s m / %s ft" % (
+                humanize.float("#,###", math.round(mountain["Elevation"])),
+                humanize.float("#,###", math.round(mountain["Elevation"] * meters_to_feet)),
+            )
+        elif sort_key == "Hiking Distance":
+            description = "Listed hike: %s km / %s mi" % (
+                humanize.float("#,###.0", mountain["Hiking Distance"]),
+                humanize.float("#,###.0", mountain["Hiking Distance"] * km_to_miles),
+            )
+        toggles.append(schema.Toggle(
+            id = "_%s" % mountain["Name"],
+            name = mountain["Name"],
+            desc = description,
+            icon = "mountain",
+            default = False,
+        ))
+    return toggles
 
 def get_schema():
     return schema.Schema(

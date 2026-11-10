@@ -7,8 +7,9 @@ author: M0ntyP
 fileName: index_ticker.star
 packageName: indexticker
 recommendedInterval: 1
+supports64x64: true
 category: finance
 tags:
   - finance
 published: '2023-12-17T12:50:41Z'
-updated: '2026-02-23T21:21:29Z'
+updated: '2026-10-01T17:59:41Z'

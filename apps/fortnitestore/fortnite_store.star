@@ -8,7 +8,7 @@ Author: naomi-nori
 load("http.star", "http")
 load("images/default_item.png", DEFAULT_ITEM_IMAGE_ASSET = "file")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 color_key = {
@@ -51,7 +51,8 @@ def main(config):
         image = picked_item["image"]
 
     return render.Root(
-        render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Column(
                     main_align = "end",
@@ -88,7 +89,7 @@ def main(config):
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 def get_cachable_data(url, ttl_seconds = 3600):

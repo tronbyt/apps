@@ -31,8 +31,13 @@ def main():
         frames = [f.readall() for f in [FRAME1, FRAME2, FRAME3, FRAME4, FRAME5, FRAME6, FRAME7, FRAME8]]
 
     return render.Root(
-        child = render.Animation(
-            children = [render.Image(src = f) for f in frames],
+        # Centre the frames on panels taller than they are (64x64).
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Animation(
+                children = [render.Image(src = f) for f in frames],
+            ),
         ),
     )
 

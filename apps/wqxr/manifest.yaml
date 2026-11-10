@@ -7,10 +7,11 @@ author: Andrew Westling
 fileName: wqxr.star
 packageName: wqxr
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - music
   - classical
   - real-time
 published: '2023-06-30T16:06:24Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T18:17:08Z'

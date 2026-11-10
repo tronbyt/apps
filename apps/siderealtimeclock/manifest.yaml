@@ -7,6 +7,7 @@ author: Daniel Sitnik
 recommendedInterval: 0
 fileName: sidereal_time.star
 packageName: siderealtimeclock
+supports64x64: true
 category: clocks
 tags:
   - time
@@ -14,4 +15,4 @@ tags:
   - clock
   - utility
 published: '2024-11-24T00:05:22Z'
-updated: '2025-12-17T23:02:59Z'
+updated: '2026-10-01T19:27:54Z'

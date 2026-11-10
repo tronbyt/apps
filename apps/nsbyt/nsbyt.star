@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -34,6 +34,15 @@ MAINTENANCE_TEXT_COLOR = "#FF7700"
 NO_FRAMES_TOGGLE = 60
 
 DEFAULT_STATION = "ehv"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     station_id = config.str("station")
@@ -66,7 +75,13 @@ def main(config):
 
     if stops == None or len(stops) == 0:
         return render.Root(
-            child = render.Padding(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
+                pad = (3, 8, 1, 1),
+                child = render.WrappedText(
+                    content = "No trains scheduled",
+                ),
+            ))) if is_square() else render.Padding(
                 pad = (3, 8, 1, 1),
                 child = render.WrappedText(
                     content = "No trains scheduled",
@@ -75,11 +90,23 @@ def main(config):
         )
 
     if len(stops) == 1:
-        return render.Root(child = renderTrain(stops[0], skip_time, time_to_leave))
+        # Centre the block on the square (64x64); other panels unchanged.
+        return render.Root(child = (render.Box(width = canvas.width(), height = canvas.height(), child = renderTrain(stops[0], skip_time, time_to_leave))) if is_square() else renderTrain(stops[0], skip_time, time_to_leave))
 
     return render.Root(
         show_full_animation = True,
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                renderTrain(stops[0], skip_time, time_to_leave),
+                render.Box(
+                    color = "#ffffff",
+                    width = 64,
+                    height = 1,
+                ),
+                renderTrain(stops[1], skip_time, time_to_leave),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 renderTrain(stops[0], skip_time, time_to_leave),
                 render.Box(

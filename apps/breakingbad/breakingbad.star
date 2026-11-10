@@ -6,7 +6,7 @@ Author: Robert Ison
 """
 
 load("images/smoke.gif", SMOKE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 SMOKE = SMOKE_ASSET.readall()
@@ -142,13 +142,14 @@ def main(config):
     show_smoke = config.bool("show_image", True)
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 render.Image(src = SMOKE) if show_smoke else None,
                 get_display_children_for_given_breakdown(1, find_element_symbol(line1)),
                 get_display_children_for_given_breakdown(2, find_element_symbol(line2)),
             ],
-        ),
+        ))),
         delay = 200,
     )
 

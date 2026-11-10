@@ -8,7 +8,7 @@ Author: tavdog
 load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -376,7 +376,27 @@ def render_view(vessels, line2_opt, line3_opt):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Row(
+                    main_align = "center",
+                    expanded = True,
+                    children = [
+                        render.Padding(
+                            pad = (0, 1, 0, 1),
+                            child = icon_widget,
+                        ),
+                    ],
+                ),
+                render.Padding(
+                    pad = (1, 0, 1, 0),
+                    child = render.Column(
+                        children = info_lines,
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Row(
                     main_align = "center",
@@ -400,11 +420,24 @@ def render_view(vessels, line2_opt, line3_opt):
 
 def render_error(err):
     return render.Root(
-        child = render.Padding(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Padding(
+            child = render.Text(err, font = "tom-thumb", color = "#f00"),
+            pad = 1,
+        ))) if is_square() else render.Padding(
             child = render.Text(err, font = "tom-thumb", color = "#f00"),
             pad = 1,
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     use_custom = config.bool("use_custom")

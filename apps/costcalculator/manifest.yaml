@@ -7,10 +7,11 @@ author: rs7q5
 fileName: cost_calculator.star
 packageName: costcalculator
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - tracking
   - finance
   - utility
 published: '2023-04-08T19:18:26Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T19:34:09Z'

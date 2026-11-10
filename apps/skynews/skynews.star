@@ -11,7 +11,7 @@ load("images/blue_background.png", BLUE_BACKGROUND_ASSET = "file")
 load("images/glass_highlight.png", GLASS_HIGHLIGHT_ASSET = "file")
 load("images/gradient_line.png", GRADIENT_LINE_ASSET = "file")
 load("images/splash_screen.gif", SPLASH_SCREEN_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")
 
@@ -28,6 +28,9 @@ SPLASH_SCREEN = SPLASH_SCREEN_ASSET.readall()
 
 # Dividing line
 
+# The backdrop and both story marquees fill whatever height the panel has:
+# 32 rows on a classic panel, 64 on a square one, so a story is read in
+# half as many scrolls. The splash and the glass highlight keep their size.
 def main(config):
     feedchoice = config.get("feedchoice", "home")
     fontsize = config.get("fontsize", "tb-8")
@@ -38,7 +41,7 @@ def main(config):
             show_full_animation = True,
             child = render.Stack(
                 children = [
-                    render.Image(width = 64, height = 32, src = BLUE_BACKGROUND),
+                    render.Image(width = 64, height = canvas.height(), src = BLUE_BACKGROUND),
                     animation.Transformation(
                         render.Image(width = 64, height = 32, src = SPLASH_SCREEN),
                         duration = 0,
@@ -56,10 +59,10 @@ def main(config):
                         ],
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = canvas.height(),
                         scroll_direction = "vertical",
                         offset_start = 91,
-                        offset_end = 32,
+                        offset_end = canvas.height(),
                         child =
                             render.Column(
                                 main_align = "space_between",
@@ -67,10 +70,10 @@ def main(config):
                             ),
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = canvas.height(),
                         scroll_direction = "vertical",
                         offset_start = 90,
-                        offset_end = 32,
+                        offset_end = canvas.height(),
                         child =
                             render.Column(
                                 main_align = "space_between",
@@ -104,7 +107,7 @@ def main(config):
             show_full_animation = True,
             child = render.Stack(
                 children = [
-                    render.Image(width = 64, height = 32, src = BLUE_BACKGROUND),
+                    render.Image(width = 64, height = canvas.height(), src = BLUE_BACKGROUND),
                     animation.Transformation(
                         render.Image(width = 64, height = 32, src = SPLASH_SCREEN),
                         duration = 0,
@@ -122,10 +125,10 @@ def main(config):
                         ],
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = canvas.height(),
                         scroll_direction = "vertical",
                         offset_start = 91,
-                        offset_end = 32,
+                        offset_end = canvas.height(),
                         child =
                             render.Column(
                                 main_align = "space_between",
@@ -133,10 +136,10 @@ def main(config):
                             ),
                     ),
                     render.Marquee(
-                        height = 32,
+                        height = canvas.height(),
                         scroll_direction = "vertical",
                         offset_start = 90,
-                        offset_end = 32,
+                        offset_end = canvas.height(),
                         child =
                             render.Column(
                                 main_align = "space_between",

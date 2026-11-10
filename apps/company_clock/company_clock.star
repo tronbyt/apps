@@ -10,7 +10,7 @@ load("images/half_sun.png", HALF_SUN_ASSET = "file")
 load("images/moon.png", MOON_ASSET = "file")
 load("images/skull.png", SKULL_ASSET = "file")
 load("images/sun.png", SUN_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -46,51 +46,61 @@ def main(config):
     else:
         img_src = SKULL
 
+    # The bordered card is drawn at 64x32; on a taller panel it sits in the
+    # middle.
     return render.Root(
         delay = 500,
-        child = render.Stack(
-            children = [
-                # Border
-                render.Plot(
-                    data = [(0, 0), (0, 32), (64, 32), (64, 0), (0, 0)],
-                    color = orange,
-                    width = 64,
-                    height = 32,
-                ),
-                # Time
-                render.Padding(
-                    pad = (4, 8, 0, 0),
-                    child = render.Animation(
-                        children = [
-                            render.Text(
-                                content = now.format("3:04"),
+        child = render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = [
+                        # Border
+                        render.Plot(
+                            data = [(0, 0), (0, 32), (64, 32), (64, 0), (0, 0)],
+                            color = orange,
+                            width = 64,
+                            height = 32,
+                        ),
+                        # Time
+                        render.Padding(
+                            pad = (4, 8, 0, 0),
+                            child = render.Animation(
+                                children = [
+                                    render.Text(
+                                        content = now.format("3:04"),
+                                        color = orange,
+                                        font = font,
+                                    ),
+                                    render.Text(
+                                        content = now.format("3 04"),
+                                        color = orange,
+                                        font = font,
+                                    ),
+                                ],
+                            ),
+                        ),
+                        render.Padding(
+                            pad = (4, 16, 0, 0),
+                            child = render.Text(
+                                content = now.format("PM"),
                                 color = orange,
                                 font = font,
                             ),
-                            render.Text(
-                                content = now.format("3 04"),
-                                color = orange,
-                                font = font,
+                        ),
+                        # Image
+                        render.Padding(
+                            pad = (33, tp_adj, 0, 0),
+                            child = render.Image(
+                                src = img_src,
                             ),
-                        ],
-                    ),
+                        ),
+                    ],
                 ),
-                render.Padding(
-                    pad = (4, 16, 0, 0),
-                    child = render.Text(
-                        content = now.format("PM"),
-                        color = orange,
-                        font = font,
-                    ),
-                ),
-                # Image
-                render.Padding(
-                    pad = (33, tp_adj, 0, 0),
-                    child = render.Image(
-                        src = img_src,
-                    ),
-                ),
-            ],
+            ),
         ),
     )
 

@@ -1,6 +1,6 @@
 load("images/candle_image.png", CANDLE_IMAGE_ASSET = "file")
 load("images/main_menorah_image.png", MAIN_MENORAH_IMAGE_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 CANDLE_IMAGE = CANDLE_IMAGE_ASSET.readall()
@@ -20,6 +20,14 @@ def get_hanukkah_dates(year):
     hanukkah_last_day = hanukkah_first_day + time.parse_duration("192h")
     return hanukkah_first_day, hanukkah_last_day
 
+def center_on_square(child):
+    # Centre the block on square (64x64) panels only; 64x32 and 2x keep the
+    # original top-left layout.
+    w, h = canvas.size()
+    if h == w:
+        return render.Box(width = w, height = h, child = child)
+    return child
+
 def main():
     tz = time.tz()
     current_time = time.now().in_location(tz)
@@ -27,11 +35,11 @@ def main():
 
     if current_year > 2030:
         return render.Root(
-            child = render.WrappedText(
+            child = center_on_square(render.WrappedText(
                 content = "This app only supports years up to 2030.",
                 color = "#ff0000",
                 font = "CG-pixel-4x5-mono",
-            ),
+            )),
         )
 
     hanukkah_first_day, hanukkah_last_day = get_hanukkah_dates(current_year)
@@ -53,8 +61,8 @@ def main():
         candles = []
         offset_widths = [0, 80, 96, 112, 136, 152, 168, 184]
         for i in range(0, num_candles):
-            candles.append(render.Box(width = offset_widths[i], child = render.Image(src = CANDLE_IMAGE)))
+            candles.append(render.Box(width = offset_widths[i], height = 32, child = render.Image(src = CANDLE_IMAGE)))
         candles.append(render.Image(src = MAIN_MENORAH_IMAGE))
         main_child = render.Stack(children = candles)
 
-    return render.Root(child = main_child)
+    return render.Root(child = center_on_square(main_child))

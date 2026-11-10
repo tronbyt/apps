@@ -7,7 +7,7 @@ Author: LunchBox8484
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -71,6 +71,12 @@ ALT_LOGO = {
 
 MAIN_FONT = "CG-pixel-3x5-mono"
 
+def is_square():
+    """Branch on canvas SHAPE, not size: a 2x wide panel reports 128x64 and a
+    2x square one 128x128, so a bare height test gets both wrong."""
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     renderCategory = []
     rotationSpeed = config.get("rotationSpeed", "5")
@@ -94,6 +100,11 @@ def main(config):
         league = {LEAGUE: apiURL}
 
     standings = get_standings(league)
+
+    # on a square panel a full division fits in one frame, so ignore
+    # teamsOptions and show all five teams under the same top shelf
+    if is_square():
+        return render_square(standings, now, rotationSpeed, timeColor, displayTop)
 
     if (standings):
         for i, s in enumerate(standings):
@@ -387,6 +398,131 @@ def get_team(x, s, entriesToDisplay, i, now, rotationSpeed, timeColor, divisionN
 
     output.extend(topColumn)
     containerHeight = int(24 / entriesToDisplay)
+    for i in range(0, entriesToDisplay):
+        if i + x < len(s):
+            # initialize stat variables
+            team_games_back = ""
+            team_record = ""
+
+            # get team info
+            teamName = s[i + x]["team"]["abbreviation"]
+            teamColor = COLOR_DICT.get(teamName)
+            teamLogo = get_logoType(teamName, s[i + x]["team"]["logos"][1]["href"])
+            stats = s[i + x]["stats"]
+            for stat in stats:
+                if stat.get("name") == "overall":
+                    team_record = stat.get("displayValue")
+                if stat.get("name") == "gamesBehind":
+                    team_games_back = stat.get("displayValue")
+
+                # if we have populated everything then break to stop going through stats
+                if team_record != "" and team_games_back != "":
+                    break
+
+            team = render.Column(
+                children = [
+                    render.Box(width = 64, height = containerHeight, color = teamColor, child = render.Row(expanded = True, main_align = "start", cross_align = "center", children = [
+                        render.Box(width = 8, height = containerHeight, child = render.Image(teamLogo, width = 10, height = 10)),
+                        render.Box(width = 14, height = containerHeight, child = render.Text(content = teamName[:3], color = "#fff", font = MAIN_FONT)),
+                        render.Box(width = 26, height = containerHeight, child = render.Text(content = team_record, color = "#fff", font = MAIN_FONT)),
+                        render.Box(width = 16, height = containerHeight, child = render.Text(content = team_games_back, color = "#fff", font = MAIN_FONT)),
+                    ])),
+                ],
+            )
+            output.extend([team])
+        else:
+            output.extend([render.Column(children = [render.Box(width = 64, height = containerHeight, color = "#111")])])
+
+    return output
+
+def render_square(standings, now, rotationSpeed, timeColor, displayTop):
+    renderCategory = []
+    if (standings):
+        for i, s in enumerate(standings):
+            entries = s["standings"]["entries"]
+
+            if entries:
+                # a whole division per frame on 64x64
+                entriesToDisplay = 5
+                divisionName = s["shortName"]
+                divisionName = divisionName.replace(" Cent", " Central")
+
+                # ESPN API does not guarantee order
+                # we sort by games behind to get the standings correct
+                entries = sorted(entries, get_games_behind)
+
+                for x in range(0, len(entries), entriesToDisplay):
+                    renderCategory.extend(
+                        [
+                            render.Column(
+                                expanded = True,
+                                main_align = "start",
+                                cross_align = "start",
+                                children = [
+                                    render.Column(
+                                        children = get_team_square(x, entries, entriesToDisplay, i, now, rotationSpeed, timeColor, divisionName, displayTop),
+                                    ),
+                                ],
+                            ),
+                        ],
+                    )
+
+        return render.Root(
+            delay = int(rotationSpeed) * 1000,
+            show_full_animation = True,
+            child = render.Animation(children = renderCategory),
+        )
+    else:
+        return []
+
+def get_team_square(x, s, entriesToDisplay, i, now, rotationSpeed, timeColor, divisionName, displayTop):
+    output = []
+    if displayTop == "gameinfo":
+        topColumn = [
+            render.Box(width = 64, height = 8, child = render.Stack(children = [
+                render.Box(width = 64, height = 8, color = "#000"),
+                render.Box(width = 64, height = 8, child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                    render.Text(color = timeColor, content = divisionName, font = MAIN_FONT),
+                ])),
+            ])),
+        ]
+    else:
+        timeBox = 20
+        statusBox = 44
+        if displayTop == "league":
+            theTime = LEAGUE_DISPLAY
+            timeBox += LEAGUE_DISPLAY_OFFSET
+            statusBox -= LEAGUE_DISPLAY_OFFSET
+        else:
+            now = now + time.parse_duration("%ds" % int(i) * int(rotationSpeed))
+            theTime = now.format("3:04")
+            if len(str(theTime)) > 4:
+                timeBox += 4
+                statusBox -= 4
+        topColumn = [
+            render.Row(
+                expanded = True,
+                main_align = "space_between",
+                cross_align = "start",
+                children = [
+                    render.Box(width = timeBox, height = 8, color = "#000", child = render.Row(expanded = True, main_align = "center", cross_align = "center", children = [
+                        render.Box(width = 1, height = 8),
+                        render.Text(color = timeColor, content = theTime, font = "tb-8"),
+                    ])),
+                    render.Box(width = statusBox, height = 8, color = "#000", child = render.Stack(children = [
+                        render.Box(width = statusBox, height = 8, child = render.Row(expanded = True, main_align = "end", cross_align = "center", children = [
+                            render.Text(color = "#FFF", content = divisionName, font = MAIN_FONT),
+                        ])),
+                    ])),
+                ],
+            ),
+        ]
+
+    output.extend(topColumn)
+
+    # 8px top shelf + 1px rule + five 11px rows = 64
+    output.extend([render.Box(width = 64, height = 1, color = "#000")])
+    containerHeight = 11
     for i in range(0, entriesToDisplay):
         if i + x < len(s):
             # initialize stat variables

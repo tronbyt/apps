@@ -7,15 +7,20 @@ Author: dinosaursrarr
 
 load("math.star", "math")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 ALIVE = True
 DEAD = False
-WIDTH = 64
-HEIGHT = 32
+WIDTH = canvas.width()
+HEIGHT = canvas.height()
 REFRESH_MILLISECONDS = 200
+
+# Every frame repaints every row grown so far, so a 64-row panel adds two
+# rows per frame (at twice the delay, so the pace is unchanged) to keep the
+# render inside the server deadline.
+ROWS_PER_FRAME = max(1, HEIGHT // 32)
 CHOOSE_RANDOM = "-"
 SINGLE_CELL = "+"
 
@@ -39,20 +44,22 @@ def next_row(current_row, rule):
         new_row.append(bool(child))
     return new_row
 
-def render_grid(grid, alive_cell, dead_cell):
-    return render.Column(
-        children = [
-            render.Row(
-                children = [
-                    alive_cell if c == ALIVE else dead_cell
-                    for c in row
-                ],
-            )
-            for row in grid
-        ],
-    )
+def render_row(row, alive_colour, dead_colour):
+    # Consecutive cells in the same state are painted as one Box: pixel-
+    # identical, and a fraction of the widgets per frame (every frame repaints
+    # every row grown so far).
+    boxes = []
+    start = 0
+    for i in range(1, len(row) + 1):
+        if i == len(row) or row[i] != row[start]:
+            boxes.append(render.Box(width = i - start, height = 1, color = alive_colour if row[start] else dead_colour))
+            start = i
+    return render.Row(children = boxes)
 
-def animate(alive_cell, dead_cell, rule, starting_row):
+def render_grid(grid, alive_colour, dead_colour):
+    return render.Column(children = [render_row(row, alive_colour, dead_colour) for row in grid])
+
+def animate(alive_colour, dead_colour, rule, starting_row):
     frames = []
 
     first_row = [DEAD] * WIDTH
@@ -64,12 +71,13 @@ def animate(alive_cell, dead_cell, rule, starting_row):
                 first_row[i] = ALIVE
 
     grid = [first_row]
-    frames.append(render_grid(grid, alive_cell, dead_cell))
+    frames.append(render_grid(grid, alive_colour, dead_colour))
 
-    for _ in range(HEIGHT):
+    for i in range(HEIGHT):
         row = next_row(grid[-1], rule)
         grid.append(row)
-        frames.append(render_grid(grid, alive_cell, dead_cell))
+        if (i + 1) % ROWS_PER_FRAME == 0 or i == HEIGHT - 1:
+            frames.append(render_grid(grid, alive_colour, dead_colour))
 
     return render.Animation(children = frames)
 
@@ -96,22 +104,11 @@ def main(config):
     # Turns out to be significantly faster to re-use
     # a single element rather than create one for each
     # cell on each iteration.
-    alive_cell = render.Box(
-        width = 1,
-        height = 1,
-        color = alive_colour,
-    )
-    dead_cell = render.Box(
-        width = 1,
-        height = 1,
-        color = dead_colour,
-    )
-
     return render.Root(
-        delay = REFRESH_MILLISECONDS,
+        delay = REFRESH_MILLISECONDS * ROWS_PER_FRAME,
         child = render.Stack(
             children = [
-                animate(alive_cell, dead_cell, rule, starting_row),
+                animate(alive_colour, dead_colour, rule, starting_row),
                 render.Padding(
                     pad = (1, 1, 0, 0),
                     color = dead_colour,

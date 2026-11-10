@@ -6,7 +6,7 @@ Author: connorwashere
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -17,13 +17,23 @@ SHORTENED_NAMES = {
     "APU / Citrus College": "Azuza",
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     transit_stop_id = config.get("stop_id", DEFAULT_STOP_ID)
     transit_line = config.get("metro_line", DEFAULT_LINE_NAME)
     api_key = config.get("transit_api_key")
     if not api_key:
         return render.Root(
-            child = render.Text("No Transit App API Key provided.", font = "5x8"),
+            # On the square the message is wrapped and centred instead of clipped to one line; other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No Transit App API Key provided.", font = "5x8", align = "center"))) if is_square() else render.Text("No Transit App API Key provided.", font = "5x8"),
         )
     route_info = parse_api_response(get_times(transit_stop_id, api_key))
     stop_renders = []
@@ -37,7 +47,16 @@ def main(config):
     stop_renders.pop()
     return render.Root(
         delay = 120,
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            width = 64,
+            height = 32,
+            child = render.Column(
+                main_align = "start",
+                cross_align = "center",
+                children = stop_renders,
+            ),
+        ))) if is_square() else render.Box(
             width = 64,
             height = 32,
             child = render.Column(

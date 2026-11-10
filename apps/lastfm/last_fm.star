@@ -7,11 +7,20 @@ Author: Chuck
 
 load("http.star", "http")
 load("images/demoicon.jpg", DEMOICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 DEMOICON = DEMOICON_ASSET.readall()
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     userName = config.get("lastFmUser") or "badUser"
@@ -26,7 +35,12 @@ def main(config):
     if (userName == "badUser"):
         print("bad user")
         return render.Root(
-            child = render.WrappedText(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
+                content = "Last.fm Username missing in Tidbyt config. Use DemoUser for demo.",
+                color = "#FF0000",
+                font = "tom-thumb",
+            ))) if is_square() else render.WrappedText(
                 content = "Last.fm Username missing in Tidbyt config. Use DemoUser for demo.",
                 color = "#FF0000",
                 font = "tom-thumb",
@@ -35,7 +49,12 @@ def main(config):
     if (api_key == "badKey"):
         print("bad key")
         return render.Root(
-            child = render.WrappedText(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
+                content = "Last.fm API key missing in Tidbyt config. Use DemoKey for demo.",
+                color = "#FF0000",
+                font = "tom-thumb",
+            ))) if is_square() else render.WrappedText(
                 content = "Last.fm API key missing in Tidbyt config. Use DemoKey for demo.",
                 color = "#FF0000",
                 font = "tom-thumb",
@@ -47,7 +66,12 @@ def main(config):
     rep = http.get(lastFmUrl)
     if rep.status_code != 200:
         return render.Root(
-            child = render.WrappedText(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText(
+                content = "Could not reach Last.fm API.",
+                color = "#FF0000",
+                font = "tom-thumb",
+            ))) if is_square() else render.WrappedText(
                 content = "Could not reach Last.fm API.",
                 color = "#FF0000",
                 font = "tom-thumb",
@@ -73,7 +97,51 @@ def main(config):
 
 def renderIt(now, albumWidget, track):
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Padding(
+                    pad = (42, 1, 0, 0),
+                    child = render.Text(
+                        content = now.format("3:04"),
+                        font = "tom-thumb",
+                        color = "#777",
+                    ),
+                ),
+                render.Padding(
+                    pad = (0, 0, 0, 0),
+                    child = albumWidget,
+                ),
+                render.Box(
+                    color = "#00FF0000",
+                    child = render.Padding(
+                        pad = (0, 0, 0, 0),
+                        color = "#FF000000",
+                        child = render.Column(
+                            cross_align = "end",
+                            main_align = "start",
+                            expanded = False,
+                            children = [
+                                render.Box(
+                                    color = "#0000FF00",
+                                    height = 6,
+                                ),
+                                render.Padding(
+                                    pad = (1, 1, 0, 0),
+                                    color = "#11111199",
+                                    child = render.WrappedText("%s" % track["name"], font = "tom-thumb", color = "#FFFFFF"),
+                                ),
+                                render.Padding(
+                                    pad = (1, 1, 0, 0),
+                                    color = "#11111199",
+                                    child = render.WrappedText("%s" % track["artist"]["#text"], font = "tom-thumb", color = "#FFF"),
+                                ),
+                            ],
+                        ),
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Padding(
                     pad = (42, 1, 0, 0),

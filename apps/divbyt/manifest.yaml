@@ -7,9 +7,10 @@ author: imnotdannorton
 fileName: mrdiv_gifs.star
 packageName: divbyt
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - art
   - clock
 published: '2023-06-15T20:14:57Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T20:55:01Z'

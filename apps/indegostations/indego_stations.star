@@ -9,7 +9,7 @@ load("http.star", "http")
 load("images/bike.png", BIKE_ASSET = "file")
 load("images/ebike.png", EBIKE_ASSET = "file")
 load("images/lightning.png", LIGHTNING_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 BIKE = BIKE_ASSET.readall()
@@ -17,6 +17,15 @@ EBIKE = EBIKE_ASSET.readall()
 LIGHTNING = LIGHTNING_ASSET.readall()
 
 url = "https://kiosks.bicycletransit.workers.dev/phl"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     rep = http.get(url)
@@ -38,7 +47,47 @@ def main(config):
         reward = "-"
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Marquee(child = render.Text(name), width = 64),
+                render.Row(
+                    expanded = False,
+                    children = [
+                        render.Column(
+                            expanded = True,
+                            children = [
+                                render.Image(src = BIKE),
+                            ],
+                        ),
+                        render.Row(
+                            cross_align = "start",
+                            children = [
+                                render.Column(
+                                    cross_align = "end",
+                                    children = [
+                                        render.Text(" " + str(int(bikes))),
+                                        render.Text(" " + str(int(ebikes))),
+                                    ],
+                                ),
+                                render.Column(
+                                    cross_align = "Start",
+                                    children = [
+                                        render.Text(" Bikes"),
+                                        render.Row(
+                                            children = [
+                                                render.Image(src = LIGHTNING),
+                                                render.Text("Bikes"),
+                                            ],
+                                        ),
+                                    ],
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Marquee(child = render.Text(name), width = 64),
                 render.Row(

@@ -9,13 +9,22 @@ load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 def round(num, precision):
     """Round a float to the specified number of significant digits"""
     return math.round(num * math.pow(10, precision)) / math.pow(10, precision)
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     print("main called")
@@ -32,7 +41,8 @@ def main(config):
     if api_key == "":
         print("no api_key configured")
         return render.Root(
-            render.Text("Add API key", color = text_color),
+            # Centre the block on the square (64x64); other panels unchanged.
+            (render.Box(width = canvas.width(), height = canvas.height(), child = render.Text("Add API key", color = text_color))) if is_square() else render.Text("Add API key", color = text_color),
         )
 
     headers = {"Authorization": "Bearer " + api_key}
@@ -103,7 +113,41 @@ def main(config):
         active_color = text_color  # or warn, but probably normal for error
 
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                render.Box(
+                    render.Column(
+                        expanded = True,
+                        main_align = "space_around",
+                        children = [
+                            render.Row(
+                                expanded = True,
+                                main_align = "center",
+                                children = [
+                                    render.WrappedText(
+                                        content = "OpenRouter Credits",
+                                        font = "tb-8",
+                                        color = active_color,
+                                    ),
+                                ],
+                            ),
+                            render.Row(
+                                expanded = True,
+                                main_align = "center",
+                                children = [
+                                    render.Text(
+                                        content = display,
+                                        font = "6x13",
+                                        color = active_color,
+                                    ),
+                                ],
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 render.Box(
                     render.Column(

@@ -7,9 +7,10 @@ author: brettohland
 fileName: neotrack.star
 packageName: neotrack
 recommendedInterval: 5
+supports64x64: true
 category: science
 tags:
   - space
   - tech
 published: '2022-09-29T20:29:33Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T22:07:01Z'

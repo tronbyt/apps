@@ -7,6 +7,7 @@ author: vipulchhajer
 fileName: custom_quotes.star
 packageName: customquotes
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - art
@@ -14,4 +15,4 @@ tags:
   - utility
   - smart-home
 published: '2024-05-22T18:15:56Z'
-updated: '2025-12-01T21:50:01Z'
+updated: '2026-10-01T20:48:26Z'

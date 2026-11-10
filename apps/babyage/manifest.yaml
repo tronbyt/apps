@@ -7,10 +7,11 @@ author: helmc2
 fileName: baby_age.star
 packageName: babyage
 recommendedInterval: 5
+supports64x64: true
 category: lifestyle
 tags:
   - lifestyle
   - tracking
   - utility
 published: '2023-02-08T15:40:57Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T20:09:53Z'

@@ -5,7 +5,7 @@ Description:  Displays 'On Air' Sign that you turn on or off.
 Author: Robert Ison
 """
 
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 def main(config):
@@ -28,9 +28,18 @@ def main(config):
     display_items.append(add_padding_to_child_element(render.Text("ON", font = "10x20", color = text_color), 5, 7))
     display_items.append(add_padding_to_child_element(render.Text("AIR", font = "10x20", color = text_color), 28, 7))
 
+    # The sign is 64x32; on a taller panel it sits in the middle.
     return render.Root(
-        render.Stack(
-            children = display_items,
+        render.Box(
+            width = 64,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64,
+                height = 32,
+                child = render.Stack(
+                    children = display_items,
+                ),
+            ),
         ),
     )
 

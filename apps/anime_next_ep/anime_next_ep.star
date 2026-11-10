@@ -9,7 +9,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -44,18 +44,23 @@ def main(config):
     )
 
     return render.Root(
-        child = render.Column(
-            # Stack title + image/text row
-            children = [
-                title_display,  # Top: Full-width title
-                render.Row(
-                    # Bottom: Image + Episode Info
-                    children = [
-                        render_cover(cover_url),
-                        next_episode_info(next_episode, status),  # Right: Airing Info OR "Finished Airing"
-                    ],
-                ),
-            ],
+        # Centre the block on taller panels (64x64).
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Column(
+                # Stack title + image/text row
+                children = [
+                    title_display,  # Top: Full-width title
+                    render.Row(
+                        # Bottom: Image + Episode Info
+                        children = [
+                            render_cover(cover_url),
+                            next_episode_info(next_episode, status),  # Right: Airing Info OR "Finished Airing"
+                        ],
+                    ),
+                ],
+            ),
         ),
     )
 

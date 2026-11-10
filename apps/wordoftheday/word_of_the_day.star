@@ -6,7 +6,7 @@ Author: greg-n
 """
 
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 CACHE_KEY = "wotd"
@@ -57,7 +57,9 @@ def main():
                             ),
                         ],
                     ),
-                    height = 25,
+                    # the rows above the rule and the label: 25 on 64x32,
+                    # 57 on a square panel
+                    height = canvas.height() - 7,
                     offset_start = 23,
                     scroll_direction = "vertical",
                 ),

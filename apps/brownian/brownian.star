@@ -1,4 +1,4 @@
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 # Custom PRNG
@@ -16,8 +16,8 @@ def main(config):
     if CIRCLE_R < 1:
         CIRCLE_R = 1
 
-    WIDTH = 64
-    HEIGHT = 32
+    WIDTH = canvas.width()
+    HEIGHT = canvas.height()
     FRAMES = 150
     HALF_FRAMES = FRAMES // 2
     CIRCLE_R_SQ = CIRCLE_R * CIRCLE_R

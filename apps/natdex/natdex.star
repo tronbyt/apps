@@ -103,33 +103,44 @@ def main(config):
     _, number_height = number_text.size()
     number_top_padding = (32 * scale) - number_height
 
+    # Everything here is placed against 32 * scale rows. A square panel is
+    # 64 tall but not 2x, so the 32-row card is centred rather than hung
+    # from the top edge.
     return render.Root(
-        child = render.Stack(
-            children = [
-                render.Box(
-                    width = 32 * scale,
-                    height = 32 * scale,
-                    child = sprite_img,
-                ),
-                render.Row(
-                    expanded = True,
-                    main_align = "end",
-                    cross_align = "start",
+        child = render.Box(
+            width = 64 * scale,
+            height = canvas.height(),
+            child = render.Box(
+                width = 64 * scale,
+                height = 32 * scale,
+                child = render.Stack(
                     children = [
-                        name_widget,
+                        render.Box(
+                            width = 32 * scale,
+                            height = 32 * scale,
+                            child = sprite_img,
+                        ),
+                        render.Row(
+                            expanded = True,
+                            main_align = "end",
+                            cross_align = "start",
+                            children = [
+                                name_widget,
+                            ],
+                        ),
+                        render.Padding(
+                            pad = (0, number_top_padding, 0, 0),
+                            child = render.Row(
+                                expanded = True,
+                                main_align = "end",
+                                children = [
+                                    number_text,
+                                ],
+                            ),
+                        ),
                     ],
                 ),
-                render.Padding(
-                    pad = (0, number_top_padding, 0, 0),
-                    child = render.Row(
-                        expanded = True,
-                        main_align = "end",
-                        children = [
-                            number_text,
-                        ],
-                    ),
-                ),
-            ],
+            ),
         ),
     )
 

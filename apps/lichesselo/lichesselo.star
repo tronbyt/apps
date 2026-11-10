@@ -7,7 +7,7 @@ Author: trbarron
 
 load("encoding/base64.star", "base64")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 LICHESS_KNIGHT = base64.decode("""
@@ -61,7 +61,14 @@ def get_diff_string(score):
 
 def message(text):
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            child = render.WrappedText(
+                content = text,
+                align = "center",
+                width = 60,
+            ),
+        ))) if is_square() else render.Box(
             child = render.WrappedText(
                 content = text,
                 align = "center",
@@ -99,6 +106,15 @@ def stat_row(value, perfs, show_change):
         cross_align = "center",
         children = children,
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     username = config.str("username", DEFAULT_USERNAME).strip()
@@ -150,7 +166,13 @@ def main(config):
     )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
+            children = [
+                render.Box(height = 8, child = header),
+                render.Box(height = 24, child = body),
+            ],
+        ))) if is_square() else render.Column(
             children = [
                 render.Box(height = 8, child = header),
                 render.Box(height = 24, child = body),

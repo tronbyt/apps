@@ -7,6 +7,7 @@ author: schumatt
 fileName: ms_teams_status.star
 packageName: msteamsstatus
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - presence
@@ -14,4 +15,4 @@ tags:
   - smart-home
   - utility
 published: '2023-10-19T19:51:22Z'
-updated: '2025-12-05T22:28:51Z'
+updated: '2026-10-01T21:58:58Z'

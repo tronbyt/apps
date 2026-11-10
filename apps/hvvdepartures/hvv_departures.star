@@ -19,7 +19,7 @@ load("images/image_s5.png", IMAGE_S5_ASSET = "file")
 load("images/image_s7.png", IMAGE_S7_ASSET = "file")
 load("images/image_xpress_bus.png", IMAGE_XPRESS_BUS_ASSET = "file")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -772,7 +772,20 @@ def render_message(message, color):
         A definition of what to render.
     """
     return render.Root(
-        child = render.Box(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+            color = COLOR_BACKGROUND,
+            child = render.Column(
+                children = [
+                    render.Box(height = 16, child = render.Image(IMAGE_LOGO)),
+                    render.Box(height = 16, child = render.WrappedText(
+                        content = message,
+                        font = "tom-thumb",
+                        color = color,
+                    )),
+                ],
+            ),
+        ))) if is_square() else render.Box(
             color = COLOR_BACKGROUND,
             child = render.Column(
                 children = [
@@ -786,6 +799,18 @@ def render_message(message, color):
             ),
         ),
     )
+
+# Each departure is a 16px block (15 rows + divider): two on 64x32, four on 64x64.
+MAX_DEPARTURES = canvas.height() // 16
+
+def departure_rows(departures, time_format):
+    """Interleave departures with dividers, padding to MAX_DEPARTURES slots."""
+    rows = []
+    for i in range(MAX_DEPARTURES):
+        if i > 0:
+            rows.append(render.Box(width = 64, height = 1, color = COLOR_SEPARATOR))
+        rows.append(render_departure(departures[i], time_format) if len(departures) > i else None)
+    return rows
 
 def render_departures(departures, time_format):
     """Render up to two departures, separated by a divider.
@@ -802,14 +827,19 @@ def render_departures(departures, time_format):
             color = COLOR_BACKGROUND,
             child = render.Column(
                 expanded = True,
-                children = [
-                    render_departure(departures[0], time_format) if len(departures) > 0 else None,
-                    render.Box(width = 64, height = 1, color = COLOR_SEPARATOR),
-                    render_departure(departures[1], time_format) if len(departures) > 1 else None,
-                ],
+                children = departure_rows(departures, time_format),
             ),
         ),
     )
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     """The applet entry point.
@@ -854,7 +884,7 @@ def main(config):
 
     # Slice departures to a maximum of two, although
     # it is already specified in the API request.
-    departures = departures[0:2]
+    departures = departures[0:MAX_DEPARTURES]
 
     # No departures were found...
     if len(departures) == 0:

@@ -6,7 +6,7 @@
 load("http.star", "http")
 
 # Import the required libraries
-load("render.star", "render")
+load("render.star", "canvas", "render")
 
 #Set the fonts
 SMALLFONT = "tom-thumb"
@@ -22,6 +22,15 @@ icecast_json_url = "https://streaming.galaxywebsolutions.com/json/stream/capital
 #If not, we fail the app which makes it stop.
 
 #We can then retirieve the song playing right now plus the last 5 songs played.
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     rep = http.get(icecast_json_url)
@@ -41,7 +50,11 @@ def main():
     #Simplest layout for version 1.
 
     return render.Root(
+        # The three bands total 31 rows; on a square panel the column expands
+        # and spreads them down the panel.
         child = render.Column(
+            expanded = is_square(),
+            main_align = "space_evenly",
             # Column is a vertical children layout
             children = [
                 render.Stack(

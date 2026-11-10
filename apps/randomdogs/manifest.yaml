@@ -7,9 +7,10 @@ author: mattmcquinn
 fileName: random_dogs.star
 packageName: randomdogs
 recommendedInterval: 5
+supports64x64: true
 category: entertainment
 tags:
   - lifestyle
   - art
 published: '2023-09-15T18:47:07Z'
-updated: '2025-11-30T20:08:55Z'
+updated: '2026-10-01T19:49:38Z'

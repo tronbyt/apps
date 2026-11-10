@@ -7,9 +7,10 @@ author: dereklarmstrong
 fileName: new_years_countdown.star
 packageName: newyearscountdown
 recommendedInterval: 60
+supports64x64: true
 category: entertainment
 tags:
   - time
   - fireworks
 published: '2023-11-29T17:51:37Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T19:27:54Z'

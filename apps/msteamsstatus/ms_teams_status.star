@@ -8,7 +8,7 @@ Author: schumatt
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("secret.star", "secret")
 
@@ -140,6 +140,15 @@ activityMap = {
     },
 }
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     if DEBUG_ON:
         print("ENTERING main: " + str(config))
@@ -238,7 +247,62 @@ def render_teams_status(userDisplayName, availability, activity, statusMessage, 
     return render.Root(
         delay = 1,
         #max_age = 5,
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render.Padding(
+                    child =
+                        render.Box(
+                            width = 5,
+                            color = statusColor,
+                        ),
+                    pad = (0, 0, 1, 0),
+                ),
+                render.Column(
+                    children = [
+                        render.Marquee(
+                            child = render.Text(
+                                content = userDisplayName,
+                            ),
+                            width = 59,
+                            offset_start = 59,
+                            offset_end = 59,
+                        ),
+                        render.Row(
+                            children = [
+                                render.Padding(
+                                    child = render.Circle(
+                                        diameter = 6,
+                                        color = dotColor,
+                                    ),
+                                    pad = (0, 1, 1, 2),
+                                    color = "#000",
+                                ),
+                                render.Marquee(
+                                    width = 51,
+                                    child = render.Text(
+                                        content = statusLabel,
+                                        color = statusColor,
+                                    ),
+                                    offset_start = 0,
+                                ),
+                            ],
+                        ),
+                        render.Marquee(
+                            child = render.WrappedText(
+                                content = statusMessage,
+                                font = "CG-pixel-3x5-mono",
+                                linespacing = 2,
+                            ),
+                            scroll_direction = "vertical",
+                            height = 15,
+                            align = "center",
+                            offset_start = 0,
+                        ),
+                    ],
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render.Padding(
                     child =

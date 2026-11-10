@@ -6,28 +6,45 @@ Author: Jack Sherbal
 """
 
 load("cache.star", "cache")
+load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("humanize.star", "humanize")
 load("re.star", "re")
 load("render.star", "render")
 load("schema.star", "schema")
 
-NUM_QUESTIONS = 100
-JSERVICE = "http://jservice.io/api/random?count=%d" % NUM_QUESTIONS
+# Open Trivia DB (https://opentdb.com): free, no key. It allows one request every 5 seconds per address and at most
+# 50 questions per request, so a batch is fetched and shown one at a time. Text is requested base64-encoded, so it
+# arrives without HTML entities.
+NUM_QUESTIONS = 50
+OPEN_TRIVIA_DB = "https://opentdb.com/api.php?amount=%d&encode=base64" % NUM_QUESTIONS
 CACHE_TTL_SECONDS = 15 * NUM_QUESTIONS
 
+def decode(value):
+    return base64.decode(value)
+
 def get_data():
+    """The next question, or None if Open Trivia DB can't be reached."""
     question_index = int(cache.get("question_index") or "0")
 
-    rep = http.get(JSERVICE, ttl_seconds = CACHE_TTL_SECONDS)
+    rep = http.get(OPEN_TRIVIA_DB, ttl_seconds = CACHE_TTL_SECONDS)
     if rep.status_code != 200:
-        fail("Jservice (Trivia) request failed with status %d", rep.status_code)
+        print("Open Trivia DB request failed with status %d" % rep.status_code)
+        return None
+    data = json.decode(rep.body())
+    questions = data.get("results") or []
+    if data.get("response_code") != 0 or not questions:
+        print("Open Trivia DB returned no questions (response code %s)" % data.get("response_code"))
+        return None
 
     cache.set("question_index", str(question_index + 1), ttl_seconds = CACHE_TTL_SECONDS)
-    questions = json.decode(rep.body())
-
-    return questions[question_index % NUM_QUESTIONS]
+    question = questions[question_index % len(questions)]
+    return {
+        "difficulty": decode(question["difficulty"]),
+        "category": decode(question["category"]),
+        "question": decode(question["question"]),
+        "answer": decode(question["correct_answer"]),
+    }
 
 def remove_chars(strr):
     return re.compile(r"<[^>]+>").sub("", strr)
@@ -46,18 +63,14 @@ def calc_delay(question, category):
 
     return 0
 
-def get_value(value):
-    if value == None:
-        return "FINAL"
-
-    return humanize.comma(value)
-
 def main(config):
     body = get_data()
-    value = get_value(body["value"])
+    if not body:
+        return []
+    value = body["difficulty"].upper()
     question = remove_chars(body["question"])
     answer = remove_chars(body["answer"])
-    category = remove_chars(body["category"]["title"])
+    category = remove_chars(body["category"])
 
     DELAY = int(config.str("scroll_speed", DEFAULT_SPEED)) + calc_delay(question, category)
     ANSWER_DELAY = config.str("answer_delay", DEFAULT_ANSWER_DELAY)

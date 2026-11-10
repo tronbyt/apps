@@ -9,7 +9,7 @@ load("encoding/base64.star", "base64")
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -141,6 +141,15 @@ def get_location(config):
 # -------------------------
 # Main
 # -------------------------
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = get_location(config)
 
@@ -232,8 +241,11 @@ def main(config):
     # -------------------------
     return render.Root(
         child = render.Box(
+            # on a square panel the date, time and temperatures spread down
+            # the panel instead of stacking under the top edge
             child = render.Column(
                 expanded = True,
+                main_align = "space_evenly" if is_square() else "start",
                 children = [
                     # Top: Date (left aligned)
                     render.Padding(

@@ -6,7 +6,7 @@ Author: bmdelaune
 """
 
 load("http.star", "http")  #HTTP Client
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("xpath.star", "xpath")  #XPath Expressions to read XML RSS Feed
 
@@ -18,7 +18,7 @@ def main():
             children = [
                 render.Marquee(
                     width = 64,
-                    height = 32,
+                    height = canvas.height(),
                     offset_start = 20,
                     offset_end = 20,
                     child = render.WrappedText(
@@ -32,7 +32,7 @@ def main():
                     main_align = "end",
                     cross_align = "end",
                     children = [
-                        render.Box(height = 10, width = 65),
+                        render.Box(height = canvas.height() - 22, width = 65),
                         render.Stack(
                             children = [
                                 render.Box(height = 10, width = 14, color = "#C83740"),

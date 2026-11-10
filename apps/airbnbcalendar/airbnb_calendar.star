@@ -9,12 +9,12 @@ load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
 load("re.star", "re")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-SCREEN_HEIGHT = 32
-SCREEN_WIDTH = 64
+SCREEN_HEIGHT = canvas.height()
+SCREEN_WIDTH = canvas.width()
 MAX_LISTING_COUNT = 5
 DEFAULT_TIMEZONE = "America/New_York"
 DEFAULT_CHECKIN_HOUR = 15

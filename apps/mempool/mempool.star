@@ -10,7 +10,7 @@ load("humanize.star", "humanize")
 load("images/box_orange_img.gif", BOX_ORANGE_IMG_ASSET = "file")
 load("images/box_purple_img.gif", BOX_PURPLE_IMG_ASSET = "file")
 load("images/line_img.gif", LINE_IMG_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 BOX_ORANGE_IMG = BOX_ORANGE_IMG_ASSET.readall()
@@ -125,6 +125,15 @@ def create_purple_block(block_tip_height = 1):
         ],
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main():
     resp = get_mempool_data(URL_BLOCK_TIP_HEIGHT)
     if not resp:
@@ -137,6 +146,44 @@ def main():
 
     box_orange = create_orange_block()
     box_purple = create_purple_block(block_tip_height)
+
+    # The two blocks are fixed 28x27 artwork and together they are as wide as
+    # a panel gets, so a square panel cannot make them bigger. It can give the
+    # block height a line of its own above them in a readable font, and
+    # centre the lot, instead of wedging the number over the purple block in
+    # the top half.
+    if is_square():
+        return render.Root(
+            max_age = 30,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    render.Text(
+                        content = str(block_tip_height),
+                        color = "#09a3ba",
+                        font = "6x13",
+                    ),
+                    render.Row(
+                        main_align = "space_between",
+                        cross_align = "end",
+                        children = [
+                            box_orange,
+                            render.Padding(
+                                pad = (3, 1, 3, 1),
+                                child = render.Image(
+                                    src = LINE_IMG,
+                                    width = 1,
+                                    height = 21,
+                                ),
+                            ),
+                            box_purple,
+                        ],
+                    ),
+                ],
+            ),
+        )
 
     return render.Root(
         max_age = 30,

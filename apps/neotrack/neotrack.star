@@ -8,13 +8,22 @@ Author: brettohland
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("images/asteroid.gif", ASTEROID_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
 ASTEROID = ASTEROID_ASSET.readall()
 
 CACHE_KEY = "neo_response"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     # NASA's API requires that the date be in a specific format
@@ -25,7 +34,10 @@ def main(config):
 
     if not data:
         return render.Root(
-            child = render.Box(
+            # Centre the block on the square (64x64); other panels unchanged.
+            child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(
+                child = render.Text("NASA API Error", color = "#FF0000"),
+            ))) if is_square() else render.Box(
                 child = render.Text("NASA API Error", color = "#FF0000"),
             ),
         )
@@ -73,7 +85,23 @@ def main(config):
     orbiting_body = closest_neo["close_approach_data"][0]["orbiting_body"]
 
     return render.Root(
-        child = render.Row(
+        # Centre the block on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Row(
+            children = [
+                render_image_and_scale(border_color, diameter),
+                render.Padding(
+                    pad = (2, 0, 0, 0),
+                    child = render.Column(
+                        children = [
+                            make_data_scroll(None, name),
+                            make_data_scroll("V:", velocity_string),
+                            make_data_scroll("D:", miss_distance_string),
+                            make_data_scroll("O:", orbiting_body),
+                        ],
+                    ),
+                ),
+            ],
+        ))) if is_square() else render.Row(
             children = [
                 render_image_and_scale(border_color, diameter),
                 render.Padding(

@@ -1,6 +1,6 @@
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 load("xpath.star", "xpath")
@@ -110,9 +110,10 @@ def render_feed(feed, articles, colors, font, show_time, show_title, show_story,
         children = [
             render_header(feed, colors, header_height, logo_width),
             render.Marquee(
-                height = 32 - header_height,
+                # the rows under the header: 64 tall panels get twice as many
+                height = canvas.height() - header_height,
                 scroll_direction = "vertical",
-                offset_start = 32 - header_height,
+                offset_start = canvas.height() - header_height,
                 child = render.Column(
                     children = render_articles(articles, colors, font, show_time, show_title, show_story),
                 ),

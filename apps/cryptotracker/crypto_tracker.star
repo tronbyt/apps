@@ -10,7 +10,7 @@ load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
 load("math.star", "math")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 DEFAULT_SYMBOL = "BTC"
@@ -150,7 +150,7 @@ def main(config):
             else:
                 print("Alphavantage API request failed with note %s" % r["Note"])
                 return render.Root(
-                    child = render.WrappedText("API Limit Reached", color = "#FF0000"),
+                    child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API Limit Reached", color = "#FF0000")),
                 )
 
         if "Error Message" in r:
@@ -167,13 +167,13 @@ def main(config):
             else:
                 print("Alphavantage API request failed with information %s" % r["Information"])
                 return render.Root(
-                    child = render.WrappedText("API Info: %s" % r["Information"], color = "#FF0000"),
+                    child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("API Info: %s" % r["Information"], color = "#FF0000")),
                 )
 
     timeseries = r.get("Time Series Crypto (15min)")
     if not timeseries:
         return render.Root(
-            child = render.WrappedText("No Data Available", color = "#FF0000"),
+            child = render.Box(width = canvas.width(), height = canvas.height(), child = render.WrappedText("No Data Available", color = "#FF0000")),
         )
 
     dates = [val for val in timeseries.keys()]
@@ -197,9 +197,10 @@ def main(config):
     else:
         color = WHITE_RGB
 
+    # Centre the block on taller panels (64x64).
     return render.Root(
         delay = 75,
-        child = render.Column(
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             children = [
                 render.Column(
                     children = [
@@ -236,7 +237,7 @@ def main(config):
                     main_align = "center",
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

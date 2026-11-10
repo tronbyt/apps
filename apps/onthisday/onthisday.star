@@ -7,7 +7,7 @@ Author: Andrew Hefele
 
 load("http.star", "http")
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -33,6 +33,54 @@ COLORS = [
     schema.Option(display = "White", value = "#ffffff"),
     schema.Option(display = "Yellow", value = "#ffff00"),
 ]
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
+def event_body(text, color):
+    """The event under the year.
+
+    On a 64x32 panel it is one line scrolled sideways. A square panel has
+    the rows to wrap it to the panel width and scroll it up instead.
+    """
+    if is_square():
+        return render.Marquee(
+            height = canvas.height() - 11,
+            scroll_direction = "vertical",
+            offset_start = canvas.height() - 11,
+            offset_end = canvas.height() - 11,
+            child = render.Padding(
+                pad = (0, 2, 0, 0),
+                child = render.WrappedText(
+                    content = text,
+                    width = 64,
+                    color = color,
+                    linespacing = 1,
+                ),
+            ),
+        )
+    return render.Marquee(
+        width = 64,
+        offset_start = 64,
+        child = render.Column(
+            expanded = True,
+            children = [
+                render.Padding(
+                    pad = (0, 4, 0, 0),
+                    child = render.Text(
+                        content = text,
+                        color = color,
+                    ),
+                ),
+            ],
+        ),
+    )
 
 def main(config):
     # get config
@@ -71,22 +119,7 @@ def main(config):
                         width = 64,
                         color = dividerColor,
                     ),
-                    render.Marquee(
-                        width = 64,
-                        offset_start = 64,
-                        child = render.Column(
-                            expanded = True,
-                            children = [
-                                render.Padding(
-                                    pad = (0, 4, 0, 0),
-                                    child = render.Text(
-                                        content = get_event_description(eventJson, index),
-                                        color = descriptionColor,
-                                    ),
-                                ),
-                            ],
-                        ),
-                    ),
+                    event_body(get_event_description(eventJson, index), descriptionColor),
                 ],
             ),
         ),

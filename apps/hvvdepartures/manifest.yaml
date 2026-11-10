@@ -8,7 +8,8 @@ fileName: hvv_departures.star
 packageName: hvvdepartures
 broken: false
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags: []
 published: '2022-02-24T01:03:53Z'
-updated: '2026-08-26T19:21:27Z'
+updated: '2026-10-01T21:37:10Z'

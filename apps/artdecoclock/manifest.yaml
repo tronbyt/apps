@@ -1,0 +1,17 @@
+---
+id: art-deco-clock
+name: Art Deco Clock
+summary: Clock with art deco themes
+desc: A clock framed in art deco ornament. Choose from Gatsby gold, Sunburst, Skyline, Emerald fan and Miami streamline themes, or a random one each time.
+author: Jeremy Blaker
+fileName: art_deco_clock.star
+packageName: artdecoclock
+recommendedInterval: 1
+supports64x64: true
+category: clocks
+tags:
+  - clock
+  - time
+  - art
+published: '2026-11-02T00:00:00Z'
+updated: '2026-11-08T21:10:00Z'

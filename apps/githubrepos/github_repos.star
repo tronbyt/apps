@@ -13,7 +13,7 @@ load("images/github_loading.png", GITHUB_LOADING_ICON_ASSET = "file")
 load("images/github_logo.png", GITHUB_LOGO_ASSET = "file")
 load("images/github_neutral.png", GITHUB_NEUTRAL_ICON_ASSET = "file")
 load("images/github_success.png", GITHUB_SUCCESS_ICON_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -188,7 +188,8 @@ def render_status_badge(status, repos):
             ),
         )
     return render.Root(
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
             children = [
                 # render.Padding(pad = (0, 1, 0, 0), child = render.Image(src = BADGE_BACKGROUND, width = 64, height = 30)),
                 render.Row(
@@ -210,7 +211,7 @@ def render_status_badge(status, repos):
                     ],
                 ),
             ],
-        ),
+        ))),
     )
 
 def main(config):

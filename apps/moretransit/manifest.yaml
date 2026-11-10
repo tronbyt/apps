@@ -7,9 +7,10 @@ author: gdcolella
 fileName: moretransit.star
 packageName: moretransit
 recommendedInterval: 5
+supports64x64: true
 category: transit
 tags:
   - local
   - utility
 published: '2022-05-03T14:29:43Z'
-updated: '2025-11-29T17:52:33Z'
+updated: '2026-10-01T21:58:58Z'

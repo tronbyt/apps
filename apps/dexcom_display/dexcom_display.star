@@ -7,7 +7,7 @@ Shows real-time glucose readings from Dexcom G7 CGM
 load("cache.star", "cache")
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -494,18 +494,20 @@ def render_glucose_display(value, arrow, units, age, color):
         )
 
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             expanded = True,
             main_align = "center",
             cross_align = "center",
             children = children,
-        ),
+        )),
     )
 
 def render_no_config():
     """Render when no configuration is provided"""
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             expanded = True,
             main_align = "center",
             cross_align = "center",
@@ -519,13 +521,14 @@ def render_no_config():
                     font = "CG-pixel-3x5-mono",
                 ),
             ],
-        ),
+        )),
     )
 
 def render_error(message):
     """Render error message"""
     return render.Root(
-        child = render.Column(
+        # Centre the block on taller panels (64x64).
+        child = render.Box(width = canvas.width(), height = canvas.height(), child = render.Column(
             expanded = True,
             main_align = "center",
             cross_align = "center",
@@ -541,7 +544,7 @@ def render_error(message):
                     color = "#FFFFFF",
                 ),
             ],
-        ),
+        )),
     )
 
 def get_schema():

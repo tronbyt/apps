@@ -1,10 +1,14 @@
 load("random.star", "random")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 # Precomputed Sine and Cosine (36 steps, 10 degrees each)
 COS = [1.0, 0.985, 0.94, 0.866, 0.766, 0.643, 0.5, 0.342, 0.174, 0.0, -0.174, -0.342, -0.5, -0.643, -0.766, -0.866, -0.94, -0.985, -1.0, -0.985, -0.94, -0.866, -0.766, -0.643, -0.5, -0.342, -0.174, -0.0, 0.174, 0.342, 0.5, 0.643, 0.766, 0.866, 0.94, 0.985]
 SIN = [0.0, 0.174, 0.342, 0.5, 0.643, 0.766, 0.866, 0.94, 0.985, 1.0, 0.985, 0.94, 0.866, 0.766, 0.643, 0.5, 0.342, 0.174, 0.0, -0.174, -0.342, -0.5, -0.643, -0.766, -0.866, -0.94, -0.985, -1.0, -0.985, -0.94, -0.866, -0.766, -0.643, -0.5, -0.342, -0.174]
+
+# The playfield wraps at the panel edges, whatever size the panel is.
+W = canvas.width()
+H = canvas.height()
 
 def get_line_pixels(x0, y0, x1, y1):
     pixels = []
@@ -72,8 +76,8 @@ def main():
     frames = []
     num_frames = 150
 
-    ship_x = 32.0
-    ship_y = 16.0
+    ship_x = W / 2.0
+    ship_y = H / 2.0
     ship_scale = 0.65
     ship_speed = 0.8
     ship_dead_timer = 0
@@ -98,7 +102,7 @@ def main():
     bullets = []
 
     background_elements = [
-        render.Box(width = 64, height = 32, color = "#000000"),
+        render.Box(width = W, height = H, color = "#000000"),
         render.Padding(pad = (10, 10, 0, 0), child = render.Box(width = 1, height = 1, color = "#444")),
         render.Padding(pad = (50, 5, 0, 0), child = render.Box(width = 1, height = 1, color = "#444")),
         render.Padding(pad = (25, 28, 0, 0), child = render.Box(width = 1, height = 1, color = "#444")),
@@ -115,8 +119,8 @@ def main():
         if ship_dead_timer > 0:
             ship_dead_timer -= 1
             if ship_dead_timer == 0:
-                ship_x = 32.0
-                ship_y = 16.0
+                ship_x = W / 2.0
+                ship_y = H / 2.0
 
                 # When respawning after a crash, pick a new random orientation
                 ship_angle_idx = random.number(0, 35)
@@ -135,16 +139,16 @@ def main():
                 a = asteroids[a_idx]
 
                 dx = a["x"] - ship_x
-                if dx > 32:
-                    dx -= 64.0
-                elif dx < -32:
-                    dx += 64.0
+                if dx > W / 2:
+                    dx -= float(W)
+                elif dx < -W / 2:
+                    dx += float(W)
 
                 dy = a["y"] - ship_y
-                if dy > 16:
-                    dy -= 32.0
-                elif dy < -16:
-                    dy += 32.0
+                if dy > H / 2:
+                    dy -= float(H)
+                elif dy < -H / 2:
+                    dy += float(H)
 
                 dist_sq = dx * dx + dy * dy
 
@@ -166,8 +170,8 @@ def main():
             c = COS[ship_angle_idx]
             s = SIN[ship_angle_idx]
 
-            ship_x = (ship_x + ship_speed * c) % 64
-            ship_y = (ship_y + ship_speed * s) % 32
+            ship_x = (ship_x + ship_speed * c) % W
+            ship_y = (ship_y + ship_speed * s) % H
 
             # Fire pattern: Strict maximum of 2 bullets alive
             cycle = i % 24
@@ -183,8 +187,8 @@ def main():
             if b["life"] <= 0:
                 continue
 
-            b["x"] = (b["x"] + b["vx"]) % 64
-            b["y"] = (b["y"] + b["vy"]) % 32
+            b["x"] = (b["x"] + b["vx"]) % W
+            b["y"] = (b["y"] + b["vy"]) % H
 
             hit = False
             for a_idx in range(len(asteroids)):
@@ -193,11 +197,11 @@ def main():
                 a = asteroids[a_idx]
 
                 dx = abs(a["x"] - b["x"])
-                if dx > 32:
-                    dx = 64.0 - dx
+                if dx > W / 2:
+                    dx = float(W) - dx
                 dy = abs(a["y"] - b["y"])
-                if dy > 16:
-                    dy = 32.0 - dy
+                if dy > H / 2:
+                    dy = float(H) - dy
 
                 r = a["scale"] * 2.5
 
@@ -221,11 +225,11 @@ def main():
                 a = asteroids[a_idx]
 
                 dx = abs(a["x"] - ship_x)
-                if dx > 32:
-                    dx = 64.0 - dx
+                if dx > W / 2:
+                    dx = float(W) - dx
                 dy = abs(a["y"] - ship_y)
-                if dy > 16:
-                    dy = 32.0 - dy
+                if dy > H / 2:
+                    dy = float(H) - dy
 
                 r_sum = (a["scale"] * 2.5) + (4 * ship_scale)
 
@@ -254,11 +258,11 @@ def main():
                 a2 = asteroids[j_idx]
 
                 dx = abs(a1["x"] - a2["x"])
-                if dx > 32:
-                    dx = 64.0 - dx
+                if dx > W / 2:
+                    dx = float(W) - dx
                 dy = abs(a1["y"] - a2["y"])
-                if dy > 16:
-                    dy = 32.0 - dy
+                if dy > H / 2:
+                    dy = float(H) - dy
 
                 r_sum = (a1["scale"] + a2["scale"]) * 2.2
 
@@ -282,13 +286,13 @@ def main():
         asteroids = surviving_asteroids
 
         for a in asteroids:
-            a["x"] = (a["x"] + a["vx"]) % 64
-            a["y"] = (a["y"] + a["vy"]) % 32
+            a["x"] = (a["x"] + a["vx"]) % W
+            a["y"] = (a["y"] + a["vy"]) % H
             a["angle"] = (a["angle"] + a["spin"]) % 36
 
             ast_pixels = draw_shape(a["x"], a["y"], a["points"], a["angle"], a["scale"])
             for p in ast_pixels:
-                px, py = p[0] % 64, p[1] % 32
+                px, py = p[0] % W, p[1] % H
                 all_pixels["%d_%d" % (px, py)] = {"x": px, "y": py, "color": "#888888"}
 
         # 6. Update and Draw Ship Particles
@@ -296,8 +300,8 @@ def main():
         for p in ship_particles:
             p["life"] -= 1
             if p["life"] > 0:
-                p["x"] = (p["x"] + p["vx"]) % 64
-                p["y"] = (p["y"] + p["vy"]) % 32
+                p["x"] = (p["x"] + p["vx"]) % W
+                p["y"] = (p["y"] + p["vy"]) % H
                 active_particles.append(p)
                 px, py = int(p["x"]), int(p["y"])
                 all_pixels["%d_%d" % (px, py)] = {"x": px, "y": py, "color": "#FFFFFF"}
@@ -307,7 +311,7 @@ def main():
         if ship_dead_timer == 0:
             ship_pixels = draw_shape(ship_x, ship_y, ship_points, ship_angle_idx, ship_scale)
             for p in ship_pixels:
-                px, py = p[0] % 64, p[1] % 32
+                px, py = p[0] % W, p[1] % H
                 all_pixels["%d_%d" % (px, py)] = {"x": px, "y": py, "color": "#FFFFFF"}
 
         # 8. Render frames

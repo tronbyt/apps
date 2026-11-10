@@ -7,10 +7,19 @@ Author: jblaker
 
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("time.star", "time")
 
 FERRY_SCHEDULE_URL = "https://api-v3.mbta.com/schedules?filter[route]=Boat-F4"
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main():
     # print("Calling MBTA API.")
@@ -83,6 +92,7 @@ def main():
                 # (left, top, right, bottom)
                 pad = (3, 1, 3, 1),
                 child = render.Column(
+                    expanded = is_square(),
                     main_align = "space_around",
                     cross_align = "start",
                     children = next_departures,

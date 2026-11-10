@@ -7,7 +7,7 @@ Author: M0ntyP
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
 API_PREFIX = "https://our.raa.com.au/assets/ajax/FuelPricesService.ashx?op=GetStationsByRadius&"
@@ -21,6 +21,15 @@ DEFAULT_LOCATION = """
 	"timezone": "Australia/Adelaide"
 }
 """
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     LocationDetails = config.get("location", DEFAULT_LOCATION)
@@ -64,8 +73,11 @@ def main(config):
 
     return render.Root(
         show_full_animation = True,
+        # The rows total 32; on a square panel the column expands and
+        # spreads them down the panel.
         child = render.Column(
-            main_align = "start",
+            expanded = is_square(),
+            main_align = "space_evenly" if is_square() else "start",
             cross_align = "start",
             children = [
                 render.Row(

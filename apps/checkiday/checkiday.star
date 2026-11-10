@@ -7,7 +7,7 @@ Author: westy92
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -31,6 +31,15 @@ CUSTOM_COLORS_BY_ID = {
     "5f5daecb0a55b46fae5236fb47a5f023": ["#952927", "#E76005", "#DDC001"],  # Thanksgiving
     "fe0eaf856243ba7aae05225e28fb0749": ["#29AAF2", "#214D6D"],  # Winter
 }
+
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
 
 def main(config):
     children = [
@@ -61,7 +70,9 @@ def main(config):
         child = render.Sequence(
             children = [
                 render.Marquee(
-                    height = 32,
+                    height = canvas.height(),
+                    # Short lists sit mid-panel on the square; 64x32 keeps its top-aligned look.
+                    align = "center" if is_square() else "start",
                     delay = 5,  # number of frames to wait at beginning
                     scroll_direction = "vertical",
                     child = render.Column(

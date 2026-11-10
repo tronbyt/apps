@@ -7,10 +7,11 @@ author: M0ntyP
 fileName: azure_status.star
 packageName: azurestatus
 recommendedInterval: 10
+supports64x64: true
 category: utilities
 tags:
   - tracking
   - tech
   - notification
 published: '2023-03-02T16:15:54Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T18:58:08Z'

@@ -30,7 +30,7 @@ load("images/minute_hand_45.png", MINUTE_HAND_45_59fffc6d_ASSET = "file")
 load("images/minute_hand_5.png", MINUTE_HAND_5_1604226e_ASSET = "file")
 load("images/minute_hand_50.png", MINUTE_HAND_50_5a97b2b8_ASSET = "file")
 load("images/minute_hand_55.png", MINUTE_HAND_55_291c2906_ASSET = "file")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -85,6 +85,15 @@ def get_minute_hand(rounded_minute):
         child = render.Image(src = MINUTE_HANDS[rounded_minute]),
     )
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     location = config.get("location")
     loc = json.decode(location) if location else json.decode(str(DEFAULT_LOCATION))
@@ -96,6 +105,36 @@ def main(config):
     day = now.day
     month = now.format("Jan").upper()
 
+    face = render.Stack(
+        children = [
+            render.Circle(diameter = 30, color = "#fff"),
+            get_minute_hand(rounded_minute),
+            get_hour_hand(hour),
+        ],
+    )
+
+    # The hands are 30px images, so the face cannot grow; a square panel
+    # puts the face above the calendar instead of beside it and gives each
+    # half of the panel.
+    if is_square():
+        return render.Root(
+            max_age = 120,
+            child = render.Column(
+                expanded = True,
+                main_align = "space_evenly",
+                cross_align = "center",
+                children = [
+                    face,
+                    render.Column(
+                        children = [
+                            render.Box(width = 28, height = 8, color = "#990000", child = render.Text(str(month))),
+                            render.Box(width = 28, height = 18, color = "#FFF", child = render.Text(str(day), color = "#000", font = "6x13")),
+                        ],
+                    ),
+                ],
+            ),
+        )
+
     return render.Root(
         max_age = 120,
         child = render.Row(
@@ -106,13 +145,7 @@ def main(config):
                     width = 32,
                     height = 32,
                     color = "#000",
-                    child = render.Stack(
-                        children = [
-                            render.Circle(diameter = 30, color = "#fff"),
-                            get_minute_hand(rounded_minute),
-                            get_hour_hand(hour),
-                        ],
-                    ),
+                    child = face,
                 ),
                 render.Box(
                     width = 32,

@@ -7,6 +7,7 @@ author: '@jtinel'
 fileName: librenms_devices.star
 packageName: librenmsdevices
 recommendedInterval: 5
+supports64x64: true
 category: utilities
 tags:
   - nms
@@ -14,4 +15,4 @@ tags:
   - tracking
   - smart-home
 published: '2023-05-26T17:03:25Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T21:41:49Z'

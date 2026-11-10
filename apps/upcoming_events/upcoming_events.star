@@ -25,7 +25,9 @@ def main(config):
     if rep.status_code != 200:
         fail("Google Calender request failed with status %d", rep.status_code)
 
-    lines = rep.body().split("\n")
+    # Unfold continuation lines (RFC 5545: lines starting with a space/tab continue the previous line)
+    body = rep.body().replace("\r\n ", "").replace("\r\n\t", "").replace("\n ", "").replace("\n\t", "")
+    lines = body.split("\n")
 
     events = []
     event = {}
@@ -47,6 +49,15 @@ def main(config):
             if line.startswith("SUMMARY:"):
                 event["name"] = ":".join(line.split(":")[1:])
 
+            if line.startswith("LOCATION:") or line.startswith("LOCATION;"):
+                location = ":".join(line.split(":")[1:]).replace("\x0d", "")
+                location = location.replace("\\n", " ").replace("\\,", ",").replace("\\;", ";")
+
+                # Keep only the venue name (Google Calendar formats locations as "Venue, Street, City, ...")
+                location = location.split(",")[0].strip()
+                if location != "":
+                    event["location"] = location
+
             if line.startswith("DTSTART:"):
                 timestamp = line.split(":")[1].replace("\x0d", "")
 
@@ -59,6 +70,8 @@ def main(config):
 
                 event["date"] = eventDate  # Keep as UTC for comparison
                 event["formattedDate"] = localEventDate.format("01/02")  # Display in local timezone
+                event["formattedTime"] = eventDate.in_location(timezone).format("15:04")
+                event["formattedLongDate"] = localEventDate.format("Mon 01/02")
 
             if line.startswith("DTSTART;VALUE=DATE:"):
                 dateString = line.split(":")[1].replace("\x0d", "")
@@ -91,9 +104,15 @@ def main(config):
 
                 event["date"] = eventDate
                 event["formattedDate"] = eventDate.in_location(timezone).format("01/02")
+                event["formattedTime"] = eventDate.in_location(timezone).format("15:04")
+                event["formattedLongDate"] = eventDate.in_location(timezone).format("Mon 01/02")
+                event["allDay"] = True
 
     maxEvents = int(config.get("number_of_events", "5"))
     events = sorted(events, key = lambda x: x["date"])[:maxEvents]
+
+    if config.bool("next_event_only") and len(events) > 0:
+        return render_next_event(events[0], config)
 
     layout = []
 
@@ -102,6 +121,7 @@ def main(config):
     if len(events) > 0:
         for event in events:
             rowColor = "#ffc300" if ((counter % 2) == 0) else "#a2d9ce"
+            altRowColor = "#a2d9ce" if ((counter % 2) == 0) else "#ffc300"
             layout.append(
                 render.Padding(
                     pad = (0, 0, 0, 3),
@@ -117,6 +137,10 @@ def main(config):
                                     render.Padding(
                                         pad = (1, 0, 0, 0),
                                         child = render.Text(content = event["formattedDate"], font = "tom-thumb"),
+                                    ),
+                                    render.Padding(
+                                        pad = (1, 0, 0, 0),
+                                        child = render.Text(content = event["formattedTime"], font = "tom-thumb", color = str(altRowColor)),
                                     ),
                                 ],
                             ),
@@ -151,6 +175,57 @@ def main(config):
         ),
     )
 
+def render_next_event(event, config):
+    whenText = event["formattedLongDate"] + " " + ("All day" if event.get("allDay") else event["formattedTime"])
+
+    # Count calendar days (in local time) from today until the event
+    timezone = config.get("timezone") or "America/New_York"
+    now = time.now().in_location(timezone)
+    eventDate = event["date"].in_location(timezone)
+    today = time.time(year = now.year, month = now.month, day = now.day, location = timezone)
+    eventDay = time.time(year = eventDate.year, month = eventDate.month, day = eventDate.day, location = timezone)
+    days = int((eventDay - today).hours + 12) // 24  # +12 absorbs DST shifts
+
+    if days == 0:
+        headerText = "TODAY:"
+    elif days == 1:
+        headerText = "1 DAY UNTIL:"
+    else:
+        headerText = str(days) + " DAYS UNTIL:"
+
+    children = [
+        render.Padding(
+            pad = (0, 0, 0, 1),
+            child = render.Text(content = headerText, font = "CG-pixel-3x5-mono", color = "#888888"),
+        ),
+        render.Marquee(
+            width = 62,
+            child = render.Text(content = event.get("name", "").replace("\x0d", ""), font = "tb-8", color = "#ffc300"),
+        ),
+        render.Padding(
+            pad = (0, 1, 0, 1),
+            child = render.Text(content = whenText, font = "tom-thumb"),
+        ),
+    ]
+
+    location = event.get("location")
+    if location:
+        children.append(
+            render.Marquee(
+                width = 62,
+                child = render.Text(content = location, font = "tom-thumb", color = "#a2d9ce"),
+            ),
+        )
+
+    return render.Root(
+        delay = int(config.str("speed", "100")),
+        show_full_animation = True,
+        child = render.Padding(
+            pad = (1, 1, 1, 1),
+            child = render.Column(children = children),
+        ),
+    )
+
 def get_schema():
     scroll_speed = [
         schema.Option(display = "Slow", value = "200"),
@@ -172,6 +247,13 @@ def get_schema():
                 desc = "The number of events you want to see.",
                 icon = "gear",
                 default = "5",
+            ),
+            schema.Toggle(
+                id = "next_event_only",
+                name = "Next Event Only",
+                desc = "Show only the next event in more detail, including its location.",
+                icon = "calendarDay",
+                default = False,
             ),
             schema.Dropdown(
                 id = "speed",

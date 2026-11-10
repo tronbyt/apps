@@ -7,10 +7,11 @@ author: tavdog
 fileName: openrouter_credits.star
 packageName: openroutercredits
 recommendedInterval: 300
+supports64x64: true
 category: utilities
 tags:
   - tech
   - utility
   - tracking
 published: '2025-10-24T09:43:27Z'
-updated: '2025-11-30T19:58:27Z'
+updated: '2026-10-01T22:12:18Z'

@@ -8,7 +8,7 @@ Author: tavdog
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -327,10 +327,14 @@ def main(config):
         y_lim_max = None
     elif y_lim_max != None:
         y_lim_max = float(y_lim_max)
+
+    # The tide curve is the backdrop for the whole panel, so it is drawn at the
+    # canvas size rather than a fixed 64x32: on a square panel that is twice
+    # the vertical resolution for the one thing here that is a shape.
     data_graph = render.Plot(
         data = points,
-        width = 64,
-        height = 32,
+        width = canvas.width(),
+        height = canvas.height(),
         color = "#00c",  #00c
         color_inverted = "#505",
         fill = True,
@@ -339,7 +343,8 @@ def main(config):
     root_children = [main_text]
 
     if config.bool("display_graph") and len(points) > 0:  # panic if we try to render an empty graph object
-        # Calculate current time position on the graph (graph x-axis is 0-64 pixels for 24 hours)
+        # Calculate current time position on the graph (the x-axis spans the
+        # panel width for 24 hours)
         current_time_x = None
         current_tide_height = 0
         if tides_graph != None and "predictions" in tides_graph and len(tides_graph["predictions"]) > 0:
@@ -369,7 +374,7 @@ def main(config):
         if current_time_x != None and current_time_x > 0:
             # Calculate pixel position for the dot
             # Map from data coordinates to pixel coordinates
-            pixel_x = int((current_time_x / (total_points - 1)) * 64)
+            pixel_x = int((current_time_x / (total_points - 1)) * canvas.width())
 
             # Map y from data coordinates to pixel coordinates (inverted because y=0 is top)
             # Use the actual y_lim values being used by the graph
@@ -377,7 +382,7 @@ def main(config):
             actual_y_max = y_lim_max if y_lim_max else max([p[1] for p in points])
             y_range = actual_y_max - actual_y_min
             y_normalized = (current_tide_height - actual_y_min) / y_range if y_range > 0 else 0
-            pixel_y = int((1 - y_normalized) * 32)  # inverted: 0 is top, 32 is bottom
+            pixel_y = int((1 - y_normalized) * canvas.height())  # inverted: 0 is top
 
             # Create a small cross shape using Padding to position it
             dot = render.Stack(

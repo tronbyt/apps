@@ -245,6 +245,15 @@ def get_weather(condition_id, is_day):
         # default to clear, but should never happen
         return "sunny" if is_day else "clear_night"
 
+def is_square():
+    """True on a 64x64 panel.
+
+    Panels are told apart by SHAPE, never by size: the 128x64 wide panel is
+    also 64 tall.
+    """
+    w, h = canvas.size()
+    return h == w
+
 def main(config):
     api_key = config.get("owmApiKey", None)
     temp_units = config.get("tempUnits", "F")
@@ -401,7 +410,30 @@ def main(config):
     # arrange elements
     return render.Root(
         delay = 500,
-        child = render.Stack(
+        # Laid out for 64x32; bound it to that and centre it on the square (64x64); other panels unchanged.
+        child = (render.Box(width = canvas.width(), height = canvas.height(), child = render.Box(width = 64, height = 32, child = render.Stack(
+            children = [
+                illustration["background"],
+                render.Box(
+                    padding = 2 * SCALE,
+                    child = render.Row(children = [
+                        render.Column(children = [clock], main_align = "start", cross_align = "start", expanded = True),
+                    ], main_align = "start", cross_align = "start", expanded = True),
+                ),
+                illustration["foreground"],
+                render.Box(
+                    padding = 2 * SCALE,
+                    child = render.Row(children = [
+                        render.Column(children = [temperatures], main_align = "end", cross_align = "start", expanded = True),
+                    ], main_align = "start", cross_align = "end", expanded = True),
+                ),
+                render.Row(
+                    children = [render.Text("SAMPLE" if display_sample else "", font = SAMPLE_FONT, color = "#FF0000", height = 22 * SCALE)],
+                    main_align = "center",
+                    expanded = True,
+                ),
+            ],
+        )))) if is_square() else render.Stack(
             children = [
                 illustration["background"],
                 render.Box(

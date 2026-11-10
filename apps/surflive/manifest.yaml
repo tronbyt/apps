@@ -6,6 +6,8 @@ desc: Shows the current surf conditions for a surf spot.
 author: Rémi Carton
 fileName: surflive.star
 packageName: surflive
+broken: true
+brokenReason: blocked by api
 recommendedInterval: 5
 category: weather
 tags:

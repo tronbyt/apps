@@ -88,6 +88,47 @@ def main(config):
     body_font = "terminus-18" if is_2x else "tb-8"
     icon_font = "terminus-18" if is_2x else "tb-8"
 
+    header = render.Box(
+        color = "#222",
+        width = width,
+        height = 14 if is_2x else 7,
+        child = render.Text(content = "TIGHTS WEATHER?", color = "#ffcfd2", font = header_font),
+    )
+
+    if width == height:
+        # Square panel: the header pinned to the top, the reading split over
+        # two lines and the advice wrapped rather than scrolled.
+        return render.Root(
+            child = render.Column(
+                children = [
+                    header,
+                    render.Box(
+                        width = width,
+                        height = height - 7,
+                        child = render.Column(
+                            expanded = True,
+                            main_align = "space_evenly",
+                            cross_align = "center",
+                            children = [
+                                render.Row(
+                                    cross_align = "center",
+                                    children = [
+                                        render.Text(content = icon, font = icon_font),
+                                        render.Padding(
+                                            pad = (3, 0, 0, 0),
+                                            child = render.Text(content = "%d°%s" % (temp, unit), font = body_font, color = "#ffffff"),
+                                        ),
+                                    ],
+                                ),
+                                render.Text(content = wind, font = body_font, color = "#99f"),
+                                render.WrappedText(content = msg, width = width - 2, align = "center", color = color, font = body_font),
+                            ],
+                        ),
+                    ),
+                ],
+            ),
+        )
+
     return render.Root(
         child = render.Box(
             color = "#000",
@@ -98,12 +139,7 @@ def main(config):
                 main_align = "space_evenly",
                 cross_align = "center",
                 children = [
-                    render.Box(
-                        color = "#222",
-                        width = width,
-                        height = 14 if is_2x else 7,
-                        child = render.Text(content = "TIGHTS WEATHER?", color = "#ffcfd2", font = header_font),
-                    ),
+                    header,
                     render.Row(
                         main_align = "center",
                         cross_align = "center",

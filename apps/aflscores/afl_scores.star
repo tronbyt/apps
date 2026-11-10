@@ -66,7 +66,7 @@ Added User Agent info to API request as per new requirements from provider
 
 load("encoding/json.star", "json")
 load("http.star", "http")
-load("render.star", "render")
+load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
@@ -454,12 +454,12 @@ def main(config):
     return render.Root(
         show_full_animation = True,
         delay = int(RotationSpeed) * 1000,
-        child = render.Column(
-            children = [
-                render.Animation(
-                    children = renderDisplay,
-                ),
-            ],
+        # The frames are expanded 32-row Columns; bound them so taller panels
+        # (64x64) centre the scoreboard instead of stretching it from the top.
+        child = render.Box(
+            width = canvas.width(),
+            height = canvas.height(),
+            child = render.Box(width = 64, height = 32, child = render.Animation(children = renderDisplay)),
         ),
     )
 

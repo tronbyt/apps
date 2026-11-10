@@ -7,9 +7,10 @@ author: Kyle Stark
 fileName: petpikachu.star
 packageName: petpikachu
 recommendedInterval: 5
+supports64x64: true
 category: gaming
 tags:
   - retro
   - gaming
 published: '2022-07-18T19:19:29Z'
-updated: '2025-12-02T19:30:22Z'
+updated: '2026-10-01T22:17:11Z'
