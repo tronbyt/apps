@@ -6,8 +6,7 @@ Author: Alysha Kwok
 """
 
 load("http.star", "http")
-load("render.star", "render", "canvas")
-load("schema.star", "schema")
+load("render.star", "canvas", "render")
 
 IMAGE_URL = "https://www.th.gov.bc.ca/ATIS/lgcws/images/Lions_gate/queue_map.gif"
 INFO_URL = "https://www.th.gov.bc.ca/ATIS/lgcws/private_status.htm#dms1"
@@ -15,7 +14,7 @@ INFO_URL = "https://www.th.gov.bc.ca/ATIS/lgcws/private_status.htm#dms1"
 def clean_string(text):
     return text.replace("&nbsp", " ").strip()
 
-def main(config):
+def main():
     image_src = http.get(IMAGE_URL).body()
     info_src = http.get(INFO_URL).body()
 
@@ -44,12 +43,12 @@ def main(config):
     delayMessage = clean_string(message1) + "\n" + clean_string(message2)
 
     return render.Root(
-        delay = 3750, 
+        delay = 3750,
         child = render.Animation(
             children = [
                 render.Padding(
                     child = render.Image(src = image_src, width = 150, height = 269),
-                    pad = (-50, -145, 0, 0), # left, top, right, bottom 
+                    pad = (-50, -145, 0, 0),  # left, top, right, bottom
                 ),
                 render.Stack(
                     children = [
@@ -59,22 +58,22 @@ def main(config):
                             height = canvas.height(),
                             child = render.Column(
                                 expanded = True,
-                                main_align = "end",  
+                                main_align = "end",
                                 cross_align = "end",
                                 children = [
                                     render.Row(
                                         expanded = True,
-                                        main_align = "end",  
+                                        main_align = "end",
                                         cross_align = "end",
                                         children = [
                                             render.Text(content = time, font = "tom-thumb"),
-                                        ]
-                                    )
+                                        ],
+                                    ),
                                 ],
                             ),
                         ),
                     ],
-                )
-            ]
-        )
+                ),
+            ],
+        ),
     )
