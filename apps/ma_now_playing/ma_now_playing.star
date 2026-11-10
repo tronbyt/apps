@@ -25,11 +25,55 @@ DIM = "#3a3a3a"
 ERROR = "#ff6b6b"
 TILE = "#1c1f24"
 
+# Pixel art for each scale: 5x5 for 64x32 and 64x64, 10x10 for 2x.
 GLYPHS = {
-    "playlist": ["####.", ".....", "####.", ".....", "##.#."],
-    "album": [".###.", "#...#", "#.#.#", "#...#", ".###."],
-    "note": ["..###", "..#.#", "..#..", "###..", "###.."],
+    1: {
+        "playlist": ["####.", ".....", "####.", ".....", "##.#."],
+        "album": [".###.", "#...#", "#.#.#", "#...#", ".###."],
+        "note": ["..###", "..#.#", "..#..", "###..", "###.."],
+    },
+    2: {
+        "playlist": [
+            "........##",
+            "#####...##",
+            "........#.",
+            "........#.",
+            "#####...#.",
+            "........#.",
+            "........#.",
+            "#####..##.",
+            "......###.",
+            "......##..",
+        ],
+        "album": [
+            "...####...",
+            ".##....##.",
+            ".#......#.",
+            "#...##...#",
+            "#..#..#..#",
+            "#..#..#..#",
+            "#...##...#",
+            ".#......#.",
+            ".##....##.",
+            "...####...",
+        ],
+        "note": [
+            "...#######",
+            "...#######",
+            "...#.....#",
+            "...#.....#",
+            "...#.....#",
+            "...#.....#",
+            ".###...###",
+            "####..####",
+            "####..####",
+            ".##....##.",
+        ],
+    },
 }
+
+# Pixels cut from each row of a rounded corner, from the edge inward.
+CORNERS = {1: [2, 1], 2: [4, 2, 1, 1]}
 
 # ---------------------------------------------------------------- layout
 
@@ -73,17 +117,36 @@ def layout():
 def text(content, font, color):
     return render.Text(content = content, font = font, color = color)
 
-def dot(x, y, color, size):
-    return render.Padding(pad = (x, y, 0, 0), child = render.Box(width = size, height = size, color = color))
-
 def glyph(name, color, s):
-    rows = GLYPHS[name]
-    dots = []
+    """A glyph drawn at the display's own resolution, one run of pixels per row segment."""
+    rows = GLYPHS[s][name]
+    runs = []
     for y, row in enumerate(rows):
-        for x in range(len(row)):
-            if row[x] == "#":
-                dots.append(dot(x * s, y * s, color, s))
-    return render.Stack(children = [render.Box(width = len(rows[0]) * s, height = len(rows) * s)] + dots)
+        x = 0
+        for _ in range(len(row)):
+            if x >= len(row):
+                break
+            if row[x] != "#":
+                x += 1
+                continue
+            start = x
+            for _ in range(len(row)):
+                if x >= len(row) or row[x] != "#":
+                    break
+                x += 1
+            runs.append(render.Padding(pad = (start, y, 0, 0), child = render.Box(width = x - start, height = 1, color = color)))
+    return render.Stack(children = [render.Box(width = len(rows[0]), height = len(rows))] + runs)
+
+def glyph_width(name, s):
+    return len(GLYPHS[s][name][0])
+
+def round_corners(size, color, s):
+    """Pixels in `color` that round off the corners of a `size` square."""
+    out = []
+    for y, cut in enumerate(CORNERS[s]):
+        for x, yy in [(0, y), (size - cut, y), (0, size - 1 - y), (size - cut, size - 1 - y)]:
+            out.append(render.Padding(pad = (x, yy, 0, 0), child = render.Box(width = cut, height = 1, color = color)))
+    return out
 
 def shifted(child, dx):
     """`child` moved dx pixels sideways (negative is left), for one frame."""
@@ -275,19 +338,28 @@ def art_widget(data, size, s):
         base = render.Image(src = data, width = size, height = size)
     else:
         base = render.Box(width = size, height = size, color = TILE, child = glyph("note", GREY, s))
-    e = size - s
-    corners = []
-    for x, y in [(0, 0), (s, 0), (0, s)]:
-        corners += [dot(x, y, "#000000", s), dot(e - x, y, "#000000", s), dot(x, e - y, "#000000", s), dot(e - x, e - y, "#000000", s)]
-    return render.Stack(children = [base] + corners)
+    return render.Stack(children = [base] + round_corners(size, "#000000", s))
+
+PAUSE_TILE = {1: 7, 2: 14}
 
 def paused_mark(s):
-    """Two pause bars in a dark tile, for the cover's corner."""
-    return render.Box(width = 7 * s, height = 7 * s, color = "#000000", child = render.Row(children = [
+    """Two pause bars in a dark tile for the cover's corner, its corners
+    rounded at 2x, where they show."""
+    size = PAUSE_TILE[s]
+    bars = render.Row(children = [
         render.Box(width = 2 * s, height = 5 * s, color = WHITE),
         render.Box(width = s, height = 5 * s),
         render.Box(width = 2 * s, height = 5 * s, color = WHITE),
-    ]))
+    ])
+    rows = []
+    cut = 1 if s == 2 else 0
+    for y in range(size):
+        c = cut if y == 0 or y == size - 1 else 0
+        rows.append(render.Padding(pad = (c, 0, 0, 0), child = render.Box(width = size - 2 * c, height = 1, color = "#000000")))
+    return render.Stack(children = [
+        render.Column(children = rows),
+        render.Box(width = size, height = size, child = bars),
+    ])
 
 def progress(position, duration, color, moving, L):
     """A bar across the bottom that advances 0.1 s a frame from `position`, or stays put."""
@@ -320,7 +392,7 @@ def music_rows(np, color, room, L):
         src = text(np["source"], L.small, GREY)
         sw, sh = src.size()
         row = render.Row(cross_align = "center", children = [glyph(np["source_kind"], GREY, s), render.Box(width = 2 * s, height = 1), src])
-        rows += [render.Box(width = 1, height = s), pingpong(row, 7 * s + sw, sh, room, s, 30)]
+        rows += [render.Box(width = 1, height = s), pingpong(row, glyph_width(np["source_kind"], s) + 2 * s + sw, sh, room, s, 30)]
     return rows
 
 def music_screen(np, L):
@@ -328,7 +400,7 @@ def music_screen(np, L):
     color = GREY if paused else np["color"]
     s = L.s
     cover = render.Stack(children = [art_widget(np["art"], L.art, s)] + (
-        [render.Padding(pad = (L.art - 8 * s, L.art - 8 * s, 0, 0), child = paused_mark(s))] if paused else []
+        [render.Padding(pad = (L.art - PAUSE_TILE[s] - s, L.art - PAUSE_TILE[s] - s, 0, 0), child = paused_mark(s))] if paused else []
     ))
     above = L.h - L.bar
 
