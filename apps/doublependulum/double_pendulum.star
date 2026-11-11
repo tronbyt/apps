@@ -21,6 +21,36 @@ LENGTH_2_MAX = 7.2
 # Use slightly smaller extent for better variety (allows some off-screen for large pendulums)
 MAX_EXTENT = 11.0  # More aggressive than actual max (13.2) for better visual variety
 
+# Render budget caps (keep Tronbyt/Pixlet renders under server timeouts)
+MAX_FRAMES = 400
+MAX_FADE_FRAMES = 48
+MAX_FREEZE_FRAMES = 48
+MAX_TRAIL_POINTS = 128
+MIN_MOTION = 0.08  # physics units; bail to embedded if the bob barely moves
+
+def subsample_frames(frames, max_frames):
+    """Evenly subsample frames, keeping first and last."""
+    n = len(frames)
+    if n <= max_frames:
+        return frames
+    if max_frames < 2:
+        return [frames[0]]
+
+    step = float(n - 1) / float(max_frames - 1)
+    out = []
+    for i in range(max_frames):
+        idx = int(float(i) * step + 0.5)
+        if idx >= n:
+            idx = n - 1
+        out.append(frames[idx])
+    return out
+
+def trail_sample_step(num_points, max_points):
+    """Stride for drawing at most max_points trail dots."""
+    if num_points <= max_points:
+        return 1
+    return int((num_points + max_points - 1) / max_points)
+
 def get_layout(width, height):
     """Calculate layout parameters based on screen dimensions."""
     origin_x = int(width / 2)
@@ -65,16 +95,30 @@ def fetch_simulation(seed, layout, generation_id = None):
     trajectory = data.get("trajectory", [])
     sim_name = data.get("name", "api")
 
-    # Calculate max Y for second bob only (lower pendulum)
+    # Bounds of second bob in physics space
+    x2_min = MAX_EXTENT
+    x2_max = -MAX_EXTENT
+    y2_min = MAX_EXTENT
     y2_max = -MAX_EXTENT
     for point in trajectory:
         if len(point) >= 4:
             if abs(point[0]) + abs(point[1]) + abs(point[2]) + abs(point[3]) > 100:
                 print("extreme trajectory detected, bailing out")
                 return None
-            y2 = point[3]  # y2 is the Y coordinate of the second bob
+            x2 = point[2]
+            y2 = point[3]
+            if x2 < x2_min:
+                x2_min = x2
+            if x2 > x2_max:
+                x2_max = x2
+            if y2 < y2_min:
+                y2_min = y2
             if y2 > y2_max:
-                y2_max = y2
+                y2_max = y2_max
+
+    if (x2_max - x2_min) < MIN_MOTION and (y2_max - y2_min) < MIN_MOTION:
+        print("near-static trajectory detected, bailing out")
+        return None
 
     # Determine optimal origin Y position based on energy level
     # If second bob never goes above origin (low energy), adjust origin upward
@@ -101,6 +145,10 @@ def fetch_simulation(seed, layout, generation_id = None):
             y2_pixel = origin_y - int(point[3] * layout.scale)
 
             pixel_frames.append([x1_pixel, y1_pixel, x2_pixel, y2_pixel])
+
+    if len(pixel_frames) > MAX_FRAMES:
+        print("subsampled API trajectory from " + str(len(pixel_frames)) + " to " + str(MAX_FRAMES) + " frames")
+        pixel_frames = subsample_frames(pixel_frames, MAX_FRAMES)
 
     # Return the transformed data along with origin_y and name
     return {
@@ -164,6 +212,9 @@ def main(config):
             seed = time.now().unix  # Changes every second
             print("Fetching simulation from API with seed: " + str(seed))
             sim_data = fetch_simulation(seed, layout)
+            if sim_data == None:
+                print("Retrying API with seed: " + str(seed + 1))
+                sim_data = fetch_simulation(seed + 1, layout)
 
         # Handle fetch failure
         if sim_data == None:
@@ -195,6 +246,9 @@ def main(config):
         api_origin_y = None  # Not used for embedded simulations
         api_name = None  # Not used for embedded simulations
         is_api_mode = False
+
+    if len(simulation) > MAX_FRAMES:
+        simulation = subsample_frames(simulation, MAX_FRAMES)
 
     # Set delay based on speed (slow = 33ms, fast = 16ms)
     if speed == "fast":
@@ -659,6 +713,8 @@ def generate_fade_out_frames(simulation, is_api_mode, config, layout, hsv_to_rgb
     delay = 16 if config.get("speed", "slow") == "fast" else 33
     fade_duration_ms = 2500  # 2.5 seconds
     num_fade_frames = int(fade_duration_ms / delay)
+    if num_fade_frames > MAX_FADE_FRAMES:
+        num_fade_frames = MAX_FADE_FRAMES
 
     # Get the simulation name for label (positions not needed for fade-out)
     if is_api_mode:
@@ -687,6 +743,8 @@ def generate_freeze_frames(simulation, is_api_mode, config, layout, hsv_to_rgb, 
     delay = 16 if config.get("speed", "slow") == "fast" else 33
     freeze_duration_ms = freeze_duration * 1000  # Convert to milliseconds
     num_freeze_frames = int(freeze_duration_ms / delay)
+    if num_freeze_frames > MAX_FREEZE_FRAMES:
+        num_freeze_frames = MAX_FREEZE_FRAMES
 
     # Create identical freeze frames (all showing only the trace from the last animation frame)
     freeze_frames = []
@@ -726,9 +784,9 @@ def render_freeze_frame(simulation, is_api_mode, config, layout, hsv_to_rgb, sim
     # Add the full trace (all points from the entire simulation)
     if len(simulation) > 0:
         trail_points = []
+        step = trail_sample_step(len(simulation), MAX_TRAIL_POINTS)
 
-        # Show all trail points from the complete animation
-        for i in range(len(simulation)):
+        for i in range(0, len(simulation), step):
             if is_api_mode:
                 f = simulation[i]
                 tx, ty = f[2], f[3]
@@ -806,9 +864,9 @@ def render_fade_frame(sim_name, config, layout, opacity, is_api_mode, simulation
     # Always show the full trace during fade-out if we have simulation data
     if len(simulation) > 0:
         trail_points = []
+        step = trail_sample_step(len(simulation), MAX_TRAIL_POINTS)
 
-        # Show ALL trail points during fade-out for complete pattern
-        for i in range(len(simulation)):
+        for i in range(0, len(simulation), step):
             if is_api_mode:
                 f = simulation[i]
                 tx, ty = f[2], f[3]
