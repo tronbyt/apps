@@ -1,7 +1,7 @@
 """
 Applet: Stock Watchlist
 Summary: Your stock & ETF watchlist
-Description: Up to 100 US stocks and ETFs with market indices on page one. Delayed prices and changes from US Stock & ETF Prices on RapidAPI. A free BASIC key works for five tickers with infrequent updates; paid plans support larger lists and more frequent updates.
+Description: Follow up to 100 US stocks and ETFs with delayed prices and percentage changes. Page one shows the DOW, S&P, NDX, RUT and VIX market indices. Get a free key at https://rapidapi.com/logicione/api/us-stock-etf-prices and paste it in the app settings.
 Author: Sudhanshu Singh
 """
 
@@ -254,9 +254,10 @@ def watchlist(config, key, tokens, more, state, started):
                 if "\"message\"" in text and not fresh_any:
                     release(undo, now)  # RapidAPI burst errors are unbilled; origin errors retain claims
             break  # the remaining chunks would get the same answer
-        if endpoint == "quotes" and resp.status_code in (401, 403) and "\"message\"" in text:
+        if resp.status_code in (401, 403):
             if not data:
-                release(undo, now)  # RapidAPI bills neither: the call right after subscribing must not wait a slot
+                if "\"message\"" in text and not fresh_any:
+                    release(undo, now)  # RapidAPI gateway errors are unbilled; origin errors retain claims
                 return notice_root(["KEY REJECTED", "Wrong key or", "not subscribed", URL_HINT], DOWN)  # not stored; HTTP cache replays it
             break
         print("%s: HTTP %d" % (endpoint, resp.status_code))  # the other chunks may still answer
@@ -775,28 +776,28 @@ def get_schema():
             schema.Text(
                 id = "rapidapi_key",
                 name = "RapidAPI key",
-                desc = "Your key for US Stock & ETF Prices on RapidAPI. Free BASIC works for the first 5 tickers with infrequent updates. Paid plans support more tickers or more frequent updates.",
+                desc = "Your RapidAPI key for US Stock & ETF Prices (free key available).",
                 icon = "key",
                 secret = True,
             ),
             schema.Text(
                 id = "symbols",
                 name = "Tickers",
-                desc = "Comma-separated, up to 100, e.g. SPY,AAPL,BRK.B. Up to 20 tickers per update with indices, 25 without; longer lists rotate. Free BASIC: first 5 only.",
+                desc = "Comma-separated, up to 100, e.g. SPY,AAPL,BRK.B. Up to 20 tickers per update with indices, 25 without; longer lists rotate.",
                 icon = "chartLine",
                 default = DEFAULT_SYMBOLS,
             ),
             schema.Toggle(
                 id = "show_indices",
                 name = "Market indices",
-                desc = "Page one shows DOW, S&P, NDX, RUT and VIX; ticker prices start on the next pages. Turn off to show tickers only. Free BASIC uses cached indices only.",
+                desc = "Page one shows DOW, S&P, NDX, RUT and VIX; ticker prices start on the next pages. Turn off to show tickers only.",
                 icon = "chartLine",
                 default = True,
             ),
             schema.Toggle(
                 id = "extended",
                 name = "Pre-market & after hours",
-                desc = "Also update 4:15-9:30 and 16:00-20:15 ET with pre-market and after-hours prices (paid plans).",
+                desc = "Also update 4:15-9:30 and 16:00-20:15 ET with pre-market and after-hours prices.",
                 icon = "moon",
                 default = False,
             ),
