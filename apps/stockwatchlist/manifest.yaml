@@ -2,12 +2,7 @@
 id: stock-watchlist
 name: Stock Watchlist
 summary: US stocks and ETF quotes
-desc: >-
-  Follow up to 100 US stocks and ETFs with delayed prices and percentage changes.
-  Market indices show DOW, S&P, NDX, RUT and VIX point and percentage changes on page one.
-  Get a free BASIC key at https://rapidapi.com/logicione/api/us-stock-etf-prices
-  for five tickers with infrequent updates. Paid plans support more tickers and
-  more frequent updates. BASIC uses about two hours of persistent HTTP caching.
+desc: Follow up to 100 US stocks and ETFs with delayed prices and percentage changes. Market indices show DOW, S&P, NDX, RUT and VIX point and percentage changes on page one. Get a free BASIC key at https://rapidapi.com/logicione/api/us-stock-etf-prices for five tickers with infrequent updates. Paid plans support more tickers and more frequent updates. BASIC uses about two hours of persistent HTTP caching.
 author: Sudhanshu Singh
 fileName: stock_watchlist.star
 packageName: stockwatchlist
@@ -19,3 +14,5 @@ tags:
   - stocks
   - etf
   - indices
+published: '2026-11-11T06:00:45Z'
+updated: '2026-11-11T06:00:45Z'
