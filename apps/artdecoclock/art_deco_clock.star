@@ -112,11 +112,14 @@ def gatsby_decor(theme, box, _frame):
             color,
         )
 
-    # Chevrons pointing in towards the time, beside it if there's room, otherwise above and below.
+    # Chevrons pointing in towards the time: above and below on square panels, otherwise beside it.
+    # Chevron i reaches x = 6 + 3i, so fit as many as leave a 2px gap before the text
+    # (a two-digit date like "MON NOV 10" leaves room for only two).
+    beside = 0 if is_square() else min(3, (box[0] - 8) // 3 + 1)
     pts = []
     cx = BW // 2
-    for i in range(3):
-        if box[0] >= 14:
+    for i in range(beside if beside > 0 else 3):
+        if beside > 0:
             for x, d in [(6 + 3 * i, 1), (BW - 7 - 3 * i, -1)]:
                 pts += line_points(x - 2 * d, mid - 2, x, mid) + line_points(x, mid, x - 2 * d, mid + 2)
         else:
