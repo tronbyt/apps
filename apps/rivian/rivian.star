@@ -260,6 +260,9 @@ def main(config):
     vehicle = slugify(config.str("vehicle", ""))
     label = config.str("label", "").strip().upper()[:8] or (vehicle.upper()[:8] if vehicle else "RIVIAN")
 
+    if not base and not token and not config.str("vehicle", ""):
+        # Unconfigured (e.g. the app store or config preview): show labelled sample data.
+        return screen("RIVIAN", "DEMO", C_DIM, 72, 210, "mi", 85, True)
     if not base or not token:
         return message(label, "Add Home Assistant URL & token in settings.")
     if not vehicle and not config.str("soc_entity", ""):
@@ -301,13 +304,16 @@ def main(config):
     else:
         status, status_color = "", C_DIM
 
+    return screen(label, status, status_color, soc, rng, units_label(rng_attrs), limit, charging)
+
+def screen(label, status, status_color, soc, rng, unit, limit, charging):
     return render.Root(
         delay = 80,
         max_age = 300,
         child = render.Stack(
             children = [
                 at(1, HEADER_Y, render.Box(width = 62, height = 6, child = header(label, status, status_color))),
-                at(1, HERO_Y, render.Box(width = 62, height = 16, child = hero(soc, rng, units_label(rng_attrs)))),
+                at(1, HERO_Y, render.Box(width = 62, height = 16, child = hero(soc, rng, unit))),
                 at(1, BAR_Y, battery_bar(soc, limit, charging)),
             ],
         ),
