@@ -172,23 +172,6 @@ def parse_number(s):
             return float(raw)
     return None
 
-def normalize_url(url):
-    cleaned = url.strip()
-    if not cleaned.startswith("http://") and not cleaned.startswith("https://"):
-        cleaned = "http://" + cleaned
-    if not cleaned.endswith("/measures/current"):
-        cleaned = cleaned + "/measures/current"
-    return cleaned
-
-def fetch_direct_data(device_url):
-    if not device_url or not device_url.strip():
-        return None, 0
-    target = normalize_url(device_url)
-    resp = http.get(target, ttl_seconds = 10)
-    if resp.status_code == 200:
-        return resp.json(), 200
-    return None, resp.status_code
-
 def to_display_unit(key, v, temp_unit):
     if key == "temp" and temp_unit == "f":
         return v * 9.0 / 5.0 + 32.0
@@ -662,8 +645,6 @@ def main(config):
     ha_token = (config.get("ha_token") or "").strip()
     ha_prefix = (config.get("ha_prefix") or "airgradient_one").strip()
 
-    device_url = (config.get("device_url") or "").strip()
-
     layout = config.get("layout", "grid")
     range_h = int_option(config, "range_hours", 24)
     y_scale = config.get("y_scale", "auto")
@@ -708,13 +689,6 @@ def main(config):
                     return []
                 return error_screen(status, is_ha = True)
             all_series = extract_ha_series(raw, keys, config, ha_prefix, temp_unit)
-    elif source == "direct":
-        if not device_url:
-            return render_message("AirGradient", ["Direct mode has", "no past history.", "Use Home Assistant", "for local graphs."], COLOR_ERROR)
-        _, status = fetch_direct_data(device_url)
-        if status != 200:
-            return render_message("AirGradient", ["Cannot reach", "monitor at IP", "check URL"], COLOR_ERROR)
-        return render_message("AirGradient", ["Connected! But", "monitor has no", "on-device history.", "Use HA for graphs"], COLOR_ERROR)
     else:
         # Default: cloud
         if not location_id or not api_key:
@@ -823,7 +797,6 @@ def get_schema():
                 options = [
                     schema.Option(display = "AirGradient Cloud (API Key)", value = "cloud"),
                     schema.Option(display = "Home Assistant (Local Network)", value = "homeassistant"),
-                    schema.Option(display = "Direct Local (Live Only - No History)", value = "direct"),
                 ],
             ),
             schema.Text(
@@ -914,12 +887,6 @@ def get_schema():
                 name = "HA Custom NOx Entity (optional)",
                 desc = "Override entity ID for NOx",
                 icon = "biohazard",
-            ),
-            schema.Text(
-                id = "device_url",
-                name = "AirGradient Device URL / IP (Direct mode)",
-                desc = "Direct mode: IP address or hostname (e.g. http://192.168.1.50 or http://airgradient.local)",
-                icon = "networkWired",
             ),
             schema.Dropdown(
                 id = "layout",
