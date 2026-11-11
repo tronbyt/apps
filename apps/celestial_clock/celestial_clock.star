@@ -239,27 +239,18 @@ def celestial_body(hour, L):
         at(x, y, crescent(d, rgb(MOON))),
     ])
 
-def time_block(hh, mm, colon_on, L):
+def time_block(hh, mm, L):
     """The time, centered, with a drop shadow so it reads over a bright sky."""
+    content = (hh + ":" + mm).replace("0", L.zero)
 
-    hh = hh.replace("0", L.zero)
-    mm = mm.replace("0", L.zero)
-
-    def row(color, colon_color, dx, dy):
-        return at(dx, L.clock_top + dy, render.Row(
+    def row(color, d):
+        return at(d, L.clock_top + d, render.Row(
             main_align = "center",
             expanded = True,
-            children = [
-                render.Text(content = hh, font = L.clock, color = color),
-                render.Text(content = ":", font = L.clock, color = colon_color),
-                render.Text(content = mm, font = L.clock, color = color),
-            ],
+            children = [render.Text(content = content, font = L.clock, color = color)],
         ))
 
-    return render.Stack(children = [
-        row(SHADOW, SHADOW if colon_on else "#00000000", L.s, L.s),
-        row(WHITE, WHITE if colon_on else "#ffffff00", 0, 0),
-    ])
+    return render.Stack(children = [row(SHADOW, L.s), row(WHITE, 0)])
 
 def date_label(text, L):
     def banner(color, dy):
@@ -312,13 +303,12 @@ def main(config):
     for i in range(FRAMES):
         t = now + time.parse_duration("%dms" % (i * FRAME_MS))
         hh, mm = clock_digits(t, use_24h)
-        colon_on = t.nanosecond < 500000000
         layers = [bg]
         stars = star_layer(i, hour, darkness, L)
         if stars != None:
             layers.append(stars)
         layers.append(body)
-        layers.append(time_block(hh, mm, colon_on, L))
+        layers.append(time_block(hh, mm, L))
         layers.append(date_label(t.format("Mon Jan 2").upper(), L))
         layers.append(bar)
         frames.append(render.Stack(children = layers))

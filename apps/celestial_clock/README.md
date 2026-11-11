@@ -1,6 +1,6 @@
 # Celestial Clock
 
-A clock over a sky that follows the time of day. The sky shifts from night through dawn, day, and dusk. A sun arcs across from 6:00 to 18:30, and a crescent moon and twinkling stars take over after dark. The time is large with a blinking colon, the date sits under it, and a bar along the bottom edge fills as the day passes.
+A clock over a sky that follows the time of day. The sky shifts from night through dawn, day, and dusk. A sun arcs across from 6:00 to 18:30, and a crescent moon and twinkling stars take over after dark. The time is large, the date sits under it, and a bar along the bottom edge fills as the day passes.
 
 | Size      | Preview                                 |
 |-----------|-----------------------------------------|
