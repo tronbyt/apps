@@ -1,0 +1,16 @@
+---
+id: celestial-clock
+name: Celestial Clock
+summary: Sky clock by time of day
+desc: A clock over a sky that follows the time of day. A sun arcs across by day, a crescent moon and twinkling stars come out at night, and a bar along the bottom shows how much of the day has passed.
+author: gcrft123
+supports2x: true
+supports64x64: true
+recommendedInterval: 0
+category: clocks
+tags:
+  - clock
+  - sky
+  - sun
+  - moon
+  - art
