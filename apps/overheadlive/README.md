@@ -1,7 +1,7 @@
-# Airplanes Live Overhead
+# Overhead Live
 
 Shows the **single closest aircraft** to a location, using an
-[airplanes.live](https://airplanes.live) ADS-B feed — no API key required.
+[adsb.lol](https://adsb.lol) ADS-B feed — no API key required.
 One readable plane beats a cramped list. Renders at **64×32** and **128×64** (2x).
 
 The frame, top to bottom:
@@ -28,15 +28,15 @@ plane and flagged (`7700 EMERG`, `7600 RADIO`, `7500 HIJACK`) with the frame in 
 
 ## Data source & terms
 
-Aircraft data is provided by [airplanes.live](https://airplanes.live) via its public
-[REST API](https://airplanes.live/api-guide/). This app is an independent project and is
-not affiliated with or endorsed by airplanes.live.
+Aircraft data is provided by [adsb.lol](https://adsb.lol) via its public
+[REST API](https://api.adsb.lol/docs). This app is an independent project and is not
+affiliated with or endorsed by adsb.lol.
 
-- **Personal, non-commercial, educational use only.** For commercial use, see their
-  [commercial data options](https://airplanes.live/commercial-use/).
-- **Max 1 request/second.** The app fetches with a 45-second cache TTL, so each device
-  stays well under the limit.
-- The API is provided with **no SLA and no uptime guarantee**.
+- **License:** adsb.lol publishes its API and data under the
+  [ODbL](https://opendatacommons.org/licenses/odbl/summary/).
+- **Free to use, no key today.** adsb.lol says an API key, available by feeding, will be
+  required in the future.
+- The app fetches with a 45-second cache TTL to keep requests to the API low.
 
-airplanes.live is a community-funded network of volunteer feeders. If you rely on this
-data, please [support them](https://airplanes.live/donate/).
+adsb.lol is a community network of volunteer feeders. If you rely on this data, consider
+[feeding it](https://adsb.lol/).

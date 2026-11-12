@@ -1,0 +1,17 @@
+---
+id: ma-now-playing
+name: MA Now Playing
+summary: Music Assistant Now Playing
+desc: The cover, title, artist, and playlist or album a Music Assistant player is playing, with a progress bar. With nothing playing it shows a clock, or skips its turn.
+author: gcrft123
+supports2x: true
+supports64x64: true
+recommendedInterval: 0
+category: smart-home
+tags:
+  - music
+  - media-player
+  - smart-home
+  - clock
+published: '2026-11-10T03:05:51Z'
+updated: '2026-11-10T03:38:39Z'

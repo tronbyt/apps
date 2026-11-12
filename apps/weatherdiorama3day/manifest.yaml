@@ -1,0 +1,16 @@
+---
+id: diorama-3-day
+name: Diorama 3 Day
+summary: Three day weather scene
+desc: A pixel landscape whose sky blends across today, tomorrow and the next day. Each day acts out its daytime weather (sun, clouds, fog, rain, storms, snow, wind, wildfire smoke) and its temperature animates between the high and the low, with a choice of count, fade, crossfade, roll, cascade or flip transitions. Uses Open-Meteo, no API key needed.
+author: vhw46wpn4t-boop
+fileName: weather_diorama_3day.star
+packageName: weatherdiorama3day
+recommendedInterval: 30
+category: weather
+tags:
+  - weather
+  - forecast
+  - animated
+published: '2026-11-11T19:16:27Z'
+updated: '2026-11-11T19:16:27Z'

@@ -1,0 +1,15 @@
+---
+id: rivian
+name: Rivian
+summary: Rivian charge, range & lock
+desc: Shows your Rivian's state of charge, range, charge limit, charging status and lock state from the Rivian (Unofficial) Home Assistant integration, via the Home Assistant REST API.
+author: John Abella
+fileName: rivian.star
+packageName: rivian
+recommendedInterval: 5
+category: smart-home
+tags:
+  - smart-home
+  - utility
+published: '2026-11-11T16:23:47Z'
+updated: '2026-11-11T21:20:11Z'

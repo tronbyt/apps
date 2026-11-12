@@ -1,11 +1,12 @@
 """
 Applet: Art Deco Clock
 Summary: Clock with art deco themes
-Description: A clock framed in art deco ornament. Choose from Gatsby gold, Sunburst, Skyline, Emerald fan and Miami streamline themes.
+Description: A clock framed in art deco ornament. Choose from Gatsby gold, Sunburst, Skyline, Emerald fan and Miami streamline themes, or a random one each time.
 Author: Jeremy Blaker
 """
 
 load("math.star", "math")
+load("random.star", "random")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
@@ -93,7 +94,7 @@ PI = math.pi
 
 # Themes ------------------------------------------------------------------------
 
-def gatsby_decor(theme, box):
+def gatsby_decor(theme, box, _frame):
     gold, dim = theme["accent"], theme["accent2"]
     mid = BH // 2
 
@@ -111,11 +112,14 @@ def gatsby_decor(theme, box):
             color,
         )
 
-    # Chevrons pointing in towards the time, beside it if there's room, otherwise above and below.
+    # Chevrons pointing in towards the time: above and below on square panels, otherwise beside it.
+    # Chevron i reaches x = 6 + 3i, so fit as many as leave a 2px gap before the text
+    # (a two-digit date like "MON NOV 10" leaves room for only two).
+    beside = 0 if is_square() else min(3, (box[0] - 8) // 3 + 1)
     pts = []
     cx = BW // 2
-    for i in range(3):
-        if box[0] >= 14:
+    for i in range(beside if beside > 0 else 3):
+        if beside > 0:
             for x, d in [(6 + 3 * i, 1), (BW - 7 - 3 * i, -1)]:
                 pts += line_points(x - 2 * d, mid - 2, x, mid) + line_points(x, mid, x - 2 * d, mid + 2)
         else:
@@ -128,7 +132,7 @@ def gatsby_decor(theme, box):
         out += dots([(cx, y - 1), (cx - 1, y), (cx, y), (cx + 1, y), (cx, y + 1)], gold)
     return out
 
-def sunburst_decor(theme, box):
+def sunburst_decor(theme, box, _frame):
     ray, gold = theme["accent2"], theme["accent"]
     cx, cy = BW // 2, BH // 2
 
@@ -150,43 +154,62 @@ def sunburst_decor(theme, box):
         out += rect(x2, mid - 1, 2, 3, gold)
     return out
 
-def tower(x, w, top, color, window):
+def tower(x, w, top, color, window, beacon, frame, seed):
     # A stepped skyscraper with three tiers and a spire.
+    # frame is None for a still image; otherwise windows flicker and the beacon blinks.
     out = []
     for inset, rise in [(0, 0), (2, 4), (4, 8)]:
         y = top + 8 - rise
         out += rect(x + inset, y, w - 2 * inset, BH - y, color)
     sx = x + w // 2
     out += rect(sx, top - 5, 1, 5, color)
+    if frame == None or frame % 4 < 2:
+        out += rect(sx, top - 5, 1, 1, beacon)
 
     lit = []
+    k = seed
     for wx in range(x + 1, x + w - 1, 2):
         for wy in range(top + 11, BH - 2, 3):
-            lit.append((wx, wy))
+            # Each window goes dark for a few frames, starting at its own point in the loop.
+            phase = (k * 7 + k * k // 3) % SKYLINE_FRAMES
+            if frame == None or (frame - phase) % SKYLINE_FRAMES >= SKYLINE_DARK:
+                lit.append((wx, wy))
+            k += 1
     out += dots(lit, window)
     return out
 
-def skyline_decor(theme, _box):
+SKYLINE_FRAMES = 16
+SKYLINE_DARK = 4
+
+def skyline_decor(theme, _box, frame):
     body, window = theme["accent"], theme["accent2"]
     tw = 11
 
     # On square panels the time is wider, so the towers stand below it.
     top = BH - 18 if is_square() else BH // 4
     out = rect(0, BH - 1, BW, 1, body)
-    out += tower(1, tw, top, body, window)
-    out += tower(BW - 1 - tw, tw, top, body, window)
+    out += tower(1, tw, top, body, window, theme["beacon"], frame, 0)
+    out += tower(BW - 1 - tw, tw, top, body, window, theme["beacon"], frame, 5)
     return out
 
-def emerald_decor(theme, _box):
+EMERALD_RINGS = [6, 9, 12]
+
+def emerald_decor(theme, _box, frame):
+    # frame is None for a still image; otherwise a gold ripple runs out through the rings.
     gold, dim = theme["accent"], theme["accent2"]
     w, h = BW - 1, BH - 1
     out = rect(0, 0, BW, 1, gold) + rect(0, BH - 1, BW, 1, gold)
 
     pts = []
+    glow = []
     corners = [(0, 0, 0), (w, 0, PI / 2), (w, h, PI), (0, h, 3 * PI / 2)]
     for cx, cy, a in corners:
-        for r in [6, 9, 12]:
-            pts += arc_points(cx, cy, r, a, a + PI / 2)
+        for i, r in enumerate(EMERALD_RINGS):
+            ring = arc_points(cx, cy, r, a, a + PI / 2)
+            if frame == i:
+                glow += ring
+            else:
+                pts += ring
 
         # Spokes between the rings.
         for k in [1, 2, 3]:
@@ -198,6 +221,7 @@ def emerald_decor(theme, _box):
                 int(math.round(cy + 12 * math.sin(ang))),
             )
     out += dots(pts, dim)
+    out += dots(glow, gold)
 
     disc = []
     for cx, cy, a in corners:
@@ -206,7 +230,7 @@ def emerald_decor(theme, _box):
     out += dots(disc, gold)
     return out
 
-def miami_decor(theme, _box):
+def miami_decor(theme, _box, _frame):
     pink, teal = theme["accent"], theme["accent2"]
     out = []
 
@@ -248,7 +272,10 @@ THEMES = {
         "date": "#9fb0c4",
         "accent": "#3b4a63",
         "accent2": "#f3c969",
+        "beacon": "#ff3b30",
         "decor": skyline_decor,
+        "frames": SKYLINE_FRAMES,
+        "delay": 400,
     },
     "emerald": {
         "name": "Emerald Fan",
@@ -258,6 +285,8 @@ THEMES = {
         "accent": "#c9a227",
         "accent2": "#1f7a55",
         "decor": emerald_decor,
+        "frames": len(EMERALD_RINGS) + 3,
+        "delay": 250,
     },
     "miami": {
         "name": "Miami Streamline",
@@ -275,7 +304,10 @@ THEME_ORDER = ["gatsby", "sunburst", "skyline", "emerald", "miami"]
 # Main --------------------------------------------------------------------------
 
 def main(config):
-    theme = THEMES.get(config.get("theme", DEFAULT_THEME), THEMES[DEFAULT_THEME])
+    theme_id = config.get("theme", DEFAULT_THEME)
+    if theme_id == "random":
+        theme_id = THEME_ORDER[random.number(0, len(THEME_ORDER) - 1)]
+    theme = THEMES.get(theme_id, THEMES[DEFAULT_THEME])
     timezone = config.get("$tz", DEFAULT_TIMEZONE)
     now = time.now().in_location(timezone)
 
@@ -293,17 +325,23 @@ def main(config):
     left, top = (BW - bw) // 2, (BH - bh) // 2
     box = (left, top, left + bw - 1, top + bh - 1)
 
-    layers = [render.Box(width = WIDTH, height = HEIGHT, color = theme["bg"])]
-    layers += theme["decor"](theme, box)
-    layers.append(render.Box(
+    text = render.Box(
         width = WIDTH,
         height = HEIGHT,
         child = render.Column(cross_align = "center", children = lines),
-    ))
+    )
 
+    def scene(frame):
+        bg = render.Box(width = WIDTH, height = HEIGHT, color = theme["bg"])
+        return render.Stack(children = [bg] + theme["decor"](theme, box, frame) + [text])
+
+    frames = theme.get("frames", 1) if config.bool("animate", True) else 1
+    if frames == 1:
+        return render.Root(max_age = 60, child = scene(None))
     return render.Root(
         max_age = 60,
-        child = render.Stack(children = layers),
+        delay = theme["delay"],
+        child = render.Animation(children = [scene(f) for f in range(frames)]),
     )
 
 def get_schema():
@@ -316,7 +354,15 @@ def get_schema():
                 desc = "The art deco style to display.",
                 icon = "palette",
                 default = DEFAULT_THEME,
-                options = [schema.Option(display = THEMES[k]["name"], value = k) for k in THEME_ORDER],
+                options = [schema.Option(display = THEMES[k]["name"], value = k) for k in THEME_ORDER] +
+                          [schema.Option(display = "Random", value = "random")],
+            ),
+            schema.Toggle(
+                id = "animate",
+                name = "Animate",
+                desc = "Animate the Skyline and Emerald Fan themes.",
+                icon = "film",
+                default = True,
             ),
             schema.Toggle(
                 id = "24hour",

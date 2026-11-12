@@ -1,0 +1,16 @@
+---
+id: simple-binary-clock
+name: Simple Binary Clock
+summary: Time as rows of binary dots
+desc: Shows the time as three rows of dots, hours on top, then minutes, then seconds. Each row is a binary number with the most significant bit on the left. Supports 12- and 24-hour time.
+author: bertrandom
+fileName: simple_binary_clock.star
+packageName: simplebinaryclock
+supports64x64: true
+category: clocks
+tags:
+  - clock
+  - time
+  - tech
+published: '2026-11-11T16:42:58Z'
+updated: '2026-11-11T16:42:58Z'
