@@ -2,16 +2,29 @@
 
 Bar charts of recent readings from an [AirGradient](https://www.airgradient.com/) air quality monitor (AirGradient ONE or Open Air), so you can see how the air has changed over the last few hours or days, not just what it is right now.
 
-A companion to the [AirGradient](../airgradient/) app by Brombomb, which shows the current readings.
+A companion to the [AirGradient](../airgradient/) app by Brombomb, which shows the current readings and hardware LED bar.
 
-## Setup
+## Connection Modes
 
-The history comes from the [AirGradient cloud API](https://api.airgradient.com/public/docs/api/v1/), so the monitor must be connected to the AirGradient dashboard. You need:
-
+### 1. AirGradient Cloud (Default)
+Reads historical measurements from the [AirGradient public API](https://api.airgradient.com/public/docs/api/v1/):
 - **Location ID**: the numeric ID shown at [Settings → Locations](https://app.airgradient.com/settings/location). This is **not** the Place ID shown under Place settings.
 - **API Key**: your place's API key from [Settings → Place → API](https://app.airgradient.com/settings/place?tab=4).
+- **Cloud / Server URL (optional)**: allows pointing to a reverse proxy or self-hosted API compatible with AirGradient's measures endpoint.
 
-Until both are set, the app shows sample data.
+### 2. Home Assistant (100% Local Network)
+Reads historical state changes directly from your local Home Assistant instance using its REST History API:
+- **HA URL**: Base URL of your Home Assistant instance (e.g. `http://homeassistant.local:8123` or your local IP/port).
+- **HA Token**: A Long-Lived Access Token created under your Home Assistant Profile → Security.
+- **HA Entity Prefix**: Sensor naming prefix (defaults to `airgradient_one` for `sensor.airgradient_one_co2`, `sensor.airgradient_one_pm2_5`, etc.).
+- **Entity Overrides**: Optional individual entity overrides for `CO2`, `PM2.5`, `PM1.0`, `PM10`, `Temperature`, `Humidity`, `TVOC`, and `NOx`.
+- **Intelligent Resampling**: State changes in Home Assistant are automatically forward-filled into continuous bar charts, accommodating both frequent polling and sparse on-change recorder settings. Both Celsius and Fahrenheit sensors are automatically recognized and converted to your preferred display unit.
+
+> [!NOTE]
+> **Why not Direct Local to the monitor?**
+> The physical AirGradient monitor (ESP32) only serves an instantaneous snapshot endpoint (`GET /measures/current`). It does not store on-device historical readings or a past-measures database. While direct local network connections work wonderfully in the companion [AirGradient](../airgradient/) app for live readings and the LED bar, rendering historical graphs requires a system that records past states. **Home Assistant** is the recommended local solution for full cloud-free historical graphs.
+
+Until configured, the app displays synthetic sample data.
 
 ## Options
 

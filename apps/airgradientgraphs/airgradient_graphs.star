@@ -1,7 +1,7 @@
 """
 Applet: Air Gradient Graphs
 Summary: AirGradient history as bar charts
-Description: Bar charts of recent readings from an AirGradient monitor via the AirGradient cloud API. Show up to six metrics on one screen, or one full-screen chart per slide.
+Description: Bar charts of recent readings from an AirGradient monitor via Home Assistant or the AirGradient cloud API. Show up to six metrics on one screen, or one full-screen chart per slide.
 Author: tscott98
 """
 
@@ -13,8 +13,8 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-# AirGradient cloud API (https://api.airgradient.com/public/docs/api/v1/)
-AG_CLOUD_API = "https://api.airgradient.com/public/api/v1"
+# Default AirGradient cloud API (https://api.airgradient.com/public/docs/api/v1/)
+DEFAULT_AG_CLOUD_API = "https://api.airgradient.com/public/api/v1"
 
 # The past-measures endpoint returns 5-minute buckets (hourly for older data)
 BUCKET_SECONDS = 300
@@ -147,7 +147,30 @@ def level_color(key, v):
     # Temperature and humidity have no air quality level
     return METRICS[key]["color"]
 
-# --- Data ---
+# --- Data Helpers ---
+
+def parse_number(s):
+    if type(s) == "int" or type(s) == "float":
+        return float(s)
+    if type(s) != "string":
+        return None
+    raw = s.strip()
+    if not raw or raw in ["unavailable", "unknown", "none"]:
+        return None
+    stripped = raw
+    if stripped.startswith("-") or stripped.startswith("+"):
+        stripped = stripped[1:]
+    if not stripped:
+        return None
+    parts = stripped.split(".")
+    if len(parts) == 1:
+        return float(raw) if parts[0].isdigit() else None
+    elif len(parts) == 2:
+        p0 = parts[0]
+        p1 = parts[1]
+        if (p0 == "" or p0.isdigit()) and (p1 == "" or p1.isdigit()) and (p0 != "" or p1 != ""):
+            return float(raw)
+    return None
 
 def to_display_unit(key, v, temp_unit):
     if key == "temp" and temp_unit == "f":
@@ -158,10 +181,11 @@ def health_range(key, temp_unit):
     lo, hi = METRICS[key]["health"]
     return float(to_display_unit(key, lo, temp_unit)), float(to_display_unit(key, hi, temp_unit))
 
-def fetch_history(location_id, api_key, hours, end_unix, refresh_seconds):
+def fetch_history(api_base, location_id, api_key, hours, end_unix, refresh_seconds):
+    base = api_base.strip().rstrip("/") if api_base and api_base.strip() else DEFAULT_AG_CLOUD_API
     start_unix = end_unix - hours * 3600
     resp = http.get(
-        "%s/locations/%s/measures/past" % (AG_CLOUD_API, location_id),
+        "%s/locations/%s/measures/past" % (base, location_id),
         params = {
             "token": api_key,
             "from": time.from_timestamp(start_unix).in_location("UTC").format("20060102T150405Z"),
@@ -177,8 +201,100 @@ def fetch_history(location_id, api_key, hours, end_unix, refresh_seconds):
         return None, 0
     return records, 200
 
+def get_ha_candidate_entities(config, metric_key, prefix):
+    p = prefix if prefix else "airgradient_one"
+    ov_key = "ha_%s_entity" % ("pm25" if metric_key == "pm25" else metric_key)
+    override = (config.get(ov_key) or "").strip()
+    if override:
+        return [override]
+    if metric_key == "co2":
+        return ["sensor.%s_co2" % p]
+    elif metric_key == "pm25":
+        return ["sensor.%s_pm2_5" % p, "sensor.%s_pm2_5_density" % p]
+    elif metric_key == "pm1":
+        return ["sensor.%s_pm1_0" % p, "sensor.%s_pm1_density" % p, "sensor.%s_pm01" % p]
+    elif metric_key == "pm10":
+        return ["sensor.%s_pm10" % p, "sensor.%s_pm10_density" % p]
+    elif metric_key == "temp":
+        return ["sensor.%s_temperature" % p]
+    elif metric_key == "hum":
+        return ["sensor.%s_humidity" % p]
+    elif metric_key == "voc":
+        return ["sensor.%s_tvoc_index" % p, "sensor.%s_tvoc" % p]
+    elif metric_key == "nox":
+        return ["sensor.%s_nox_index" % p, "sensor.%s_nox" % p]
+    return []
+
+def fetch_ha_history(ha_url, ha_token, entity_ids, hours, end_unix, refresh_seconds):
+    if not ha_url or not ha_token:
+        return None, 0
+    base_url = ha_url.strip().rstrip("/")
+    start_unix = end_unix - hours * 3600
+    start_iso = time.from_timestamp(start_unix).in_location("UTC").format("2006-01-02T15:04:05Z")
+    end_iso = time.from_timestamp(end_unix).in_location("UTC").format("2006-01-02T15:04:05Z")
+
+    url = "%s/api/history/period/%s" % (base_url, start_iso)
+    params = {
+        "filter_entity_id": ",".join(entity_ids),
+        "end_time": end_iso,
+        "minimal_response": "true",
+        "no_attributes": "true",
+    }
+    headers = {
+        "Authorization": "Bearer " + ha_token.strip(),
+        "Content-Type": "application/json",
+    }
+    resp = http.get(url, params = params, headers = headers, ttl_seconds = refresh_seconds)
+    if resp.status_code != 200:
+        return None, resp.status_code
+
+    raw = resp.json()
+    if type(raw) != "list":
+        return None, 0
+    return raw, 200
+
+def extract_ha_series(raw, keys, config, prefix, temp_unit):
+    by_entity = {}
+    for entity_history in raw:
+        if type(entity_history) == "list" and len(entity_history) > 0:
+            eid = entity_history[0].get("entity_id")
+            if eid:
+                by_entity[eid] = entity_history
+
+    series = {k: [] for k in keys}
+    for k in keys:
+        candidates = get_ha_candidate_entities(config, k, prefix)
+        entity_history = None
+        for cand in candidates:
+            if cand in by_entity:
+                entity_history = by_entity[cand]
+                break
+        if not entity_history:
+            continue
+
+        points = []
+        for entry in entity_history:
+            state_str = entry.get("state")
+            val = parse_number(state_str)
+            if val == None:
+                continue
+            ts = entry.get("last_changed") or entry.get("last_updated")
+            if not ts:
+                continue
+            t = time.parse_time(ts).unix
+            if k == "temp":
+                if val > 45:
+                    if temp_unit == "c":
+                        val = (val - 32.0) * 5.0 / 9.0
+                elif temp_unit == "f":
+                    val = val * 9.0 / 5.0 + 32.0
+            points.append((t, float(val)))
+
+        series[k] = sorted(points, key = lambda p: p[0])
+    return series
+
 def demo_history(hours, end_unix):
-    # Synthetic but plausible readings, used for previews before a Location ID and key are set
+    # Synthetic but plausible readings, used for previews before credentials are set
     step = BUCKET_SECONDS if hours <= 48 else 3600
     records = []
     count = hours * 3600 // step
@@ -220,31 +336,50 @@ def extract_series(records, keys, temp_unit):
             series[k].append((t, float(to_display_unit(k, v, temp_unit))))
     return {k: sorted(s, key = lambda p: p[0]) for k, s in series.items()}
 
-def bucket_series(series, start_unix, end_unix, n):
-    # Average the series into n equal time slots; empty slots are None
+def bucket_series(series, start_unix, end_unix, n, forward_fill = True):
+    # Average the series into n equal time slots with optional forward-fill
     span = float(end_unix - start_unix)
     sums = [0.0] * n
     counts = [0] * n
-    for t, v in series:
-        if t < start_unix or t > end_unix:
-            continue
-        idx = int((t - start_unix) / span * n)
-        if idx >= n:
-            idx = n - 1
-        sums[idx] += v
-        counts[idx] += 1
-    return [sums[i] / counts[i] if counts[i] > 0 else None for i in range(n)]
+    last_in_slot = [None] * n
 
-def average_since(series, since_unix):
-    total = 0.0
-    count = 0
+    last_val = None
     for t, v in series:
-        if t >= since_unix:
-            total += v
-            count += 1
-    if count == 0:
+        if t <= start_unix:
+            last_val = v
+        elif t <= end_unix:
+            idx = int((t - start_unix) / span * n)
+            if idx >= n:
+                idx = n - 1
+            sums[idx] += v
+            counts[idx] += 1
+            last_in_slot[idx] = v
+
+    buckets = []
+    for i in range(n):
+        if counts[i] > 0:
+            val = sums[i] / counts[i]
+            if last_in_slot[i] != None:
+                last_val = last_in_slot[i]
+            buckets.append(val)
+        elif forward_fill and last_val != None:
+            buckets.append(last_val)
+        else:
+            buckets.append(None)
+    return buckets
+
+def average_since(series, since_unix, now_unix):
+    if not series:
         return None
-    return total / count
+    total_sec = max(1, now_unix - since_unix)
+    buckets = bucket_series(series, since_unix, now_unix, max(1, total_sec // BUCKET_SECONDS), forward_fill = True)
+    present = [v for v in buckets if v != None]
+    if not present:
+        return None
+    total = 0.0
+    for v in present:
+        total += v
+    return total / len(present)
 
 def y_range(key, values, baseline, scale, temp_unit):
     present = [v for v in values if v != None]
@@ -344,7 +479,7 @@ def render_bars(chart, w, h, opts):
     bar_w = (w + gap) // n - gap
     used = n * bar_w + (n - 1) * gap
 
-    values = bucket_series(chart["series"], opts["start_unix"], opts["end_unix"], n)
+    values = bucket_series(chart["series"], opts["start_unix"], opts["end_unix"], n, forward_fill = True)
     present = [v for v in values if v != None]
     if not present:
         return render.Box(
@@ -478,7 +613,14 @@ def render_message(title, lines, color):
         ),
     )
 
-def error_screen(status):
+def error_screen(status, is_ha = False):
+    if is_ha:
+        if status == 401 or status == 403:
+            return render_message("HomeAssistant", ["Check your", "HA token"], COLOR_ERROR)
+        elif status == 404:
+            return render_message("HomeAssistant", ["HA API endpoint", "not found (404)"], COLOR_ERROR)
+        return render_message("HomeAssistant", ["HA error", str(status) if status else "unreachable"], COLOR_ERROR)
+
     if status == 401 or status == 403:
         return render_message("AirGradient", ["Check your", "API key"], COLOR_ERROR)
     elif status == 404:
@@ -494,8 +636,15 @@ def int_option(config, key, default):
     return default
 
 def main(config):
+    source = config.get("source", "cloud")
     location_id = (config.get("ag_location_id") or "").strip()
     api_key = (config.get("ag_api_key") or "").strip()
+    cloud_url = (config.get("ag_cloud_url") or "").strip()
+
+    ha_url = (config.get("ha_url") or "http://homeassistant.local:8123").strip()
+    ha_token = (config.get("ha_token") or "").strip()
+    ha_prefix = (config.get("ha_prefix") or "airgradient_one").strip()
+
     layout = config.get("layout", "grid")
     range_h = int_option(config, "range_hours", 24)
     y_scale = config.get("y_scale", "auto")
@@ -524,19 +673,38 @@ def main(config):
     if color_mode == "average" and avg_h > fetch_h:
         fetch_h = avg_h
 
-    if not location_id or not api_key:
-        records = demo_history(fetch_h, end_unix)
-    elif not location_id.isdigit():
-        return render_message("AirGradient", ["Location ID", "must be a", "number"], COLOR_ERROR)
+    if source == "homeassistant":
+        if not ha_token or ha_token == "APIKEY":
+            records = demo_history(fetch_h, end_unix)
+            all_series = extract_series(records, keys, temp_unit)
+        else:
+            needed_entities = []
+            for k in keys:
+                for eid in get_ha_candidate_entities(config, k, ha_prefix):
+                    if eid not in needed_entities:
+                        needed_entities.append(eid)
+            raw, status = fetch_ha_history(ha_url, ha_token, needed_entities, fetch_h, end_unix, refresh)
+            if raw == None:
+                if status in TRANSIENT_STATUSES:
+                    return []
+                return error_screen(status, is_ha = True)
+            all_series = extract_ha_series(raw, keys, config, ha_prefix, temp_unit)
     else:
-        records, status = fetch_history(location_id, api_key, fetch_h, end_unix, refresh)
-        if records == None:
-            if status in TRANSIENT_STATUSES:
-                # Keep showing the last good frame until the API recovers
-                return []
-            return error_screen(status)
+        # Default: cloud
+        if not location_id or not api_key:
+            records = demo_history(fetch_h, end_unix)
+            all_series = extract_series(records, keys, temp_unit)
+        elif not location_id.isdigit():
+            return render_message("AirGradient", ["Location ID", "must be a", "number"], COLOR_ERROR)
+        else:
+            records, status = fetch_history(cloud_url, location_id, api_key, fetch_h, end_unix, refresh)
+            if records == None:
+                if status in TRANSIENT_STATUSES:
+                    # Keep showing the last good frame until the API recovers
+                    return []
+                return error_screen(status, is_ha = False)
+            all_series = extract_series(records, keys, temp_unit)
 
-    all_series = extract_series(records, keys, temp_unit)
     charts = []
     for k in keys:
         series = all_series[k]
@@ -544,7 +712,7 @@ def main(config):
             # e.g. CO2 on an Open Air monitor
             continue
         latest_t, latest = series[-1]
-        baseline = average_since(series, now_unix - avg_h * 3600) if color_mode == "average" else None
+        baseline = average_since(series, now_unix - avg_h * 3600, now_unix) if color_mode == "average" else None
         if now_unix - latest_t > refresh + STALE_SECONDS:
             # The monitor has stopped reporting; don't present an old reading as current
             value_color = COLOR_STALE
@@ -620,18 +788,105 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.Dropdown(
+                id = "source",
+                name = "Data Source",
+                desc = "Choose how to retrieve history for your AirGradient monitor",
+                icon = "plug",
+                default = "cloud",
+                options = [
+                    schema.Option(display = "AirGradient Cloud (API Key)", value = "cloud"),
+                    schema.Option(display = "Home Assistant (Local Network)", value = "homeassistant"),
+                ],
+            ),
             schema.Text(
                 id = "ag_location_id",
-                name = "Location ID",
+                name = "Location ID (Cloud mode)",
                 desc = "Numeric ID from app.airgradient.com/settings/location. Not the Place ID.",
                 icon = "locationDot",
             ),
             schema.Text(
                 id = "ag_api_key",
-                name = "API Key",
+                name = "API Key (Cloud mode)",
                 desc = "Place API key from app.airgradient.com/settings/place (API tab)",
                 icon = "key",
                 secret = True,
+            ),
+            schema.Text(
+                id = "ag_cloud_url",
+                name = "Cloud / Server URL (optional)",
+                desc = "Custom server base URL (default: https://api.airgradient.com/public/api/v1)",
+                icon = "server",
+                default = "https://api.airgradient.com/public/api/v1",
+            ),
+            schema.Text(
+                id = "ha_url",
+                name = "HA URL (Home Assistant mode)",
+                desc = "Base URL of Home Assistant (e.g. http://homeassistant.local:8123)",
+                icon = "server",
+                default = "http://homeassistant.local:8123",
+            ),
+            schema.Text(
+                id = "ha_token",
+                name = "HA Token (Home Assistant mode)",
+                desc = "Long-Lived Access Token for Home Assistant",
+                icon = "key",
+                secret = True,
+            ),
+            schema.Text(
+                id = "ha_prefix",
+                name = "HA Entity Prefix (Home Assistant mode)",
+                desc = "Prefix for sensors (e.g. airgradient_one for sensor.airgradient_one_co2)",
+                icon = "tag",
+                default = "airgradient_one",
+            ),
+            schema.Text(
+                id = "ha_co2_entity",
+                name = "HA Custom CO2 Entity (optional)",
+                desc = "Override entity ID for CO2 (e.g. sensor.living_room_co2)",
+                icon = "smog",
+            ),
+            schema.Text(
+                id = "ha_pm25_entity",
+                name = "HA Custom PM2.5 Entity (optional)",
+                desc = "Override entity ID for PM2.5 (e.g. sensor.living_room_pm2_5)",
+                icon = "wind",
+            ),
+            schema.Text(
+                id = "ha_pm1_entity",
+                name = "HA Custom PM1.0 Entity (optional)",
+                desc = "Override entity ID for PM1.0",
+                icon = "wind",
+            ),
+            schema.Text(
+                id = "ha_pm10_entity",
+                name = "HA Custom PM10 Entity (optional)",
+                desc = "Override entity ID for PM10",
+                icon = "wind",
+            ),
+            schema.Text(
+                id = "ha_temp_entity",
+                name = "HA Custom Temp Entity (optional)",
+                desc = "Override entity ID for Temperature",
+                icon = "temperatureHalf",
+            ),
+            schema.Text(
+                id = "ha_hum_entity",
+                name = "HA Custom Humidity Entity (optional)",
+                desc = "Override entity ID for Humidity",
+                icon = "droplet",
+            ),
+            schema.Text(
+                id = "ha_voc_entity",
+                name = "HA Custom TVOC Entity (optional)",
+                desc = "Override entity ID for TVOC",
+                icon = "flask",
+            ),
+            schema.Text(
+                id = "ha_nox_entity",
+                name = "HA Custom NOx Entity (optional)",
+                desc = "Override entity ID for NOx",
+                icon = "biohazard",
             ),
             schema.Dropdown(
                 id = "layout",
