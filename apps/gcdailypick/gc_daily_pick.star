@@ -105,6 +105,7 @@ def parseDealRow(raw_csv):
 def getDailyPick(source_name):
     # try and get it from the render API first, if that fails, fall back to the Google Sheet
     render_api_url = "https://dailydealsapi.onrender.com/api/v1/deals/" + source_name + "/latest"
+    print("Fetching daily pick from render API: " + render_api_url)
     resp = http.get(url = render_api_url)
     if resp.status_code == 200:
         respData = resp.json()["deal"]
