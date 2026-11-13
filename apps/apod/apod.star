@@ -8,10 +8,16 @@ The spirit of Tidbyt's first-party JWST app, pointed at the richer daily
 source. One picture a day, edge to edge, with the title on a translucent
 strip along the bottom.
 
-Data: https://api.nasa.gov/planetary/apod (thumbs=true). Verified by hand
-before this was written; field notes that differ from folklore:
-  - api.nasa.gov sits behind api-umbrella and answers anywhere from 0.3s to
-    5.5s, against pixlet's ~5s http deadline. A blown deadline is a TRANSPORT
+Data: NASA's APOD Basic JSON, https://science.nasa.gov/wp-json/wp/v2/apod-basic
+(per_page=1 is the newest entry). APOD moved to science.nasa.gov in late
+2026 and the old api.nasa.gov/planetary/apod endpoint stopped returning real
+entries; see https://api.nasa.gov/assets/files/apod/APOD-APIs-and-RSS-info.pdf.
+Field notes:
+  - The response is a JSON LIST, even for per_page=1.
+  - url is the APOD article page, NOT the picture. The picture is hdurl,
+    which video days also carry (a still frame), so one field covers both.
+  - No API key and no rate-limit headers; NASA's CDN caches for 60s.
+  - Any http dependency can stall past pixlet's ~5s deadline. A blown deadline is a TRANSPORT
     error, which aborts the whole render: Starlark never gets control back,
     so no amount of downstream fallback runs. Everything here is arranged so
     that costs at most one render in a while, never the next one too:
@@ -25,12 +31,8 @@ before this was written; field notes that differ from folklore:
         when there is a good picture to fall back on), so a failed attempt
         genuinely suppresses the following renders instead of every one of
         them repeating it.
-  - Video days do NOT reliably have thumbnail_url: YouTube embeds do,
-    self-hosted .mp4 days return thumbnail_url of "" (empty string).
-    Those fall back to the starfield title card with a play glyph.
-  - DEMO_KEY is rate limited per IP (observed x-ratelimit-limit: 10 per
-    window). Harmless at a 6h fresh TTL; heavy users can paste their own
-    free key.
+  - An entry with no hdurl (the guide says it can be empty) falls back to
+    the starfield title card, with a play glyph on video days.
 
 Source images are often multi-megabyte, so they are never fetched raw:
 images.weserv.nl resizes server-side to exactly the panel's own size (~800
@@ -57,10 +59,9 @@ load("render.star", "canvas", "render")
 load("schema.star", "schema")
 load("time.star", "time")
 
-API_BASE = "https://api.nasa.gov"
-APOD_PATH = "/planetary/apod"
+API_BASE = "https://science.nasa.gov"
+APOD_PATH = "/wp-json/wp/v2/apod-basic"
 PROXY_BASE = "https://images.weserv.nl"
-DEMO_KEY = "DEMO_KEY"
 NASA_TZ = "America/New_York"  # APOD's own publication clock
 
 FRESH_TTL = 21600  # re-ask the API at most every 6h (APOD flips once a day)
@@ -85,7 +86,6 @@ def main(config):
     api_conf = url_conf(config, "api")
     base = api_conf if api_conf else API_BASE
     proxy = url_conf(config, "proxy") or PROXY_BASE
-    key = (config.get("api_key") or "").strip() or DEMO_KEY
     show_title = config.bool("show_title", True)
     show_date = config.bool("show_date", False)
     w, h = panel()
@@ -96,7 +96,7 @@ def main(config):
     live = api_conf != None or not boot_holding()
 
     today = nasa_today()
-    apod = get_apod(base, key, live, today)
+    apod = get_apod(base, live, today)
     img = get_art(proxy, apod, live, w, h)
 
     if apod != None and apod["date"] != "" and apod["date"] != today:
@@ -170,22 +170,26 @@ def fetch_json(url, params):
     if resp.status_code != 200:
         print("apod: API -> " + str(resp.status_code))
         return None
-    if not (body.startswith("{") and body.endswith("}")):
-        print("apod: non-JSON body from API")
+    if not (body.startswith("[") and body.endswith("]")):
+        print("apod: non-JSON-list body from API")
         return None
     d = json.decode(body, None)
     if d == None:
-        # Braced but broken JSON (truncated, missing commas): json.decode's
+        # Bracketed but broken JSON (truncated, missing commas): json.decode's
         # 1-arg form would abort the render.
         print("apod: undecodable JSON from API")
         return None
-    return d
+    if type(d) != "list" or len(d) == 0 or type(d[0]) != "dict":
+        print("apod: empty or unexpected list from API")
+        return None
+    return d[0]
 
-def get_apod(base, key, live, today):
-    """Today's entry, extracted to a small dict and cached so an outage
-    serves the last good reading. Keyed by base + api key: a config change
-    must never read another config's data."""
-    ck = "apod:v1:d:" + base + ":" + key
+def get_apod(base, live, today):
+    """The newest entry, extracted to a small dict and cached so an outage
+    serves the last good reading. Keyed by base so the test hook never reads
+    real data. v2: v1 entries came from the old API and may hold its
+    placeholder ("NASA Science" + logo) under today's date."""
+    ck = "apod:v2:d:" + base
     gk = ck + ":gate"
     cached = decode_extract(cache.get(ck))
 
@@ -202,7 +206,7 @@ def get_apod(base, key, live, today):
     # when yesterday's cosmos is there to show instead.
     cache.set(gk, "1", ttl_seconds = HOLD_STALE if cached != None else HOLD_COLD)
 
-    d = fetch_json(base + APOD_PATH, {"api_key": key, "thumbs": "true"})
+    d = fetch_json(base + APOD_PATH, {"per_page": "1"})
     if d == None:
         return cached
     apod = extract_apod(d)
@@ -230,17 +234,15 @@ def decode_extract(raw):
     return d
 
 def extract_apod(d):
-    """media_type image -> url; video -> thumbnail_url (often ""!); anything
-    else -> title-only card. Every field defensively stringified: the API
-    has served nulls."""
+    """The picture is hdurl for every media type (url is the article page);
+    an empty hdurl -> title-only card. Every field defensively stringified:
+    APIs serve nulls."""
     title = strv(d, "title")
     date = strv(d, "date")
     media = strv(d, "media_type")
-    src = ""
-    if media == "image":
-        src = strv(d, "url")
-    elif media == "video":
-        src = strv(d, "thumbnail_url")
+    src = strv(d, "hdurl")
+    if not (src.startswith("https://") or src.startswith("http://")):
+        src = ""
     if len(title) > 110:
         title = title[0:107] + "..."
     if title == "" and src == "":
@@ -555,13 +557,6 @@ def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
-            schema.Text(
-                id = "api_key",
-                name = "NASA API key",
-                desc = "Optional. The shared DEMO_KEY works out of the box; grab a free key at api.nasa.gov if you run several devices.",
-                icon = "key",
-                default = "",
-            ),
             schema.Toggle(
                 id = "show_title",
                 name = "Show title",
