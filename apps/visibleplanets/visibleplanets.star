@@ -19,7 +19,6 @@ Author: Robert Ison
 # The hide toggle applies only to individual planets.
 # Magnitude descriptions are guidance, not guarantees of visibility.
 
-
 load("encoding/json.star", "json")
 load("http.star", "http")
 load("humanize.star", "humanize")
@@ -35,7 +34,6 @@ load("render.star", "render")
 load("schema.star", "schema")
 load("sunrise.star", "sunrise")
 load("time.star", "time")
-
 
 app_hash = "M2IxYmY2OWUtZWIzMS00NTM0LTkyOWItMmRiMDlhMWVkYjI5OmZhN2YxOTM2M2I2N2QzZDNiYjEzNmNkMDhjMzM3YmUzZTQwMjE3ODg1MjIzY2QyYTNiNzFkZDlhYzU1YzBkODdkOWE0YjFiODkwMWUxN2JkZDU3YmZjOTBmZWI4NmE5MjdlMTBjNjZhYWFkYzFhMjE1NjdiOGYxNTUxOGNmMDU1ZGMwOTFhNzg5Nzc5M2FhNDE5OTUyMDAzNTUyY2U2ZWQ5NWUxNDZmMjkxZWQ0M2RhYzNjNGRmMjNmYTc5NTU2OTQ0MGVlNWY1N2NhOTJmYjNmYTg4OWYxOWFlNWQxMzU2"
 time_display_format = "3:04 PM"
@@ -54,7 +52,6 @@ planet_images = {
     "neptune": NEPTUNE_ASSET.readall(),
 }
 
-
 planet_colors = {
     "mercury": "#bc6700",
     "venus": "#c19e5e",
@@ -64,7 +61,6 @@ planet_colors = {
     "uranus": "#3a68ff",
     "neptune": "#121178",
 }
-
 
 default_location = """
 {
@@ -76,7 +72,6 @@ default_location = """
     "timezone": "America/New_York"
 }
 """
-
 
 def main(config):
     """Displays the selected planet or the Full Sky View."""
@@ -234,7 +229,6 @@ def main(config):
         config,
     )
 
-
 def get_bucketed_time(local_time, bucket_minutes):
     """Rounds a local timestamp down to a stable minute bucket."""
 
@@ -244,7 +238,6 @@ def get_bucketed_time(local_time, bucket_minutes):
     )
 
     return local_time - time.parse_duration("%ss" % seconds_into_bucket)
-
 
 def get_nested_value(value, keys):
     """Reads nested dictionary keys, returning None if any are missing."""
@@ -259,7 +252,6 @@ def get_nested_value(value, keys):
 
     return current
 
-
 def is_digit_string(value):
     """Checks for one or more ASCII digits."""
 
@@ -273,7 +265,6 @@ def is_digit_string(value):
             return False
 
     return True
-
 
 def parse_number(value):
     """Parses a bounded decimal number without converting invalid strings.
@@ -345,7 +336,6 @@ def parse_number(value):
 
     return number
 
-
 def get_body_rows(position_json):
     """Validates the response's body-row container."""
 
@@ -358,7 +348,6 @@ def get_body_rows(position_json):
         return None
 
     return rows
-
 
 def get_body_cell(body_name, rows):
     """Finds the requested body's first cell without a fallback body."""
@@ -397,7 +386,6 @@ def get_body_cell(body_name, rows):
         return cells[0]
 
     return None
-
 
 def get_body_information(body_name, rows):
     """Extracts required coordinates and optional display information."""
@@ -458,7 +446,6 @@ def get_body_information(body_name, rows):
         "distance": distance,
     }
 
-
 def get_distance_display(distance, system):
     """Formats an available distance, or returns an empty string."""
 
@@ -472,7 +459,6 @@ def get_distance_display(distance, system):
         math.floor(distance * 0.6213712),
     )
 
-
 def get_all_planet_information(location, check_time, cache_ttl_seconds):
     """Gets planetary positions for an explicit calculation time."""
 
@@ -481,7 +467,6 @@ def get_all_planet_information(location, check_time, cache_ttl_seconds):
         check_time,
         cache_ttl_seconds,
     )
-
 
 def get_planet_code(object_name):
     """Gets an uppercase, single-character celestial object code."""
@@ -494,7 +479,6 @@ def get_planet_code(object_name):
         return "*"
 
     return object_name[0].upper()
-
 
 def get_summary_coordinates(altitude, bearing):
     """Maps altitude and bearing to bounded S-W-N-E-S chart coordinates."""
@@ -524,7 +508,6 @@ def get_summary_coordinates(altitude, bearing):
     )
 
     return row, column, fractional_row, fractional_column
-
 
 def place_summary_object(summary, object_name, altitude, bearing, magnitude):
     """Places an object in its desired cell or the nearest empty cell."""
@@ -571,7 +554,6 @@ def place_summary_object(summary, object_name, altitude, bearing, magnitude):
 
     summary[best_row][best_column] = content
     return True
-
 
 def get_summary_of_night_sky(rows):
     """Always renders a summary chart from valid, already-fetched rows."""
@@ -641,7 +623,6 @@ def get_summary_of_night_sky(rows):
         ),
     )
 
-
 def get_render_row_children(items):
     """Converts a summary row into renderable text elements."""
 
@@ -663,7 +644,6 @@ def get_render_row_children(items):
         )
 
     return children
-
 
 def get_display(image, planet, row1, row2, config):
     """Renders the selected planet and its information."""
@@ -719,7 +699,6 @@ def get_display(image, planet, row1, row2, config):
         delay = int(config.get("scroll", 60)),
     )
 
-
 def get_magnitude_color(magnitude):
     """Gets the magnitude color, using white when magnitude is unknown."""
 
@@ -760,22 +739,32 @@ def get_magnitude_description(magnitude):
 
     return "you might need the James Webb Space telescope"
 
-
 def get_cardinal_position_from_degrees(bearing):
     """Returns the nearest of sixteen compass directions."""
 
     compass_brackets = [
-        "North", "NNE", "NE", "ENE",
-        "East", "ESE", "SE", "SSE",
-        "South", "SSW", "SW", "WSW",
-        "West", "WNW", "NW", "NNW",
+        "North",
+        "NNE",
+        "NE",
+        "ENE",
+        "East",
+        "ESE",
+        "SE",
+        "SSE",
+        "South",
+        "SSW",
+        "SW",
+        "WSW",
+        "West",
+        "WNW",
+        "NW",
+        "NNW",
     ]
 
     normalized_bearing = bearing % 360.0
     index = int((normalized_bearing + 11.25) // 22.5) % 16
 
     return compass_brackets[index]
-
 
 def get_readable_large_number(number):
     """Formats a large number using thousand/million/billion suffixes."""
@@ -797,7 +786,6 @@ def get_readable_large_number(number):
         checkval = checkval / 1000
 
     return returnval
-
 
 def get_all_body_positions(location, check_time, ttl_seconds = 3600):
     """Gets body positions for the calculation date and timestamp."""
@@ -842,7 +830,6 @@ def get_all_body_positions(location, check_time, ttl_seconds = 3600):
 
     return position_json
 
-
 def two_character_time_date_part(number):
     """Pads a single-digit date or time component with a leading zero."""
 
@@ -850,7 +837,6 @@ def two_character_time_date_part(number):
         return "0" + str(number)
 
     return str(number)
-
 
 def get_schema():
     planet_options = [
