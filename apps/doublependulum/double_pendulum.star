@@ -218,8 +218,8 @@ def main(config):
         cost = trail_widget_cost(len(simulation))
         sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
         print("Falling back to embedded simulation no." + str(sim_idx + 1) +
-            ": estimated trail cost " + str(cost) + " exceeds budget " + str(MAX_TRAIL_WIDGET_COST) +
-            " (" + str(len(simulation)) + " frames)")
+              ": estimated trail cost " + str(cost) + " exceeds budget " + str(MAX_TRAIL_WIDGET_COST) +
+              " (" + str(len(simulation)) + " frames)")
         simulation = ALL_SIMULATIONS[sim_idx]
         api_origin_y = None
         api_name = None
