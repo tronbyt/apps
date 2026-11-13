@@ -21,6 +21,24 @@ LENGTH_2_MAX = 7.2
 # Use slightly smaller extent for better variety (allows some off-screen for large pendulums)
 MAX_EXTENT = 11.0  # More aggressive than actual max (13.2) for better visual variety
 
+# Each frame draws one trail dot per prior frame (~n^2 widgets). Above this, renders
+# risk pixlet/Tronbyt render timeouts — use a random embedded animation instead.
+MAX_TRAIL_WIDGET_COST = 200000
+
+def trail_widget_cost(frame_count):
+    if frame_count < 2:
+        return 0
+    return frame_count * (frame_count - 1) // 2
+
+def render_exceeds_budget(frame_count, config, width, height):
+    cost = trail_widget_cost(frame_count)
+    if config.get("line_style", "widget") == "bresenham":
+        cost = cost * 2
+    panel_units = (width * height) // (64 * 32)
+    if panel_units > 1:
+        cost = cost * panel_units
+    return cost > MAX_TRAIL_WIDGET_COST
+
 def get_layout(width, height):
     """Calculate layout parameters based on screen dimensions."""
     origin_x = int(width / 2)
@@ -167,8 +185,8 @@ def main(config):
 
         # Handle fetch failure
         if sim_data == None:
-            print("API request failed, falling back to random embedded simulation")
             sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+            print("API request failed, falling back to embedded simulation no." + str(sim_idx + 1))
             simulation = ALL_SIMULATIONS[sim_idx]
             api_origin_y = None
             api_name = None
@@ -180,8 +198,8 @@ def main(config):
 
             # Check if we have valid frames
             if len(simulation) == 0:
-                print("API returned empty frames, falling back to random embedded simulation")
                 sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+                print("API returned empty frames, falling back to embedded simulation no." + str(sim_idx + 1))
                 simulation = ALL_SIMULATIONS[sim_idx]
                 api_origin_y = None
                 api_name = None
@@ -194,6 +212,17 @@ def main(config):
         simulation = ALL_SIMULATIONS[sim_idx]
         api_origin_y = None  # Not used for embedded simulations
         api_name = None  # Not used for embedded simulations
+        is_api_mode = False
+
+    if render_exceeds_budget(len(simulation), config, width, height):
+        cost = trail_widget_cost(len(simulation))
+        sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+        print("Falling back to embedded simulation no." + str(sim_idx + 1) +
+              ": estimated trail cost " + str(cost) + " exceeds budget " + str(MAX_TRAIL_WIDGET_COST) +
+              " (" + str(len(simulation)) + " frames)")
+        simulation = ALL_SIMULATIONS[sim_idx]
+        api_origin_y = None
+        api_name = None
         is_api_mode = False
 
     # Set delay based on speed (slow = 33ms, fast = 16ms)
