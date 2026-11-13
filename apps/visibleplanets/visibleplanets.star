@@ -41,6 +41,8 @@ application_delimiter = ":"
 
 summary_row_count = 5
 summary_column_count = 13
+summary_column_degrees = 30.0
+summary_cell_width = 5
 
 planet_images = {
     "mercury": MERCURY_ASSET.readall(),
@@ -166,7 +168,7 @@ def main(config):
 
     # Full Sky View does not use the hide toggle.
     if planet == "all":
-        return get_summary_of_night_sky(rows)
+        return get_summary_of_night_sky(rows, get_view_heading(config))
 
     body = get_body_information(planet, rows)
 
@@ -228,6 +230,29 @@ def main(config):
         row2,
         config,
     )
+
+def get_view_heading(config):
+    """Gets the Full Sky View centre heading in degrees, defaulting to north."""
+
+    heading = config.get("heading") or "0"
+
+    if heading == "custom":
+        custom = (config.get("heading_degrees") or "").strip()
+        custom = custom.replace("°", "").strip()
+        heading = custom if custom != "" else "0"
+
+    degrees = parse_number(heading)
+
+    if degrees == None:
+        print("Invalid view heading %r; using north." % heading)
+        return 0.0
+
+    return degrees % 360.0
+
+def get_relative_bearing(bearing, heading):
+    """Gets a bearing relative to the view heading, in [-180, 180)."""
+
+    return (bearing - heading + 180.0) % 360.0 - 180.0
 
 def get_bucketed_time(local_time, bucket_minutes):
     """Rounds a local timestamp down to a stable minute bucket."""
@@ -480,8 +505,11 @@ def get_planet_code(object_name):
 
     return object_name[0].upper()
 
-def get_summary_coordinates(altitude, bearing):
-    """Maps altitude and bearing to bounded S-W-N-E-S chart coordinates."""
+def get_summary_coordinates(altitude, bearing, heading):
+    """Maps altitude and bearing to bounded chart coordinates.
+
+    The chart spans 360 degrees with the view heading in the centre column.
+    """
 
     bounded_altitude = max(0.0, min(90.0, altitude))
 
@@ -492,8 +520,8 @@ def get_summary_coordinates(altitude, bearing):
 
     row = summary_row_count - 1 - altitude_band
 
-    chart_degrees = (bearing + 180.0) % 360.0
-    fractional_column = chart_degrees / 30.0
+    chart_degrees = get_relative_bearing(bearing, heading) + 180.0
+    fractional_column = chart_degrees / summary_column_degrees
 
     column = int(math.floor(fractional_column + 0.5))
     column = max(0, min(summary_column_count - 1, column))
@@ -509,12 +537,13 @@ def get_summary_coordinates(altitude, bearing):
 
     return row, column, fractional_row, fractional_column
 
-def place_summary_object(summary, object_name, altitude, bearing, magnitude):
+def place_summary_object(summary, object_name, altitude, bearing, magnitude, heading):
     """Places an object in its desired cell or the nearest empty cell."""
 
     row, column, fractional_row, fractional_column = get_summary_coordinates(
         altitude,
         bearing,
+        heading,
     )
 
     content = "%s%s%s" % (
@@ -555,7 +584,41 @@ def place_summary_object(summary, object_name, altitude, bearing, magnitude):
     summary[best_row][best_column] = content
     return True
 
-def get_summary_of_night_sky(rows):
+def get_compass_scale(heading):
+    """Draws N, E, S and W at their true positions for the view heading.
+
+    A direction 180 degrees from the heading appears at both edges, as the
+    chart wraps around the compass.
+    """
+
+    children = []
+
+    for letter, direction in [("N", 0.0), ("E", 90.0), ("S", 180.0), ("W", 270.0)]:
+        relative = get_relative_bearing(direction, heading)
+        positions = [relative]
+
+        if relative == -180.0:
+            positions.append(180.0)
+
+        for position in positions:
+            fractional_column = (position + 180.0) / summary_column_degrees
+            x = int(math.round(fractional_column * summary_cell_width))
+            x = max(0, min(summary_column_count * summary_cell_width - summary_cell_width, x))
+
+            children.append(
+                render.Padding(
+                    pad = (x, 0, 0, 0),
+                    child = render.Text(
+                        content = letter,
+                        color = "#ffffff",
+                        font = "CG-pixel-4x5-mono",
+                    ),
+                ),
+            )
+
+    return render.Stack(children = children)
+
+def get_summary_of_night_sky(rows, heading):
     """Always renders a summary chart from valid, already-fetched rows."""
 
     summary = [
@@ -587,41 +650,34 @@ def get_summary_of_night_sky(rows):
                 body["altitude"],
                 body["bearing"],
                 body["magnitude"],
+                heading,
             )
 
     # Render even if no objects were placed.
-    return render.Root(
-        render.Column(
-            children = [
-                render.Row(
-                    children = get_render_row_children(summary[0]),
-                ),
-                render.Row(
-                    children = get_render_row_children(summary[1]),
-                ),
-                render.Row(
-                    children = get_render_row_children(summary[2]),
-                ),
-                render.Row(
-                    children = get_render_row_children(summary[3]),
-                ),
-                render.Row(
-                    children = get_render_row_children(summary[4]),
-                ),
-                render.Box(width = 64, height = 1, color = "#009900"),
-                render.Box(width = 64, height = 1, color = "#000000"),
-                render.Row(
-                    children = [
-                        render.Text(
-                            content = "S  W  N  E  S",
-                            color = "#ffffff",
-                            font = "CG-pixel-4x5-mono",
-                        ),
-                    ],
-                ),
-            ],
-        ),
+    chart = render.Column(
+        children = [
+            render.Row(
+                children = get_render_row_children(summary[0]),
+            ),
+            render.Row(
+                children = get_render_row_children(summary[1]),
+            ),
+            render.Row(
+                children = get_render_row_children(summary[2]),
+            ),
+            render.Row(
+                children = get_render_row_children(summary[3]),
+            ),
+            render.Row(
+                children = get_render_row_children(summary[4]),
+            ),
+            render.Box(width = 64, height = 1, color = "#009900"),
+            render.Box(width = 64, height = 1, color = "#000000"),
+            get_compass_scale(heading),
+        ],
     )
+
+    return render.Root(chart)
 
 def get_render_row_children(items):
     """Converts a summary row into renderable text elements."""
@@ -850,6 +906,35 @@ def get_schema():
         schema.Option(value = "all", display = "Full Sky View"),
     ]
 
+    heading_names = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+    ]
+
+    heading_options = [
+        schema.Option(
+            value = str(i * 22.5),
+            display = "%s (%s°)" % (name, humanize.float("#.#", i * 22.5)),
+        )
+        for i, name in enumerate(heading_names)
+    ] + [
+        schema.Option(value = "custom", display = "Custom (degrees)"),
+    ]
+
     measurement_options = [
         schema.Option(value = "metric", display = "Metric"),
         schema.Option(value = "imperial", display = "Imperial"),
@@ -877,6 +962,21 @@ def get_schema():
                 name = "Location",
                 desc = "Your location to calculate the sky positions.",
                 icon = "locationDot",
+            ),
+            schema.Dropdown(
+                id = "heading",
+                name = "View direction",
+                desc = "Full Sky View only: the compass direction your display faces, shown at the centre of the chart.",
+                icon = "compass",
+                options = heading_options,
+                default = "0.0",
+            ),
+            schema.Text(
+                id = "heading_degrees",
+                name = "Custom direction (degrees)",
+                desc = "Used when View direction is Custom. 0 is north, 90 east, 180 south, 270 west.",
+                icon = "compass",
+                default = "",
             ),
             schema.Dropdown(
                 id = "system",
