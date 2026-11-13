@@ -1,0 +1,18 @@
+---
+id: github-assigned-issues-oauth
+name: GitHub Assigned Issues (OAuth)
+summary: GitHub assigned issue count (OAuth test)
+desc: Same as GitHub Assigned Issues, with Tronbyt server-managed OAuth instead of a PAT.
+author: tavdog
+fileName: github_assigned_issues_oauth.star
+packageName: githubassignedissuesoauth
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+  - github
+published: '2026-11-13T00:00:00Z'
+updated: '2026-11-13T00:00:00Z'
