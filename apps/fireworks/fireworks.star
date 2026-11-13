@@ -31,13 +31,20 @@ def compile_cells():
 
 FIREWORK_CELLS = compile_cells()
 
-def summon_fireworks():
+def rocket_count_for(duration_ms):
+    # The default DURATION leaves this much time after the last rocket's fuse
+    # for it to climb, burst and fade. Keep the same tail for longer runs and
+    # add rockets so the sky doesn't go empty while a long message scrolls.
+    tail_ms = DURATION - (ROCKET_COUNT - 1) * ROCKET_FUSE_SPACING
+    return max(ROCKET_COUNT, (duration_ms - tail_ms) // ROCKET_FUSE_SPACING + 1)
+
+def summon_fireworks(rocket_count):
     rockets = []
 
     # rockets climb to the top of whatever panel they are on
     max_altitude = canvas.height() - ROCKET_FLARES_RADIUS
     min_altitude = max_altitude - 3
-    for rocket_i in range(ROCKET_COUNT):
+    for rocket_i in range(rocket_count):
         rockets.append({
             "cells": FIREWORK_CELLS[random.number(0, len(FIREWORK_CELLS) - 1)],
             "fuse": ROCKET_FUSE_SPACING * rocket_i,
@@ -156,28 +163,32 @@ def main(config):
     else:
         msg = ""
 
+    marquee = render.Marquee(
+        width = 64,
+        offset_start = 64,
+        align = "center",
+        child = render.Text(
+            content = msg,
+            color = config.get("message_color", DEFAULT_MSG_COLOR),
+            font = config.get("font", DEFAULT_FONT),
+        ),
+    )
     widget_message = render.Column(
         expanded = True,
         main_align = "end",
-        children = [
-            render.Marquee(
-                width = 64,
-                offset_start = 64,
-                align = "center",
-                child = render.Text(
-                    content = msg,
-                    color = config.get("message_color", DEFAULT_MSG_COLOR),
-                    font = config.get("font", DEFAULT_FONT),
-                ),
-            ),
-        ],
+        children = [marquee],
     )
 
     frame_delay = int(config.get("frame_delay", DEFAULT_FRAME_DELAY))
     timestamp_ms = 0
-    frame_count = int(DURATION / frame_delay)
+
+    # Run at least DURATION, but long enough for the Marquee to finish: the
+    # message scrolls off the left edge, then slides back in from the right.
+    # Its length depends on the text and font; speed sets the frame delay.
+    msg_frames = marquee.frame_count() if msg else 0
+    frame_count = max(int(DURATION / frame_delay), msg_frames)
     frames = []
-    rockets = summon_fireworks()
+    rockets = summon_fireworks(rocket_count_for(frame_count * frame_delay))
     for _ in range(frame_count):
         frame_stack = []
         frame_stack.append(widget_message)
@@ -188,6 +199,7 @@ def main(config):
 
     return render.Root(
         delay = frame_delay,
+        show_full_animation = True,
         child = render.Animation(frames),
     )
 
