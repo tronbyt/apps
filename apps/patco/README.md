@@ -2,7 +2,7 @@
 
 Next scheduled PATCO Speedline trains at your station on a Tidbyt or Tronbyt display. It can show trains toward Philadelphia, trains toward Lindenwold, or both.
 
-![preview](patco.webp)
+![PATCO app showing the next trains each way](preview.webp)
 
 PATCO doesn't publish real-time train positions, so the times come from PATCO's official schedule (its GTFS feed). The schedule is rebuilt every day, so weekday, Saturday and Sunday timetables, track-work days and special-event service are all handled automatically. No API key is needed.
 
@@ -28,7 +28,7 @@ Pick your **Station** and you're done. Everything else is optional.
 
 **Big countdown:** one large number per direction. With a walk time set, it counts down to when you should leave.
 
-![Big countdown layout](patco_countdown.webp)
+![Big countdown layout](preview_countdown.webp)
 
 Colors:
 - **Blue** `PHL` is toward Philadelphia. **Amber** `LND` is toward Lindenwold.
