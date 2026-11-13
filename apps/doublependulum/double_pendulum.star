@@ -22,9 +22,8 @@ LENGTH_2_MAX = 7.2
 MAX_EXTENT = 11.0  # More aggressive than actual max (13.2) for better visual variety
 
 # Each frame draws one trail dot per prior frame (~n^2 widgets). Above this, renders
-# risk pixlet/Tronbyt render timeouts — use a fixed embedded animation instead.
+# risk pixlet/Tronbyt render timeouts — use a random embedded animation instead.
 MAX_TRAIL_WIDGET_COST = 200000
-DEFAULT_FALLBACK_IDX = 0  # built-in simulation no. 1
 
 def trail_widget_cost(frame_count):
     if frame_count < 2:
@@ -217,10 +216,10 @@ def main(config):
 
     if render_exceeds_budget(len(simulation), config, width, height):
         cost = trail_widget_cost(len(simulation))
-        print("Falling back to default simulation no." + str(DEFAULT_FALLBACK_IDX + 1) +
+        sim_idx = time.now().unix % (len(ALL_SIMULATIONS) - 1)
+        print("Falling back to embedded simulation no." + str(sim_idx + 1) +
             ": estimated trail cost " + str(cost) + " exceeds budget " + str(MAX_TRAIL_WIDGET_COST) +
             " (" + str(len(simulation)) + " frames)")
-        sim_idx = DEFAULT_FALLBACK_IDX
         simulation = ALL_SIMULATIONS[sim_idx]
         api_origin_y = None
         api_name = None
