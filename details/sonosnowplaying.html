@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sonos Now Playing - Tronbyt App</title>
+        <meta name="description" content="What's playing on a Sonos">
+        <link rel="canonical" href="https://apps.tronbyt.com/details/sonosnowplaying">
+        <meta property="og:site_name" content="Tronbyt App Viewer">
+        <meta property="og:title" content="Sonos Now Playing - Tronbyt App">
+        <meta property="og:description" content="What's playing on a Sonos">
+        <meta property="og:url" content="https://apps.tronbyt.com/details/sonosnowplaying">
+        <meta property="og:type" content="website">
+        <meta property="og:image" content="https://apps.tronbyt.com/cards/sonosnowplaying-576904e464.png">
+        <meta property="og:image:type" content="image/png">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Sonos Now Playing on a Tronbyt display">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="Sonos Now Playing - Tronbyt App">
+        <meta name="twitter:description" content="What's playing on a Sonos">
+        <meta name="twitter:image" content="https://apps.tronbyt.com/cards/sonosnowplaying-576904e464.png">
+        <meta name="twitter:image:alt" content="Sonos Now Playing on a Tronbyt display">
+        <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Sonos Now Playing","description":"Shows the track playing on a Sonos speaker with title, artist, album, art, and play state, polled directly over your LAN. No cloud account, no OAuth, no API key. It talks UPnP to the speaker itself, so it needs a tronbyt-style server on the same network as the speaker. Enter the speaker's IP address to set it up; until then it shows a demo card.","url":"https://apps.tronbyt.com/details/sonosnowplaying","image":"https://apps.tronbyt.com/cards/sonosnowplaying-576904e464.png","applicationCategory":"Tronbyt app","applicationSubCategory":"entertainment","operatingSystem":"Tronbyt","keywords":"music, sonos, now-playing, smart-home","author":{"@type":"Person","name":"nsluke"},"datePublished":"2026-09-02T23:17:51Z","dateModified":"2026-10-01T15:26:52Z"}</script>
+        <meta name="app-name" content="sonosnowplaying">
+        <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/200508996?s=48&v=4">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../style.css">
+    </head>
+
+    <body>
+        <div class="container py-4">
+            <div class="viewer-header mb-4">
+                <h1 class="main-title mb-0">
+                    <a href="../index.html" class="home-link" title="Tronbyt App Viewer home">
+                        <img src="https://avatars.githubusercontent.com/u/200508996?s=48&v=4" alt="">
+                        <span class="title-full">Tronbyt App Viewer</span>
+                        <span class="title-short">App Viewer</span>
+                    </a>
+                </h1>
+            </div>
+
+            <a href="../index.html" class="btn btn-secondary mb-3">← Back
+                to Apps</a>
+
+            <div class="mb-4">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="dot-matrix-toggle" checked>
+                    <label class="form-check-label" for="dot-matrix-toggle">
+                        Enable dot matrix overlay
+                    </label>
+                </div>
+            </div>
+
+            <div id="app-content">
+                <h1>Sonos Now Playing</h1>
+                <p>What's playing on a Sonos</p>
+                <p>Shows the track playing on a Sonos speaker with title, artist, album, art, and play state, polled directly over your LAN. No cloud account, no OAuth, no API key. It talks UPnP to the speaker itself, so it needs a tronbyt-style server on the same network as the speaker. Enter the speaker's IP address to set it up; until then it shows a demo card.</p>
+                <p>By <a href="../authors/nsluke">nsluke</a></p>
+                <p>Tags: <a href="../index.html?tag=music">music</a>, <a href="../index.html?tag=sonos">sonos</a>, <a href="../index.html?tag=now-playing">now-playing</a>, <a href="../index.html?tag=smart-home">smart-home</a></p>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.5/dist/purify.min.js"></script>
+        <script type="module" src="../main.js"></script>
+    </body>
+
+</html>

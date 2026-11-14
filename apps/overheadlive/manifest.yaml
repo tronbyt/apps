@@ -1,0 +1,20 @@
+---
+id: overhead-live
+name: Overhead Live
+summary: Closest aircraft overhead
+desc: 'Shows the single closest aircraft to your location using the adsb.lol ADS-B feed (no API key): callsign, type, altitude, distance, bearing, speed, and a plane icon rotated to its heading. Surfaces emergency squawks (7500/7600/7700) first. Renders at 64x32 and 128x64. Data from adsb.lol, licensed under ODbL.'
+author: jonfishr
+fileName: overheadlive.star
+packageName: overheadlive
+recommendedInterval: 1
+supports2x: true
+supports64x64: true
+category: transit
+tags:
+  - aviation
+  - aircraft
+  - adsb
+  - flight
+  - wide 2x support
+published: '2026-06-28T15:23:18Z'
+updated: '2026-11-07T02:28:40Z'

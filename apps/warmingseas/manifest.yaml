@@ -1,0 +1,17 @@
+---
+id: warming-seas
+name: Warming Sea Series
+summary: Kinetic ocean temperature art
+desc: A kinetic ocean data matrix visualizing real-time sea temperatures through motion and reflection, translating rising sea temperatures into shimmering patterns of gold across a field of deep blue. Inspired by BREAKFAST's Warming Seas series.
+author: brombomb
+fileName: warming_seas.star
+packageName: warmingseas
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - weather
+  - art
+  - real-time
+published: '2026-10-01T15:09:12Z'
+updated: '2026-10-02T04:23:40Z'

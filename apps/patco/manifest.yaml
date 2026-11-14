@@ -1,0 +1,15 @@
+---
+id: patco
+name: PATCO
+summary: Next PATCO trains
+desc: Shows the next scheduled PATCO Speedline trains at your station toward Philadelphia, Lindenwold, or both. Uses PATCO's published schedule (PATCO has no real-time tracking), refreshed daily including holiday and special-event service.
+author: John Abella
+fileName: patco.star
+packageName: patco
+recommendedInterval: 1
+category: transit
+tags:
+  - transit
+supports2x: true
+published: '2026-11-13T17:31:17Z'
+updated: '2026-11-13T17:40:48Z'

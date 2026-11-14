@@ -1,0 +1,17 @@
+---
+id: gitlab-pipeline
+name: Gitlab Pipeline
+summary: Shows Pipeline status
+desc: Shows the status of the most recent pipeline in a selected Gitlab project.
+author: Sven Ringger
+fileName: gitlab_pipeline.star
+packageName: gitlabpipeline
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - tracking
+  - utility
+published: '2023-04-17T13:20:58Z'
+updated: '2026-10-01T21:17:57Z'

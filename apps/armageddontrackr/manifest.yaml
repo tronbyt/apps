@@ -1,0 +1,16 @@
+---
+id: armageddon-trackr
+name: Armageddon Trackr
+summary: Closest Near Earth Object
+desc: Provides information from NASA about the nearest Near Earth Object on a given date.
+author: flynnt
+fileName: armageddon_trackr.star
+packageName: armageddontrackr
+recommendedInterval: 5
+supports64x64: true
+category: science
+tags:
+  - asteroids
+  - space
+published: '2023-11-19T17:44:29Z'
+updated: '2026-10-01T20:09:53Z'

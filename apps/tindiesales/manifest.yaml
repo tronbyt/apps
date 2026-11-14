@@ -1,0 +1,15 @@
+---
+id: tindie-sales
+name: Tindie Sales
+summary: Shows Tindie sales numbers
+desc: Tindie is an online marketplace for maker-made products. This app displays sales stats for your Tindie store.
+author: Joey Castillo
+fileName: tindie_sales.star
+packageName: tindiesales
+recommendedInterval: 5
+category: utilities
+tags:
+  - finance
+  - utility
+published: '2022-06-29T16:03:09Z'
+updated: '2025-12-05T22:28:51Z'

@@ -1,0 +1,18 @@
+---
+id: nba-game
+name: NBA Game
+summary: NBA game with live score
+desc: A recreation of the original Tidbyt Basketball app. Follow one team through the start time and conference standings, the live score with quarter and clock, then the final.
+author: ckelley-1992
+fileName: nba_game.star
+packageName: nba_game
+recommendedInterval: 1
+supports2x: true
+category: sports
+tags:
+  - nba
+  - basketball
+  - real-time
+  - wide 2x support
+published: '2026-10-27T19:29:16Z'
+updated: '2026-10-27T19:29:16Z'

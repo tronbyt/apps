@@ -1,0 +1,16 @@
+---
+id: unix-epoch-clock
+name: Unix Epoch Clock
+summary: Seconds from the Unix epoch
+desc: A clock showing seconds from the Unix epoch.
+author: paultyng
+fileName: unix_epoch_clock.star
+packageName: unixepochclock
+recommendedInterval: 0
+category: clocks
+tags:
+  - time
+  - utility
+  - clock
+published: '2023-12-07T18:06:01Z'
+updated: '2025-12-02T19:30:22Z'

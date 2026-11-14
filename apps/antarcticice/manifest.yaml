@@ -1,0 +1,20 @@
+---
+id: antarctic-ice
+name: Antarctic Ice Series
+summary: Kinetic polar glacial art
+desc: A kinetic glacial data matrix inspired by Breakfast's polar artwork, visualizing Antarctic ice sheet dynamics, polar winds, and extreme sub-zero temperatures in real time.
+author: brombomb
+fileName: antarctic_ice.star
+packageName: antarcticice
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - antarctica
+  - ice
+  - polar
+  - weather
+  - art
+  - real-time
+published: '2026-10-02T04:29:02Z'
+updated: '2026-10-02T04:29:02Z'

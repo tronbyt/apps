@@ -1,0 +1,16 @@
+---
+id: diorama-hourly
+name: Diorama Hourly
+summary: Now, +3h and +6h weather
+desc: A pixel landscape whose sky blends across three slots, now, three hours ahead and six hours ahead. Each slot acts out its weather (sun, clouds, fog, rain, storms, snow, wind, wildfire smoke) at the right time of day with the current moon phase at night. Temperatures shift from warm white to pale blue by where they sit in the day's range. Uses Open-Meteo, no API key needed.
+author: vhw46wpn4t-boop
+fileName: weather_diorama_hourly.star
+packageName: weatherdioramahourly
+recommendedInterval: 15
+category: weather
+tags:
+  - weather
+  - forecast
+  - animated
+published: '2026-11-11T19:16:27Z'
+updated: '2026-11-11T19:16:27Z'
