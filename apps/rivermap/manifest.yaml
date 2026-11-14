@@ -1,0 +1,16 @@
+---
+id: rivermap
+name: River Map
+summary: River levels along a US river
+desc: A map of a major US river, coloured along its length by the water level at USGS stream gauges. Show how today's level compares with normal, how close the river is to flood stage, or whether it is rising or falling, with optional state or county lines.
+author: tscott98
+fileName: river_map.star
+packageName: rivermap
+recommendedInterval: 15
+supports2x: true
+supports64x64: false
+category: weather
+tags:
+  - weather
+  - nature
+  - maps
