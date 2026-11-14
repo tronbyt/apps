@@ -799,6 +799,9 @@ def main(config):
     events_today = EVENTS.get(key, [])
 
     if len(events_today) == 0:
+        if no_events_display == "skip":
+            # An empty list tells the server to leave this app out of the rotation.
+            return []
         if no_events_display == "text":
             return layout(no_events_text(), frame_delay)
         return render.Root(
@@ -831,12 +834,13 @@ def get_schema():
             schema.Dropdown(
                 id = "no_events_display",
                 name = "No Events Display",
-                desc = "What to show on days with no recorded events.",
+                desc = "What to show on days with no recorded events, or skip the app that day.",
                 icon = "image",
                 default = "gif",
                 options = [
                     schema.Option(display = "Animation", value = "gif"),
                     schema.Option(display = "\"No Events\" text", value = "text"),
+                    schema.Option(display = "Skip the app", value = "skip"),
                 ],
             ),
             schema.Dropdown(
