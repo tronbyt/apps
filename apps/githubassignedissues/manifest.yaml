@@ -2,7 +2,7 @@
 id: github-assigned-issues
 name: GitHub Assigned Issues
 summary: GitHub assigned issue count
-desc: Displays open GitHub issues assigned to you. PAT or Tronbyt server OAuth sign-in.
+desc: Displays open GitHub issues assigned to you. OAuth or PAT (OAuth preferred when connected).
 author: tavdog
 fileName: github_assigned_issues.star
 packageName: githubassignedissues
