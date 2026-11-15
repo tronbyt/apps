@@ -1,0 +1,23 @@
+[Unit]
+Description=SolarEdge API Proxy Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/opt/solaredge-proxy
+EnvironmentFile=/etc/solaredge-proxy.env
+Environment=PYTHONUNBUFFERED=1
+# systemd creates /var/log/solaredge-proxy (owned by User) on every start,
+# so the service also starts after a reboot if /var/log is RAM-backed.
+LogsDirectory=solaredge-proxy
+ExecStart=/opt/solaredge-proxy/venv/bin/gunicorn --bind 0.0.0.0:10001 --workers 1 --threads 4 --timeout 120 --access-logfile /var/log/solaredge-proxy/access.log --error-logfile /var/log/solaredge-proxy/error.log --log-level info app:app
+Restart=always
+RestartSec=10
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
