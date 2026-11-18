@@ -172,7 +172,7 @@ def main(config):
                                     width = WIDTH,
                                     child = render.Text(data["itemName"], ""),
                                     offset_start = 4,
-                                    offset_end = WIDTH * 2
+                                    offset_end = WIDTH * 2,
                                 ),
                                 render.Row(
                                     children = [
