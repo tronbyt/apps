@@ -1,6 +1,6 @@
-"""Overhead — the single closest aircraft to a location, from an Airplanes.live feed.
+"""Overhead — the single closest aircraft to a location, from the adsb.lol feed.
 
-Personal, non-commercial use against api.airplanes.live (no key). Renders one readable
+Uses the public api.adsb.lol API (no key). Renders one readable
 plane on a 64x32 display; never raises on bad/empty data — shows a tidy frame instead.
 """
 
@@ -10,7 +10,7 @@ load("math.star", "math")
 load("render.star", "canvas", "render")
 load("schema.star", "schema")
 
-API_URL = "https://api.airplanes.live/v2/point"
+API_URL = "https://api.adsb.lol/v2/point"
 
 # Oklahoma City metro center — a neutral default; the user sets their own location.
 DEFAULT_LAT = 35.4676
@@ -18,7 +18,7 @@ DEFAULT_LON = -97.5164
 DEFAULT_LOCATION = '{"lat": "35.4676", "lng": "-97.5164", "locality": "Oklahoma City"}'
 
 DEFAULT_RADIUS = "10"  # nautical miles
-TTL_SECONDS = 45  # >=30 so a device's refresh never approaches the 1 req/sec limit
+TTL_SECONDS = 45  # >=30 so a device's refresh stays gentle on the free public API
 STALE_SECONDS = 60  # drop records whose position is older than this
 
 EARTH_NM = 3440.065  # mean earth radius in nautical miles

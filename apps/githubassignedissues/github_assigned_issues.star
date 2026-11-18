@@ -75,6 +75,12 @@ def fetch_assigned_issues(access_token, query):
         ttl_seconds = 60,
     )
 
+def github_access_token(config):
+    token = config.get("github_auth")
+    if token:
+        return token
+    return config.get("access_token") or None
+
 def repo_filter_fields(repo_scope):
     if repo_scope == "org":
         return [
@@ -211,7 +217,7 @@ def main(config):
     Returns:
         A Root view to render to the app
     """
-    access_token = config.get("access_token") or None
+    access_token = github_access_token(config)
     text_color = config.get("text_color", "#ffffff")
     open_color = config.get("open_color", "#3fb950")
     closed_color = config.get("closed_color", "#8957e5")
@@ -270,16 +276,28 @@ def main(config):
             closed_color,
         )
     else:
-        return render_error("No Access Token.", text_color)
+        return render_error("Sign in with GitHub or set a PAT.", text_color)
 
 def get_schema():
     return schema.Schema(
         version = "1",
         fields = [
+            schema.OAuth2(
+                id = "github_auth",
+                name = "GitHub",
+                desc = "Sign in on Tronbyt (repo scope for private issues). Used when connected.",
+                icon = "github",
+                authorization_endpoint = "https://github.com/login/oauth/authorize",
+                token_endpoint = "https://github.com/login/oauth/access_token",
+                scopes = [
+                    "read:user",
+                    "repo",
+                ],
+            ),
             schema.Text(
                 id = "access_token",
                 name = "Github Personal Access Token",
-                desc = "Personal Access token (repo scope for private issues)",
+                desc = "Used when OAuth is not connected.",
                 icon = "lock",
                 secret = True,
             ),

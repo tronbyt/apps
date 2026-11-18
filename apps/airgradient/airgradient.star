@@ -1,7 +1,7 @@
 """
 Applet: AirGradient
 Summary: AirGradient ONE & Open Air monitor
-Description: Interfaces with an AirGradient ONE or Open Air air quality monitor via direct local network or Home Assistant, capturing the LED bar and screen metrics.
+Description: Interfaces with an AirGradient ONE or Open Air air quality monitor via direct local network, Home Assistant, or the AirGradient cloud API, capturing the LED bar and screen metrics.
 Author: Brombomb
 """
 
@@ -59,6 +59,9 @@ COLOR_TEXT_SUBTLE = "#555A60"
 COLOR_DIVIDER = "#24272D"
 COLOR_DIVIDER_AMBIENT = "#444D56"
 COLOR_BG = "#000000"
+
+# AirGradient cloud API (https://api.airgradient.com/public/docs/api/v1/)
+AG_CLOUD_API = "https://api.airgradient.com/public/api/v1"
 
 def get_co2_level(co2):
     if co2 <= 600:
@@ -304,6 +307,78 @@ def fetch_ha_data(ha_url, ha_token, prefix, co2_override, pm25_override, temp_ov
         return data, False
 
     return DEFAULT_DATA, True
+
+def ag_corrected(raw, key):
+    # Prefer the cloud's corrected value (what the AirGradient dashboard shows), falling back to raw
+    val = raw.get(key + "_corrected")
+    return val if val != None else raw.get(key)
+
+def fetch_cloud_data(location_id, api_key, want_led_mode):
+    loc = location_id.strip() if location_id else ""
+    key = api_key.strip() if api_key else ""
+    if not loc or not key:
+        return DEFAULT_DATA, False
+
+    # Location IDs are numeric; reject anything else rather than splicing it into the URL
+    if not loc.isdigit():
+        return DEFAULT_DATA, True
+
+    params = {"token": key}
+    resp = http.get(
+        "%s/locations/%s/measures/current" % (AG_CLOUD_API, loc),
+        params = params,
+        ttl_seconds = 60,
+    )
+    if resp.status_code != 200:
+        return DEFAULT_DATA, True
+
+    raw = resp.json()
+    if type(raw) == "list":
+        raw = raw[0] if len(raw) > 0 else None
+    if type(raw) != "dict":
+        return DEFAULT_DATA, True
+
+    # Map the cloud schema onto the local API schema the rest of the app expects.
+    # Cloud temperatures are always Celsius, same as the local API.
+    mapped = {
+        "rco2": ag_corrected(raw, "rco2"),
+        "pm01": ag_corrected(raw, "pm01"),
+        "pm02": raw.get("pm02"),
+        "pm02Compensated": raw.get("pm02_corrected"),
+        "pm10": ag_corrected(raw, "pm10"),
+        "atmp": raw.get("atmp"),
+        "atmpCompensated": raw.get("atmp_corrected"),
+        "rhum": raw.get("rhum"),
+        "rhumCompensated": raw.get("rhum_corrected"),
+        "tvocIndex": raw.get("tvocIndex"),
+        "noxIndex": raw.get("noxIndex"),
+        "wifi": raw.get("wifi"),
+        "serialno": raw.get("serialno"),
+        "firmware": raw.get("firmwareVersion"),
+        "model": raw.get("model"),
+    }
+
+    # Drop missing sensors (e.g. no CO2/VOC on Open Air) so downstream defaults apply
+    data = {}
+    for k, v in mapped.items():
+        if v != None:
+            data[k] = v
+
+    # The measures endpoint doesn't include the LED mode, so look it up separately
+    # when the LED bar is set to follow the monitor (CO2-capable models only).
+    model = data.get("model", "")
+    if want_led_mode and data.get("rco2") != None and not model.startswith("O-"):
+        led_resp = http.get(
+            "%s/locations/%s/sensor/config/leds/mode" % (AG_CLOUD_API, loc),
+            params = params,
+            ttl_seconds = 300,
+        )
+        if led_resp.status_code == 200:
+            led = led_resp.json()
+            if type(led) == "dict" and led.get("mode"):
+                data["ledMode"] = led["mode"]
+
+    return data, False
 
 def format_number(val):
     int_val = int(math.round(val))
@@ -795,12 +870,17 @@ def main(config):
     tvoc_ov = config.get("ha_tvoc_entity", "")
     nox_ov = config.get("ha_nox_entity", "")
 
+    ag_location_id = config.get("ag_location_id", "")
+    ag_api_key = config.get("ag_api_key", "")
+
     # Fetch data
     if source == "homeassistant":
         if not ha_url or not ha_token:
             data = DEFAULT_DATA
         else:
             data, _ = fetch_ha_data(ha_url, ha_token, ha_prefix, co2_ov, pm_ov, temp_ov, hum_ov, tvoc_ov, nox_ov)
+    elif source == "cloud":
+        data, _ = fetch_cloud_data(ag_location_id, ag_api_key, show_led_bar and led_mode == "auto")
     elif not device_url or not device_url.strip():
         data = DEFAULT_DATA
     else:
@@ -946,6 +1026,7 @@ def get_schema():
                 options = [
                     schema.Option(display = "Direct Local (IP / Hostname)", value = "direct"),
                     schema.Option(display = "Home Assistant", value = "homeassistant"),
+                    schema.Option(display = "AirGradient Cloud (API Key)", value = "cloud"),
                 ],
             ),
             schema.Text(
@@ -953,6 +1034,19 @@ def get_schema():
                 name = "AirGradient Device URL / IP",
                 desc = "Direct mode: IP address or hostname (e.g. http://192.168.1.50 or http://airgradient.local)",
                 icon = "networkWired",
+            ),
+            schema.Text(
+                id = "ag_location_id",
+                name = "Location ID (Cloud mode)",
+                desc = "Numeric ID from app.airgradient.com/settings/location. Not the Place ID.",
+                icon = "locationDot",
+            ),
+            schema.Text(
+                id = "ag_api_key",
+                name = "API Key (Cloud mode)",
+                desc = "Place API key from app.airgradient.com/settings/place (API tab)",
+                icon = "key",
+                secret = True,
             ),
             schema.Dropdown(
                 id = "display_mode",

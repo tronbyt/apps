@@ -161,11 +161,15 @@ The Sun is not included in the summary’s plotted object list.
 
 ### Horizontal Position: Direction
 
-The bottom scale reads:
+The chart covers the whole compass, with the **View direction** setting at its centre. Set it to the direction your display faces, and objects line up with where they are in the real sky.
+
+With the default view direction, north, the bottom scale reads:
 
     S  W  N  E  S
 
-South appears at both ends because the chart wraps around the compass.
+The direction opposite the view appears at both ends because the chart wraps around the compass.
+
+For other view directions, the N, E, S and W letters move to their true positions on the scale. Facing east, for example, it reads `W  N  E  S  W`. Facing northeast, no letter sits at the centre: N and E sit either side of it.
 
 A letter’s horizontal position gives an approximate direction along that scale.
 
@@ -232,6 +236,8 @@ Each instance still needs rendering and may generate requests; do not assume mul
 | --- | --- |
 | Planet | Selects one planet or Full Sky View. Defaults to Full Sky View. |
 | Location | Supplies observing coordinates and time zone. |
+| View direction | Full Sky View only. The compass direction at the centre of the chart: one of 16 points (N, NNE, NE … NNW) or Custom. Defaults to N. |
+| Custom direction (degrees) | Used when View direction is Custom. 0 is north, 90 east, 180 south, 270 west. An invalid value falls back to north. |
 | Measurement | Chooses kilometers or miles for individual-view distances. Defaults to Metric. |
 | Scroll | Sets individual-detail scrolling speed. Defaults to Slow Scroll. |
 | Hide if not visible | Hides an individual planet below the calculated horizon. The settings form defaults to enabled. |

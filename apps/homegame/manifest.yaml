@@ -1,0 +1,19 @@
+---
+id: homegame
+name: HomeGame
+summary: Next college football game
+desc: Shows your college football team's next game - the matchup, a red HOME or green AWAY band, and the kickoff time, counting down once it's game day. Pick any team ESPN covers from the search box.
+author: tscott98
+fileName: homegame.star
+packageName: homegame
+recommendedInterval: 1
+supports2x: false
+supports64x64: false
+category: sports
+tags:
+  - football
+  - college football
+  - ncaa
+  - countdown
+published: '2026-11-07T03:04:19Z'
+updated: '2026-11-08T06:58:29Z'

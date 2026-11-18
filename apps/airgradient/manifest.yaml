@@ -2,7 +2,7 @@
 id: airgradient
 name: AirGradient
 summary: AirGradient air monitor
-desc: Interfaces with AirGradient ONE and Open Air quality monitors via direct local network or Home Assistant, capturing the LED bar and screen metrics.
+desc: Interfaces with AirGradient ONE and Open Air quality monitors via direct local network, Home Assistant, or the AirGradient cloud API, capturing the LED bar and screen metrics.
 author: Brombomb
 fileName: airgradient.star
 packageName: airgradient
@@ -16,4 +16,4 @@ tags:
   - utility
   - real-time
 published: '2026-10-05T16:49:56Z'
-updated: '2026-10-07T16:38:36Z'
+updated: '2026-11-08T02:22:17Z'

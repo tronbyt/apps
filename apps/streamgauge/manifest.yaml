@@ -1,0 +1,18 @@
+---
+id: streamgauge
+name: Stream Gauge
+summary: River level and forecast
+desc: Water level at one or two USGS stream gauges, with recent readings and the National Weather Service forecast on one chart. When a river is forecast to reach flood stage, a flood screen shows the flood level and when the crest is due.
+author: tscott98
+fileName: stream_gauge.star
+packageName: streamgauge
+recommendedInterval: 15
+supports2x: true
+supports64x64: false
+category: weather
+tags:
+  - weather
+  - nature
+  - charts
+published: '2026-11-09T00:02:46Z'
+updated: '2026-11-09T01:29:50Z'
