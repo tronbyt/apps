@@ -17,9 +17,8 @@ DEFAULT_THEME = "gatsby"
 WIDTH, HEIGHT = canvas.size()
 S = 2 if canvas.is2x() else 1
 
-# Ornaments are drawn on a base grid (64x32 or 64x64) and scaled up by S.
-BW = WIDTH // S
-BH = HEIGHT // S
+# Ornaments are drawn at native resolution: S scales their size and spacing,
+# while lines stay 1px wide so they are as fine as the text on 2x panels.
 
 def is_square():
     w, h = canvas.size()
@@ -34,16 +33,16 @@ def fonts():
 
 TIME_FONT, DATE_FONT = fonts()
 
-# Drawing helpers (base grid units) ---------------------------------------------
+# Drawing helpers ---------------------------------------------------------------
 
 def rect(x, y, w, h, color):
     x0, y0 = max(x, 0), max(y, 0)
-    x1, y1 = min(x + w, BW), min(y + h, BH)
+    x1, y1 = min(x + w, WIDTH), min(y + h, HEIGHT)
     if x1 <= x0 or y1 <= y0:
         return []
     return [render.Padding(
-        pad = (x0 * S, y0 * S, 0, 0),
-        child = render.Box(width = (x1 - x0) * S, height = (y1 - y0) * S, color = color),
+        pad = (x0, y0, 0, 0),
+        child = render.Box(width = x1 - x0, height = y1 - y0, color = color),
     )]
 
 def outline(x, y, w, h, color):
@@ -54,7 +53,7 @@ def dots(points, color):
     # Turn a list of (x, y) pixels into one box per horizontal run.
     rows = {}
     for x, y in points:
-        if x >= 0 and x < BW and y >= 0 and y < BH:
+        if x >= 0 and x < WIDTH and y >= 0 and y < HEIGHT:
             rows.setdefault(y, {})[x] = True
     out = []
     for y in sorted(rows.keys()):
@@ -96,12 +95,12 @@ PI = math.pi
 
 def gatsby_decor(theme, box, _frame):
     gold, dim = theme["accent"], theme["accent2"]
-    mid = BH // 2
+    mid = HEIGHT // 2
 
     # Double frame with stepped corners.
     out = []
-    for inset, step, color in [(0, 4, gold), (2, 2, dim)]:
-        l, t, r, b = inset, inset, BW - 1 - inset, BH - 1 - inset
+    for inset, step, color in [(0, 4 * S, gold), (2 * S, 2 * S, dim)]:
+        l, t, r, b = inset, inset, WIDTH - 1 - inset, HEIGHT - 1 - inset
         out += dots(
             line_points(l + step, t, r - step, t) + line_points(l + step, b, r - step, b) +
             line_points(l, t + step, l, b - step) + line_points(r, t + step, r, b - step) +
@@ -113,63 +112,72 @@ def gatsby_decor(theme, box, _frame):
         )
 
     # Chevrons pointing in towards the time: above and below on square panels, otherwise beside it.
-    # Chevron i reaches x = 6 + 3i, so fit as many as leave a 2px gap before the text
+    # Chevron i reaches x = (6 + 3i)S, so fit as many as leave a 2S gap before the text
     # (a two-digit date like "MON NOV 10" leaves room for only two).
-    beside = 0 if is_square() else min(3, (box[0] - 8) // 3 + 1)
+    beside = 0 if is_square() else min(3, (box[0] - 8 * S) // (3 * S) + 1)
     pts = []
-    cx = BW // 2
+    cx = WIDTH // 2
+    arm = 2 * S
     for i in range(beside if beside > 0 else 3):
         if beside > 0:
-            for x, d in [(6 + 3 * i, 1), (BW - 7 - 3 * i, -1)]:
-                pts += line_points(x - 2 * d, mid - 2, x, mid) + line_points(x, mid, x - 2 * d, mid + 2)
+            for x, d in [((6 + 3 * i) * S, 1), (WIDTH - 1 - (6 + 3 * i) * S, -1)]:
+                pts += line_points(x - arm * d, mid - arm, x, mid) + line_points(x, mid, x - arm * d, mid + arm)
         else:
-            for y, d in [(6 + 3 * i, 1), (BH - 7 - 3 * i, -1)]:
-                pts += line_points(cx - 2, y - 2 * d, cx, y) + line_points(cx, y, cx + 2, y - 2 * d)
+            for y, d in [((6 + 3 * i) * S, 1), (HEIGHT - 1 - (6 + 3 * i) * S, -1)]:
+                pts += line_points(cx - arm, y - arm * d, cx, y) + line_points(cx, y, cx + arm, y - arm * d)
     out += dots(pts, gold)
 
     # Diamond clasps on the inner frame, top and bottom.
-    for y in [2, BH - 3]:
-        out += dots([(cx, y - 1), (cx - 1, y), (cx, y), (cx + 1, y), (cx, y + 1)], gold)
+    for y in [2 * S, HEIGHT - 1 - 2 * S]:
+        out += dots([
+            (cx + dx, y + dy)
+            for dx in range(-S, S + 1)
+            for dy in range(-S, S + 1)
+            if abs(dx) + abs(dy) <= S
+        ], gold)
     return out
 
 def sunburst_decor(theme, box, _frame):
     ray, gold = theme["accent2"], theme["accent"]
-    cx, cy = BW // 2, BH // 2
+    cx, cy = WIDTH // 2, HEIGHT // 2
 
     # Rays from the centre to evenly spaced points around the edge.
     pts = []
-    for x in range(0, BW + 1, 8):
-        pts += line_points(cx, cy, x, 0) + line_points(cx, cy, x, BH - 1)
-    for y in range(BH // 4, BH, BH // 4):
-        pts += line_points(cx, cy, 0, y) + line_points(cx, cy, BW - 1, y)
+    for x in range(0, WIDTH + 1, 8):
+        pts += line_points(cx, cy, x, 0) + line_points(cx, cy, x, HEIGHT - 1)
+    side = HEIGHT // (4 * S)
+    for y in range(side, HEIGHT, side):
+        pts += line_points(cx, cy, 0, y) + line_points(cx, cy, WIDTH - 1, y)
     out = dots(pts, ray)
 
     # Panel behind the time, with stepped gold tabs on each side.
-    l, t, r, b = box[0] - 3, box[1] - 2, box[2] + 3, box[3] + 2
+    l, t, r, b = box[0] - 3 * S, box[1] - 2 * S, box[2] + 3 * S, box[3] + 2 * S
     out += rect(l, t, r - l + 1, b - t + 1, theme["bg"])
     out += outline(l, t, r - l + 1, b - t + 1, gold)
     mid = (t + b) // 2
-    for x1, x2 in [(l - 2, l - 4), (r + 1, r + 3)]:
-        out += rect(x1, mid - 3, 2, 7, gold)
-        out += rect(x2, mid - 1, 2, 3, gold)
+    for x1, x2 in [(l - 2 * S, l - 4 * S), (r + 1, r + 1 + 2 * S)]:
+        out += rect(x1, mid - 3 * S, 2 * S, 6 * S + 1, gold)
+        out += rect(x2, mid - S, 2 * S, 2 * S + 1, gold)
     return out
 
 def tower(x, w, top, color, window, beacon, frame, seed):
     # A stepped skyscraper with three tiers and a spire.
     # frame is None for a still image; otherwise windows flicker and the beacon blinks.
     out = []
-    for inset, rise in [(0, 0), (2, 4), (4, 8)]:
-        y = top + 8 - rise
-        out += rect(x + inset, y, w - 2 * inset, BH - y, color)
-    sx = x + w // 2
-    out += rect(sx, top - 5, 1, 5, color)
+    for inset, rise in [(0, 0), (2 * S, 4 * S), (4 * S, 8 * S)]:
+        y = top + 8 * S - rise
+        out += rect(x + inset, y, w - 2 * inset, HEIGHT - y, color)
+    sx = x + (w - S) // 2
+    out += rect(sx, top - 5 * S, S, 5 * S, color)
     if frame == None or frame % 4 < 2:
-        out += rect(sx, top - 5, 1, 1, beacon)
+        out += rect(sx, top - 5 * S, S, S, beacon)
 
+    # Windows stay single pixels, so a 2x tower gets more of them.
+    # Start so the columns sit centred under the spire.
     lit = []
     k = seed
-    for wx in range(x + 1, x + w - 1, 2):
-        for wy in range(top + 11, BH - 2, 3):
+    for wx in range(x + 2 * S - 1, x + w - S, S + 1):
+        for wy in range(top + 11 * S, HEIGHT - 2 * S, 3):
             # Each window goes dark for a few frames, starting at its own point in the loop.
             phase = (k * 7 + k * k // 3) % SKYLINE_FRAMES
             if frame == None or (frame - phase) % SKYLINE_FRAMES >= SKYLINE_DARK:
@@ -183,13 +191,13 @@ SKYLINE_DARK = 4
 
 def skyline_decor(theme, _box, frame):
     body, window = theme["accent"], theme["accent2"]
-    tw = 11
+    tw = 11 * S
 
     # On square panels the time is wider, so the towers stand below it.
-    top = BH - 18 if is_square() else BH // 4
-    out = rect(0, BH - 1, BW, 1, body)
-    out += tower(1, tw, top, body, window, theme["beacon"], frame, 0)
-    out += tower(BW - 1 - tw, tw, top, body, window, theme["beacon"], frame, 5)
+    top = HEIGHT - 18 if is_square() else HEIGHT // 4
+    out = rect(0, HEIGHT - 1, WIDTH, 1, body)
+    out += tower(S, tw, top, body, window, theme["beacon"], frame, 0)
+    out += tower(WIDTH - S - tw, tw, top, body, window, theme["beacon"], frame, 5)
     return out
 
 EMERALD_RINGS = [6, 9, 12]
@@ -197,15 +205,16 @@ EMERALD_RINGS = [6, 9, 12]
 def emerald_decor(theme, _box, frame):
     # frame is None for a still image; otherwise a gold ripple runs out through the rings.
     gold, dim = theme["accent"], theme["accent2"]
-    w, h = BW - 1, BH - 1
-    out = rect(0, 0, BW, 1, gold) + rect(0, BH - 1, BW, 1, gold)
+    w, h = WIDTH - 1, HEIGHT - 1
+    out = rect(0, 0, WIDTH, 1, gold) + rect(0, HEIGHT - 1, WIDTH, 1, gold)
 
     pts = []
     glow = []
+    inner, outer = EMERALD_RINGS[0] * S, EMERALD_RINGS[-1] * S
     corners = [(0, 0, 0), (w, 0, PI / 2), (w, h, PI), (0, h, 3 * PI / 2)]
     for cx, cy, a in corners:
         for i, r in enumerate(EMERALD_RINGS):
-            ring = arc_points(cx, cy, r, a, a + PI / 2)
+            ring = arc_points(cx, cy, r * S, a, a + PI / 2)
             if frame == i:
                 glow += ring
             else:
@@ -215,17 +224,17 @@ def emerald_decor(theme, _box, frame):
         for k in [1, 2, 3]:
             ang = a + PI / 2 * k / 4
             pts += line_points(
-                int(math.round(cx + 6 * math.cos(ang))),
-                int(math.round(cy + 6 * math.sin(ang))),
-                int(math.round(cx + 12 * math.cos(ang))),
-                int(math.round(cy + 12 * math.sin(ang))),
+                int(math.round(cx + inner * math.cos(ang))),
+                int(math.round(cy + inner * math.sin(ang))),
+                int(math.round(cx + outer * math.cos(ang))),
+                int(math.round(cy + outer * math.sin(ang))),
             )
     out += dots(pts, dim)
     out += dots(glow, gold)
 
     disc = []
     for cx, cy, a in corners:
-        for r in range(4):
+        for r in range(4 * S):
             disc += arc_points(cx, cy, r, a, a + PI / 2)
     out += dots(disc, gold)
     return out
@@ -237,13 +246,14 @@ def miami_decor(theme, _box, _frame):
     # Streamline speed lines, sweeping in from the left at the top and the right at the bottom.
     for i, length in enumerate([18, 13, 8]):
         color = teal if i % 2 else pink
-        y = 3 + i * 3
-        out += rect(0, y, length, 1, color)
-        out += rect(BW - length, BH - 1 - y, length, 1, color)
+        y = (3 + i * 3) * S
+        out += rect(0, y, length * S, 1, color)
+        out += rect(WIDTH - length * S, HEIGHT - 1 - y, length * S, 1, color)
 
     # Porthole rings in the open corners.
-    out += dots(arc_points(BW - 7, 6, 3, 0, 2 * PI), teal)
-    out += dots(arc_points(6, BH - 7, 3, 0, 2 * PI), pink)
+    c = 6 * S
+    out += dots(arc_points(WIDTH - 1 - c, c, 3 * S, 0, 2 * PI), teal)
+    out += dots(arc_points(c, HEIGHT - 1 - c, 3 * S, 0, 2 * PI), pink)
     return out
 
 THEMES = {
@@ -316,14 +326,13 @@ def main(config):
     if config.bool("show_date", True):
         lines.append(render.Text(now.format("Mon Jan 2").upper(), font = DATE_FONT, color = theme["date"]))
 
-    # Bounding box of the centred text in base units: (left, top, right, bottom).
+    # Bounding box of the centred text: (left, top, right, bottom).
     text_w = max([t.size()[0] for t in lines])
     text_h = 0
     for t in lines:
         text_h += t.size()[1]
-    bw, bh = (text_w + S - 1) // S, (text_h + S - 1) // S
-    left, top = (BW - bw) // 2, (BH - bh) // 2
-    box = (left, top, left + bw - 1, top + bh - 1)
+    left, top = (WIDTH - text_w) // 2, (HEIGHT - text_h) // 2
+    box = (left, top, left + text_w - 1, top + text_h - 1)
 
     text = render.Box(
         width = WIDTH,
