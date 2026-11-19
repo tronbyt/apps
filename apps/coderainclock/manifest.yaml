@@ -1,0 +1,17 @@
+---
+id: code-rain-clock
+name: Code Rain Clock
+summary: Time shimmers through code rain
+desc: Green characters rain down the display. Wherever the rain passes the digits of the current time, the characters light up much brighter and keep a faint glow, so the time (HH:MM) slowly forms and shimmers through the rain.
+author: Sonic-79
+fileName: coderainclock.star
+packageName: coderainclock
+recommendedInterval: 0
+supports2x: true
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - clock
+  - animation
+  - wide 2x support
