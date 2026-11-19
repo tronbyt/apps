@@ -1,0 +1,18 @@
+---
+id: wortuhr
+name: Wortuhr
+summary: German word clock
+desc: Shows the time as a German sentence on a 16x5 letter grid, for example ES IST ZEHN VOR HALB ACHT. The words of the current time light up, the other letters stay dim, and four dots count the minutes between the five-minute steps.
+author: Sonic-79
+fileName: wortuhr.star
+packageName: wortuhr
+recommendedInterval: 0
+supports2x: true
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - clock
+  - german
+published: '2026-11-19T06:12:14Z'
+updated: '2026-11-19T06:12:14Z'
