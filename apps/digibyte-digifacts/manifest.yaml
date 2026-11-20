@@ -1,0 +1,19 @@
+---
+id: digibyte-digifacts
+name: DigiFacts
+summary: Facts about DigiByte
+desc: Shows a DigiFact - a bite-size fact about DigiByte - in your language. Choose the DigiFact of the day, or a random DigiFact each time. DigiFacts with a link end with a QR code to scan. DigiFacts are written by the DigiByte community - see github.com/DigiNode-Tools/digibyte-digifacts.
+author: DigiNode Tools
+fileName: digifacts.star
+packageName: digibyte-digifacts
+recommendedInterval: 30
+supports2x: true
+supports64x64: true
+category: education
+tags:
+  - crypto
+  - digibyte
+  - facts
+  - blockchain
+published: '2026-10-13T01:13:26Z'
+updated: '2026-10-13T15:55:23Z'

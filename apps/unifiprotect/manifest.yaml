@@ -1,0 +1,18 @@
+---
+id: unifi-protect
+name: UniFi Protect
+summary: Cameras on your panel
+desc: Puts a UniFi Protect camera on your display as a live snapshot, or shows a status board with cameras online, alarm arm state and UP Sense sensor alerts. By default it connects through the UniFi cloud and needs only an API key from unifi.ui.com. A direct local connection is also available, but for that the display must be able to resolve your console's hostname and trust its certificate. Motion and doorbell events are not included, as the official API only sends those over WebSocket.
+author: nsluke
+fileName: unifi_protect.star
+packageName: unifiprotect
+recommendedInterval: 1
+supports2x: true
+category: smart-home
+tags:
+  - tech
+  - smart-home
+  - real-time
+  - wide 2x support
+published: '2026-08-31T21:20:49Z'
+updated: '2026-09-02T00:23:54Z'

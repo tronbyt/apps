@@ -1,0 +1,17 @@
+---
+id: earthquake-map
+name: Earthquake Map
+summary: Map of global earthquakes
+desc: Display a map of earthquakes based on USGS data (v0.2.5).
+author: Brian McLaughlin (SpinStabilized)
+fileName: earthquake_map.star
+packageName: earthquakemap
+recommendedInterval: 5
+supports64x64: true
+category: science
+tags:
+  - science
+  - real-time
+  - tech
+published: '2022-12-02T16:30:01Z'
+updated: '2026-10-01T17:07:58Z'

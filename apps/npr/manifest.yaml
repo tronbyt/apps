@@ -1,0 +1,17 @@
+---
+id: 03453f94-7c15-4714-86b7-257156dbeaf2
+name: NPR News
+summary: NPR RSS Reader
+desc: NDisplays NPR News with a wide range of customizable options!
+author: W00tock
+recommendedInterval: 10
+fileName: npr_news.star
+packageName: npr
+supports64x64: true
+category: entertainment
+tags:
+  - news
+  - art
+  - media
+published: '2024-09-20T15:01:50Z'
+updated: '2026-10-01T18:46:01Z'

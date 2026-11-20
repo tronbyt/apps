@@ -1,0 +1,19 @@
+---
+id: air-series
+name: Air Series
+summary: Kinetic air quality & wind art
+desc: A kinetic atmospheric particle matrix inspired by Breakfast's artwork, visualizing Air Quality Index (AQI), PM2.5 particle density, and wind vectors in real time.
+author: brombomb
+fileName: air_series.star
+packageName: airseries
+recommendedInterval: 5
+supports2x: true
+category: weather
+tags:
+  - air
+  - aqi
+  - wind
+  - art
+  - real-time
+published: '2026-10-02T03:45:12Z'
+updated: '2026-10-02T03:45:12Z'

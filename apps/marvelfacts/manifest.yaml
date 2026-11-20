@@ -1,0 +1,17 @@
+---
+id: marvel-facts
+name: Marvel Facts
+summary: Character Info
+desc: Gives you the description or number of comics a random character has been in.
+author: Kaitlyn Musial
+fileName: marvel_facts.star
+packageName: marvelfacts
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - media
+  - fandom
+  - music
+published: '2022-11-10T15:02:16Z'
+updated: '2026-10-01T21:48:48Z'

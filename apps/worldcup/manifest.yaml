@@ -1,0 +1,15 @@
+---
+id: worldcup
+name: World Cup
+summary: Follow a World Cup country
+desc: Track your favorite country's World Cup matches, live scores, upcoming schedules, and team records.
+author: Brombomb
+fileName: worldcup.star
+packageName: worldcup
+recommendedInterval: 1
+supports2x: true
+category: sports
+tags:
+  - soccer
+published: '2026-06-08T04:42:40Z'
+updated: '2026-06-11T17:45:32Z'

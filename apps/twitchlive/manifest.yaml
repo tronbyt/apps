@@ -1,0 +1,18 @@
+---
+id: twitchlive
+name: Twitch Live
+summary: A streamer's live frame
+desc: Put in one Twitch channel and the panel shows what that stream looks like right now, scaled down to the pixels you have. When the channel is not streaming it says OFFLINE instead. The picture is the preview frame Twitch publishes for the channel, which the service regenerates every few minutes, so it is a window onto the stream rather than live video.
+author: nsluke
+fileName: twitch_live.star
+packageName: twitchlive
+recommendedInterval: 1
+supports2x: true
+supports64x64: true
+category: entertainment
+tags:
+  - gaming
+  - real-time
+  - wide 2x support
+published: '2026-10-01T17:17:59Z'
+updated: '2026-10-01T17:33:33Z'

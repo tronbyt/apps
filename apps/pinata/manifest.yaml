@@ -1,0 +1,18 @@
+---
+id: pinata
+name: Pinata
+summary: Smack a pinata until it bursts
+desc: A colorful pinata swings on its rope while a stick smacks it. Bits of paper and chunks fly off, and sometimes it bursts and spills candy. Stars, donkeys, llamas, fish, ice cream and cacti.
+author: tscott98
+fileName: pinata.star
+packageName: pinata
+recommendedInterval: 15
+supports2x: true
+category: entertainment
+tags:
+  - animation
+  - party
+  - fun
+  - wide 2x support
+published: '2026-11-15T03:06:24Z'
+updated: '2026-11-15T03:06:24Z'

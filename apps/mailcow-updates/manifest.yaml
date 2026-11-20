@@ -1,0 +1,19 @@
+---
+id: mailcow-updates
+name: Mailcow Updates
+summary: Mailcow server updates
+desc: Shows when a new mailcow release is available for your mailcow servers, comparing the version each one is running with the latest release on GitHub. Supports up to five servers. By default it only appears when there's an update.
+author: saltedlolly
+fileName: mailcow_updates.star
+packageName: mailcow-updates
+recommendedInterval: 5
+supports2x: true
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - utility
+  - self-hosted
+  - email
+published: '2026-11-20T15:56:56Z'
+updated: '2026-11-20T15:56:56Z'

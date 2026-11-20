@@ -1,0 +1,18 @@
+---
+id: nycalerts
+name: NYC Alerts
+summary: NYC emergency alert ticker
+desc: Scrolls live NYC emergency alerts from the official Notify NYC system. Color coded by category including fires, MTA disruptions, power outages, traffic incidents, Silver Alerts, and weather emergencies. Updates every 5 minutes.
+author: Rosie Domenech
+fileName: nycalerts.star
+packageName: nycalerts
+supports64x64: true
+category: news
+tags:
+  - news
+  - alerts
+  - nyc
+  - emergency
+  - local
+published: '2026-04-14T21:24:42Z'
+updated: '2026-10-01T18:22:49Z'

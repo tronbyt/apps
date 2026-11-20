@@ -1,0 +1,14 @@
+---
+id: playingoncapital
+name: PlayingOnCapital
+summary: Now Playing on Capital 604
+desc: Shows the current song playing on Capital Radio 604.
+author: Craig James Johnston
+recommendedInterval: 5
+supports64x64: true
+category: entertainment
+tags:
+  - music
+  - real-time
+published: '2024-10-01T19:28:45Z'
+updated: '2026-10-01T18:38:43Z'

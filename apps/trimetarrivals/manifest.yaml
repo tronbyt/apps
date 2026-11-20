@@ -1,0 +1,15 @@
+---
+id: trimet-arrivals
+name: TriMet Arrivals
+summary: Next arrivals at a bus stop
+desc: Simple app for displaying the next arrival at a bus stop.
+author: thedriver
+fileName: trimet_arrivals.star
+packageName: trimetarrivals
+recommendedInterval: 5
+category: transit
+tags:
+  - real-time
+  - utility
+published: '2023-04-27T13:36:38Z'
+updated: '2025-12-05T22:28:51Z'

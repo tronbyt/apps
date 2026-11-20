@@ -1,0 +1,16 @@
+---
+id: solaredge-prod
+name: SolarEdge_Prod
+summary: SolarEdge daily production
+desc: Monitor SolarEdge PV panel daily current and daily production.
+author: Billy_McSkintos
+recommendedInterval: 5
+fileName: solaredge_prod.star
+packageName: solaredgeprod
+category: utilities
+tags:
+  - utility
+  - tracking
+  - smart-home
+published: '2024-10-21T17:18:56Z'
+updated: '2025-12-17T23:02:59Z'

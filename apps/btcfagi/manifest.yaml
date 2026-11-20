@@ -1,0 +1,16 @@
+---
+id: btcfagi
+name: BtcFagi
+summary: BTC Fear And Greed Index
+desc: Shows the Fear And Greed Index for Bitcoin.
+author: PMK (@pmk)
+fileName: btcfagi.star
+packageName: btcfagi
+recommendedInterval: 1
+supports64x64: true
+category: finance
+tags:
+  - crypto
+  - finance
+published: '2023-10-07T18:32:12Z'
+updated: '2026-10-01T20:24:07Z'

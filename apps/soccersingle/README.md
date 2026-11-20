@@ -1,0 +1,54 @@
+# Track single soccer team across all global tournaments / leagues they are playing in
+
+Show upcoming / current / future game for a single soccer team across all leagues / tournaments they play in - one app tracks the team everywhere.  Handles all ESPN API leagues / tournaments.
+Approx 3000 teams globally are in this app (2500 men's teams & 500 women's teams - including professional, international and college)
+
+Displayed:
+
+- Home / Away Teams & current record (if applicable for current league / tournament)
+- Game's League / Tournament abbreviation
+- If future game: Date & Time of upcoming game
+- If inprogress game:  Score & Time
+- If past game:  Final Score  (as per ESPN API - scores flip over to next game at 1AM US ET - future version coming to assist with this)
+
+## Configuration
+- Enter text to search team name (minimum 4 characters) - Women's teams are prefixed with a W & Men's with an M
+- Which team to display first (home or away)
+- Select display format type
+- Select color for time (uses new schema.Color)
+- 12 hour vs 24 hour time & US vs Intl date format
+
+## Up to 4 teams on 2x displays
+
+When configuring a 2x (128x64) display, the settings add **Team 2 / Team 3 / Team 4** pickers (they don't
+appear for 1x displays). Each team's game is shown at once as its own 64x32 tile, in the display type you
+select (the same display type is used for every team):
+
+- 1 team: centered; 2 teams: side by side; 3 teams: two side by side over one centered; 4 teams: 2x2
+- If two of your teams play each other, the game is shown once
+- On a 1x display only the first team is shown
+
+![2x screenshot](soccersingle@2x.webp)
+
+## 2 teams on 64x64 square displays
+
+When configuring a square (64x64) display, the settings add a **Team 2** picker. The two teams' games are
+stacked, in the selected display type; with one team, its game is centered.
+
+![64x64 screenshot](soccersingle@64x64.webp)
+
+## Thanks
+
+Tons of thanks to @whyamihere/@rs7q5 for the API assistance - couldn't have gotten here without you
+Thanks to @dinotash/@dinosaursrarr for making me think deep thoughts about connected schema fields & @matslina for setting me straight.
+Of course - the original author of a bunch of this display code is @Lunchbox8484
+Thanks to @jesushairdo for the option to be able to show home or away team first.  Let's be more international :-)
+
+## Screenshot
+
+![screenshot](soccersingle-score-1.jpg)
+![screenshot](soccersingle-score-2.jpg)
+
+## Schema Search for Teams
+![screenshot](soccersingle-schema-teamsearch-3.jpg)
+![screenshot](soccersingle-schema-teamsearch-2.jpg)
