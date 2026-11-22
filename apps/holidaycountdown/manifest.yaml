@@ -1,0 +1,15 @@
+---
+id: holidaycountdown
+name: Holiday Countdown
+summary: Countdown to upcoming holidays
+desc: Shows the next upcoming holiday, cycles holidays within 7 days, or celebrates the day of. Includes toggles for US, Canadian, and cultural holidays.
+author: zandif
+fileName: holiday_countdown.star
+packageName: holidaycountdown
+recommendedInterval: 60
+supports2x: true
+category: lifestyle
+tags:
+  - holiday
+  - calendar
+  - wide 2x support
