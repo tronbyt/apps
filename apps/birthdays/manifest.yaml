@@ -1,0 +1,16 @@
+---
+id: birthdays
+name: Birthdays
+summary: Upcoming birthday countdowns
+desc: Displays upcoming birthdays with an animated cake and cycles through any occurring within the configured lookahead window.
+author: zandif
+fileName: birthdays.star
+packageName: birthdays
+recommendedInterval: 60
+supports2x: true
+category: lifestyle
+tags:
+  - family
+  - calendar
+published: '2026-11-11T00:00:00Z'
+updated: '2026-11-20T00:00:00Z'
