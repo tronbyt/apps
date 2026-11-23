@@ -8,7 +8,44 @@ load("schema.star", "schema")
 PROJECT_ID = "P3HEU9eRz5zrjI8c28n88adIDzyI"
 AUTH_HOST = "https://auth.sternpinball.com"
 REDIRECT_URI = "https://insider.sternpinball.com/auth/callback"
+FLOW_ID = "prd-sign-in-or-up"
+DEFAULT_FLOW_VERSION = 4
+DEFAULT_COMPONENTS_VERSION = "3.27.2"
+DEFAULT_INTERACTION_ID = "AMeyg_7npF"
 B64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+
+def get_descope_flow_config():
+    flow_version = DEFAULT_FLOW_VERSION
+    components_version = DEFAULT_COMPONENTS_VERSION
+    rep_cfg = http.get("%s/pages/%s/v2-beta/config.json" % (AUTH_HOST, PROJECT_ID))
+    if rep_cfg.status_code == 200:
+        cfg = rep_cfg.json()
+        flow_cfg = cfg.get("flows", {}).get(FLOW_ID, {})
+        if flow_cfg.get("version") != None:
+            flow_version = flow_cfg.get("version")
+        if cfg.get("componentsVersion"):
+            components_version = cfg.get("componentsVersion")
+    return flow_version, components_version
+
+def get_login_interaction_id(screen_id):
+    if not screen_id:
+        return DEFAULT_INTERACTION_ID
+    rep_screen = http.get("%s/pages/%s/v2-beta/%s.html" % (AUTH_HOST, PROJECT_ID, screen_id))
+    if rep_screen.status_code == 200:
+        body = rep_screen.body()
+        btn_idx = body.find('auto-submit="true"')
+        if btn_idx != -1:
+            tag_start = body.rfind("<descope-button", 0, btn_idx)
+            tag_end = body.find(">", btn_idx)
+            if tag_start != -1 and tag_end != -1:
+                tag = body[tag_start:tag_end]
+                id_idx = tag.find('id="')
+                if id_idx != -1:
+                    id_start = id_idx + 4
+                    id_end = tag.find('"', id_start)
+                    if id_end != -1:
+                        return tag[id_start:id_end]
+    return DEFAULT_INTERACTION_ID
 
 def hex_to_b64url(hex_str):
     res = []
@@ -48,19 +85,22 @@ def login(username, password):
     if cached_token:
         return cached_token
 
+    flow_version, components_version = get_descope_flow_config()
+
     verifier = "pixlet_starlark_descope_login_verifier_12345678901234"
     h = hash.sha256(verifier)
     challenge = hex_to_b64url(h)
     state = "pixlet_state_123456"
 
     # 1. Authorize
-    auth_url = "%s/oauth2/v1/%s/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=openid&state=%s&code_challenge=%s&code_challenge_method=S256&flow=prd-sign-in-or-up" % (
+    auth_url = "%s/oauth2/v1/%s/authorize?client_id=%s&redirect_uri=%s&response_type=code&scope=openid&state=%s&code_challenge=%s&code_challenge_method=S256&flow=%s" % (
         AUTH_HOST,
         PROJECT_ID,
         PROJECT_ID,
         REDIRECT_URI,
         state,
         challenge,
+        FLOW_ID,
     )
     rep = http.get(auth_url)
     if rep.status_code != 200:
@@ -86,7 +126,7 @@ def login(username, password):
         start_headers["Cookie"] = cookies
 
     start_body = json.encode({
-        "flowId": "prd-sign-in-or-up",
+        "flowId": FLOW_ID,
         "options": {
             "baseUrl": AUTH_HOST,
             "oidcIdpStateId": state_id,
@@ -94,9 +134,9 @@ def login(username, password):
             "oidcErrorRedirectUri": REDIRECT_URI,
         },
         "flowVersions": {
-            "prd-sign-in-or-up": 3,
+            FLOW_ID: flow_version,
         },
-        "componentsVersion": "3.27.2",
+        "componentsVersion": components_version,
         "input": {"origin": AUTH_HOST},
     })
 
@@ -107,6 +147,8 @@ def login(username, password):
 
     start_data = rep_start.json()
     execution_id = start_data.get("executionId")
+    step_id = start_data.get("stepId") or "1"
+    interaction_id = get_login_interaction_id(start_data.get("screen", {}).get("id", ""))
     nonce = rep_start.headers.get("X-Descope-Flow-Nonce") or rep_start.headers.get("x-descope-flow-nonce")
 
     # 3. Flow Next (Credentials)
@@ -126,10 +168,10 @@ def login(username, password):
 
     next_body = json.encode({
         "executionId": execution_id,
-        "stepId": "1",
-        "interactionId": "AMeyg_7npF",
-        "version": 3,
-        "componentsVersion": "3.27.2",
+        "stepId": step_id,
+        "interactionId": interaction_id,
+        "version": flow_version,
+        "componentsVersion": components_version,
         "input": {
             "email": username,
             "password": password,
