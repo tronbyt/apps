@@ -2,7 +2,7 @@
 id: microseasons
 name: Microseasons
 summary: 72 Japanese microseasons
-desc: Displays today's Japanese microseason (Shichijuni-ko) in English or Japanese Romaji on its daily Iro-goyomi traditional color background, with optional daily phrase and color note screens. Inspired by and using seasonal/color data from Koyomina (koyomina.com).
+desc: Displays today's Japanese microseason (Shichijuni-ko) in English or Romaji on its daily Iro-goyomi color, with optional phrase and color note screens. Data from koyomina.com.
 author: Brombomb
 fileName: microseasons.star
 packageName: microseasons
@@ -14,4 +14,3 @@ tags:
   - nature
   - calendar
   - art
-  - local
