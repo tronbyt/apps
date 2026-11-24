@@ -1,7 +1,7 @@
 """
 Applet: PWHL Scores
 Summary: PWHL scores and schedule
-Description: Live PWHL game scores, or the next/most-recent game when nothing is live. Optionally filter to a single favorite team. Data and logos from the PWHL (HockeyTech) feed.
+Description: Live PWHL game scores in a scorebug layout. After a game ends, the final alternates with the next game for a while. Optionally filter to a single favorite team. Data and logos from the PWHL (HockeyTech) feed.
 Author: hiawatha98
 """
 
@@ -32,6 +32,16 @@ DEFAULT_LOCATION = '{"timezone": "America/New_York"}'
 ISO_FMT = "2006-01-02T15:04:05Z07:00"
 LIVE_WINDOW = "5h"  # a started game is only treated as live for this long
 
+# After a game goes final it alternates with the next game until this long
+# after its scheduled start. 18h holds a 7 PM game's final until about 1 PM
+# the next day; a game that starts sooner takes over once it is live.
+FINAL_HOLD = "18h"
+
+# Each frame of the final/next pair is shown this long. Tronbyt cuts an app
+# off at its display time (8s by default on this device) unless "show full
+# animation" is on, so two 4s frames fit the slot; a longer slot just loops.
+PAIR_FRAME_MS = 4000
+
 # HockeyTech publishes no status enum, so match on GameStatusString's text
 # rather than on numeric codes. "Unofficial Final" contains "final" and so
 # counts as complete, which is what we want: the score is real, only the stats
@@ -39,11 +49,18 @@ LIVE_WINDOW = "5h"  # a started game is only treated as live for this long
 LIVE_STATUS = "2"
 DISRUPTED_MARKS = ["postpone", "suspend", "cancel", "delay"]
 
-BAR_LIVE = "#cc2222"
-BAR_FINAL = "#444444"
-BAR_NEXT = "#1a6dc1"
+# 1px strip across the top: the only remnant of the old status bar.
+STRIP_LIVE = "#cc2222"
+STRIP_FINAL = "#444444"
+STRIP_NEXT = "#1a6dc1"
+
 WHITE = "#ffffff"
+GRAY = "#8a8a8a"
+DIM = "#6a6a6a"
 AMBER = "#ffb300"
+LIVE_RED = "#ff4040"
+
+ORDINALS = {1: "1ST", 2: "2ND", 3: "3RD"}
 
 def main(config):
     team = config.get("team", "all")
@@ -57,11 +74,26 @@ def main(config):
     if team != "all":
         games = [g for g in games if g["HomeID"] == team or g["VisitorID"] == team]
 
-    kind, game = pick_game(games, now)
-    if game == None:
-        return message("No games")
+    live, upcoming, past = pick_games(games, now)
+    scale = 2 if is_2x() else 1
 
-    return render_game(kind, game, tz)
+    if live != None:
+        return render.Root(child = scorebug(live, "live", scale, now, tz))
+
+    fresh_final = past != None and now - parse_start(past) < time.parse_duration(FINAL_HOLD)
+    if fresh_final and upcoming != None:
+        return render.Root(
+            delay = PAIR_FRAME_MS,
+            child = render.Animation(children = [
+                scorebug(past, "final", scale, now, tz),
+                scorebug(upcoming, "next", scale, now, tz),
+            ]),
+        )
+    if upcoming != None and not fresh_final:
+        return render.Root(child = scorebug(upcoming, "next", scale, now, tz))
+    if past != None:
+        return render.Root(child = scorebug(past, "final", scale, now, tz))
+    return message("No games")
 
 def fetch_games():
     resp = http.get(SCOREBAR_URL, ttl_seconds = 60)
@@ -89,6 +121,9 @@ def period_number(game):
     period = game.get("Period", "")
     return int(period) if period.isdigit() else 0
 
+def is_shootout(game):
+    return game.get("PeriodNameShort", "").upper() == "SO"
+
 def is_live(game, start, now, window):
     # Require a positive in-progress signal. Treating "started and not final" as
     # live shows postponed and suspended games as though they were being played,
@@ -99,10 +134,11 @@ def is_live(game, start, now, window):
         return False
     return period_number(game) > 0
 
-def pick_game(games, now):
-    # Prefer a live game; else the soonest upcoming; else the most recent final.
-    # A game that matches none of those - disrupted, or started long ago and
-    # never finalised - is left out rather than shown as something it is not.
+def pick_games(games, now):
+    # Returns (live, upcoming, past): the earliest-started live game, the
+    # soonest upcoming game, and the most recent final. A game that matches
+    # none of those - disrupted, or started long ago and never finalised - is
+    # left out rather than shown as something it is not.
     window = time.parse_duration(LIVE_WINDOW)
     live = None
     upcoming = None
@@ -120,50 +156,153 @@ def pick_game(games, now):
         elif start > now:
             if upcoming == None or start < upcoming[0]:
                 upcoming = (start, g)
-
-    if live != None:
-        return ("live", live[1])
-    if upcoming != None:
-        return ("next", upcoming[1])
-    if past != None:
-        return ("final", past[1])
-    return (None, None)
-
-def render_game(kind, game, tz):
-    scale = 2 if is_2x() else 1
-    away_logo = fetch_logo(game["VisitorLogo"])
-    home_logo = fetch_logo(game["HomeLogo"])
-
-    if kind == "final":
-        bar_color = BAR_FINAL
-        bar_text = final_text(game)
-        center = score_widget(game, scale)
-    elif kind == "next":
-        bar_color = BAR_NEXT
-        bar_text = parse_start(game).in_location(tz).format("Jan 2 3:04 PM")
-        center = render.Text(content = "VS", font = small_font(scale), color = AMBER)
-    else:
-        bar_color = BAR_LIVE
-        bar_text = live_text(game)
-        center = score_widget(game, scale)
-
-    return render.Root(
-        child = render.Column(
-            children = [
-                status_bar(bar_color, bar_text, scale),
-                render.Row(
-                    expanded = True,
-                    main_align = "space_between",
-                    cross_align = "center",
-                    children = [
-                        team_widget(away_logo, game["VisitorCode"], scale),
-                        center,
-                        team_widget(home_logo, game["HomeCode"], scale),
-                    ],
-                ),
-            ],
-        ),
+    return (
+        live[1] if live != None else None,
+        upcoming[1] if upcoming != None else None,
+        past[1] if past != None else None,
     )
+
+# ---------------------------------------------------------------------------
+# Labels. The feed's PeriodNameShort is a bare "1"/"2"/"3" and GameClock is
+# zero-padded ("06:49"), so both are rebuilt here rather than shown as-is.
+
+def period_label(game):
+    if is_shootout(game):
+        return "SO"
+    n = period_number(game)
+    if n in ORDINALS:
+        return ORDINALS[n]
+    if n == 4:
+        return "OT"
+    if n > 4:
+        return "%dOT" % (n - 3)  # playoff multi-OT: 5 -> 2OT
+    return game.get("PeriodNameShort", "").upper()
+
+def clock_label(game):
+    clock = game.get("GameClock", "")
+    if clock.startswith("0") and len(clock) > 1 and clock[1] != ":":
+        clock = clock[1:]  # "06:49" -> "6:49", but "0:42" stays
+    return clock
+
+def final_suffix(game):
+    if is_shootout(game):
+        return "SO"
+    if period_number(game) > 3:
+        return "OT" if period_number(game) == 4 else "%dOT" % (period_number(game) - 3)
+    return ""
+
+def day_label(start, now):
+    if start.format("2006-01-02") == now.format("2006-01-02"):
+        return "TODAY"
+    if start - now < time.parse_duration("144h"):
+        return start.format("Mon").upper()  # within the week: TUE
+    return start.format("1/2")  # further out: 11/30
+
+# ---------------------------------------------------------------------------
+# Layout (1x numbers; everything is multiplied by scale on 2x hardware):
+#   row 0       1px colour strip (red live / gray final / blue next)
+#   rows 6-25   20x20 logos at x=1 and x=43
+#   x 21-42     22px centre column: a vertically centred stack of lines
+
+def scorebug(game, kind, scale, now, tz):
+    if kind == "live":
+        strip, center = STRIP_LIVE, live_center(game, scale)
+    elif kind == "final":
+        strip, center = STRIP_FINAL, final_center(game, scale)
+    else:
+        start = parse_start(game).in_location(tz)
+        strip, center = STRIP_NEXT, next_center(start, now, scale)
+
+    return render.Column(
+        children = [
+            render.Box(width = canvas.width(), height = scale, color = strip),
+            render.Row(
+                expanded = True,
+                main_align = "space_between",
+                cross_align = "center",
+                children = [
+                    logo_widget(game["VisitorLogo"], game["VisitorCode"], scale),
+                    render.Box(width = 22 * scale, height = canvas.height() - scale, child = center),
+                    logo_widget(game["HomeLogo"], game["HomeCode"], scale),
+                ],
+            ),
+        ],
+    )
+
+def is_intermission(game):
+    # The feed's Intermission flag stays "0" during real intermissions; what it
+    # does do is freeze GameClock at "00:00" for the period that just ended.
+    if game.get("Intermission", "") == "1":
+        return True
+    return period_number(game) > 0 and game.get("GameClock", "").replace(":", "").strip("0") == ""
+
+def live_center(game, scale):
+    if is_shootout(game):
+        line1, color1, line2 = "SO", LIVE_RED, ""
+    elif is_intermission(game):
+        line1, color1, line2 = "END", AMBER, period_label(game)
+    else:
+        line1, color1, line2 = period_label(game), LIVE_RED, clock_label(game)
+    return stack([
+        score_row(game, scale, False),
+        gap(3, scale),
+        small(line1, color1, scale),
+        gap(1, scale),
+        small(line2, WHITE, scale),
+    ])
+
+def final_center(game, scale):
+    return stack([
+        score_row(game, scale, True),
+        gap(3, scale),
+        small("FINAL", GRAY, scale),
+        gap(1, scale),
+        small(final_suffix(game), AMBER, scale),
+    ])
+
+def next_center(start, now, scale):
+    return stack([
+        small(day_label(start, now), AMBER, scale),
+        render.Text(content = start.format("3:04"), font = score_font(scale), color = WHITE),
+        gap(1, scale),
+        small(start.format("PM"), GRAY, scale),
+    ])
+
+def stack(children):
+    return render.Column(main_align = "center", cross_align = "center", children = children)
+
+def gap(px, scale):
+    return render.Box(width = 1, height = px * scale)
+
+def small(text, color, scale):
+    # An empty line still takes its height so the stack doesn't shift between
+    # FINAL and FINAL/OT.
+    if text == "":
+        return render.Box(width = 1, height = small_height(scale))
+    return render.Text(content = text, font = small_font(scale), color = color)
+
+def score_row(game, scale, dim_loser):
+    away, home = game["VisitorGoals"], game["HomeGoals"]
+    away_color, home_color = WHITE, WHITE
+    if dim_loser and away.isdigit() and home.isdigit():
+        if int(away) > int(home):
+            home_color = DIM
+        elif int(home) > int(away):
+            away_color = DIM
+    font = score_font(scale)
+    return render.Row(children = [
+        render.Text(content = away, font = font, color = away_color),
+        render.Text(content = "-", font = font, color = GRAY),
+        render.Text(content = home, font = font, color = home_color),
+    ])
+
+def logo_widget(url, code, scale):
+    logo = fetch_logo(url)
+    if logo != None:
+        child = render.Image(src = logo, width = 20 * scale, height = 20 * scale)
+    else:
+        child = render.Text(content = code, font = small_font(scale), color = WHITE)
+    return render.Box(width = 21 * scale, height = 20 * scale, child = child)
 
 def is_2x():
     # canvas.is2x() is the documented signal, but the released pixlet CLI never
@@ -172,49 +311,13 @@ def is_2x():
     return canvas.is2x() or canvas.width() >= 128
 
 def small_font(scale):
-    # terminus-16 is the default 2x font, but it is too tall for the status bar;
-    # terminus-12 keeps the same proportions the 1x bar has with tom-thumb.
     return "terminus-12" if scale == 2 else "tom-thumb"
+
+def small_height(scale):
+    return 12 if scale == 2 else 6
 
 def score_font(scale):
     return "terminus-16" if scale == 2 else "tb-8"
-
-def status_bar(color, text, scale):
-    return render.Box(
-        width = canvas.width(),
-        height = 7 * scale,
-        color = color,
-        child = render.Marquee(
-            width = canvas.width() - 2 * scale,
-            child = render.Text(content = text, font = small_font(scale), color = WHITE),
-        ),
-    )
-
-def team_widget(logo, code, scale):
-    if logo != None:
-        child = render.Image(src = logo, width = 22 * scale, height = 22 * scale)
-    else:
-        child = render.Text(content = code, font = small_font(scale), color = WHITE)
-    return render.Box(width = 24 * scale, height = 24 * scale, child = child)
-
-def score_widget(game, scale):
-    return render.Text(
-        content = "%s-%s" % (game["VisitorGoals"], game["HomeGoals"]),
-        font = score_font(scale),
-        color = WHITE,
-    )
-
-def final_text(game):
-    if game.get("PeriodNameShort", "") == "SO":
-        return "FINAL/SO"
-    if period_number(game) > 3:
-        return "FINAL/OT"
-    return "FINAL"
-
-def live_text(game):
-    if game.get("Intermission", "") == "1":
-        return game.get("PeriodNameShort", "") + " INT"
-    return game.get("PeriodNameShort", "") + " " + game.get("GameClock", "")
 
 def fetch_logo(url):
     if url == "":
