@@ -2,7 +2,7 @@
 id: pwhl-scores
 name: PWHL Scores
 summary: PWHL scores and schedule
-desc: Live scores from the Professional Women's Hockey League, straight from the league's own feed - no API key and no third-party service in the middle. Shows one game at a time, picked for you - a game in progress with its period and clock, otherwise the next game on the schedule with its start time in your timezone, otherwise the most recent final with the score. Team logos come from the league, so expansion clubs appear as soon as they are added. Filter to a favorite team, or let it cycle the whole league.
+desc: Live scores from the Professional Women's Hockey League, straight from the league's own feed - no API key and no third-party service in the middle. A scorebug puts both teams' logos either side of the score, with the period and clock while a game is on. Once a game ends, its final alternates with the next game until midday the following day; otherwise you see the next game's day and start time in your timezone. Team logos come from the league, so expansion clubs appear as soon as they are added. Filter to a favorite team, or follow the whole league.
 author: hiawatha98
 fileName: pwhlscores.star
 packageName: pwhlscores
@@ -15,4 +15,4 @@ tags:
   - sports
   - scores
 published: '2026-09-03T00:55:56Z'
-updated: '2026-10-01T19:04:39Z'
+updated: '2026-11-24T19:42:39Z'
