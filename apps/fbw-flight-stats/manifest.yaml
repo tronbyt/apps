@@ -1,0 +1,17 @@
+---
+id: flybywire-flights
+name: FlyByWire Flights
+summary: FlyByWire Number of Flights
+desc: Shows a count of the number of flights using the FlyByWire Simulations systems.
+author: Philippe Dellaert (pdellaert)
+recommendedInterval: 5
+fileName: flybywire_flights.star
+packageName: fbw-flight-stats
+supports64x64: true
+category: transit
+tags:
+  - sports
+  - utility
+  - gaming
+published: '2024-09-25T14:41:29Z'
+updated: '2026-10-01T21:00:02Z'

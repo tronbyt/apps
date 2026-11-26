@@ -1,0 +1,19 @@
+---
+id: ahlscores
+name: AHL Scores
+summary: Live AHL scores and game status
+desc: Displays live, scheduled, and final scores for the American Hockey League with team colors, logos, and status indicators.
+author: zandif
+fileName: ahl_scores.star
+packageName: ahlscores
+recommendedInterval: 5
+category: sports
+tags:
+  - ahl
+  - hockey
+  - sports
+  - scores
+  - wide 2x support
+supports2x: true
+published: '2026-11-22T18:09:04Z'
+updated: '2026-11-22T18:09:04Z'

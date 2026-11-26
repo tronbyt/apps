@@ -1,0 +1,13 @@
+---
+id: asteroids
+name: Asteroids
+summary: Retro space arcade simulation
+desc: A vector-style animation featuring a ship navigating a hazardous asteroid field with realistic physics and explosive collisions.
+author: Mark Greinke
+fileName: asteroids.star
+packageName: asteroids
+published: '2026-05-06T17:34:49Z'
+updated: '2026-10-01T20:09:53Z'
+supports64x64: true
+category: gaming
+tags: []

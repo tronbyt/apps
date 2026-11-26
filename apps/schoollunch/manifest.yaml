@@ -1,0 +1,16 @@
+---
+id: school-lunch
+name: School Lunch
+summary: School lunch from MealViewer
+desc: Displays today's or tomorrow's school lunch menu from MealViewer.com with optional school logo.
+author: zandif
+fileName: school_lunch.star
+packageName: schoollunch
+recommendedInterval: 60
+supports2x: true
+category: food
+tags:
+  - school
+  - food
+published: '2026-11-22T18:16:49Z'
+updated: '2026-11-22T18:16:49Z'

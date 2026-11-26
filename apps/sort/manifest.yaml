@@ -1,0 +1,16 @@
+---
+id: sort
+name: Sort
+summary: Show sorting algorithms
+desc: Show various sorting algorithms.
+author: noahpodgurski
+fileName: sort.star
+packageName: sort
+recommendedInterval: 5
+category: education
+tags:
+  - tech
+  - education
+  - art
+published: '2023-06-15T15:08:08Z'
+updated: '2025-12-02T19:30:22Z'

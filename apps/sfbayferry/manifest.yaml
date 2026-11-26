@@ -1,0 +1,14 @@
+---
+id: sf-bay-ferry
+name: SF Bay Ferry
+summary: SFBF departures times
+desc: Display next departure times for SF Bay Ferry routes.
+author: nyergler
+fileName: sfbf.star
+packageName: sfbayferry
+recommendedInterval: 5
+supports64x64: true
+category: transit
+tags: []
+published: '2023-09-05T17:42:44Z'
+updated: '2026-10-01T22:41:51Z'

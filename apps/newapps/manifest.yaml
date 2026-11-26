@@ -1,0 +1,16 @@
+---
+id: new-apps
+name: New Apps
+summary: Lists new Tidbyt apps
+desc: Lists new Tidbyt apps within the last week.
+author: rs7q5
+fileName: new_apps.star
+packageName: newapps
+recommendedInterval: 60
+category: utilities
+tags:
+  - tidbyt
+  - utility
+  - tech
+published: '2023-01-23T18:10:49Z'
+updated: '2025-11-30T19:58:27Z'

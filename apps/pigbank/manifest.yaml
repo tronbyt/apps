@@ -1,0 +1,18 @@
+---
+id: pigbank
+name: PigBank
+summary: Kid's allowance piggy bank
+desc: Shows your child's PigBank balance, one screen per savings piggy with the piglets due next allowance, and blinks a reminder on allowance day. Generate the key in the PigBank app (pigbank.com.br), under Ajustes.
+author: acidio
+fileName: pigbank.star
+packageName: pigbank
+recommendedInterval: 5
+supports2x: false
+supports64x64: true
+category: finance
+tags:
+  - finance
+  - kids
+  - allowance
+published: '2026-09-19T19:09:48Z'
+updated: '2026-10-01T22:17:11Z'

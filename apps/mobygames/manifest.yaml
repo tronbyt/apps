@@ -1,0 +1,17 @@
+---
+id: moby-games
+name: MobyGames
+summary: Game info from MobyGames
+desc: Display information about random games from the extensive MobyGames database. Includes basic information such as a thumbnail, year of release, etc.
+author: pandincus
+fileName: moby_games.star
+packageName: mobygames
+supports64x64: true
+category: gaming
+tags:
+  - gaming
+  - retro
+  - tech
+  - education
+published: '2023-11-07T14:44:32Z'
+updated: '2026-10-01T21:54:45Z'

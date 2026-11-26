@@ -1,0 +1,14 @@
+---
+id: subwave-nowplaying
+name: SUBWAVE Now Playing
+summary: SUB/WAVE radio now playing
+desc: Configure with your SUB/WAVE (github.com/perminder-klair/subwave) station's base URL to display the current track, artist, show, host, listener count, album art, time/temp, and a progress bar. Supports 1x and 2x displays.
+author: poprhythm
+supports2x: true
+category: entertainment
+tags:
+  - music
+  - radio
+recommendedInterval: 0
+published: '2026-11-21T17:45:07Z'
+updated: '2026-11-21T17:45:07Z'

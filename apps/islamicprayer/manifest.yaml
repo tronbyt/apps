@@ -1,0 +1,17 @@
+---
+id: islamic-prayer
+name: Islamic Prayer
+summary: Islamic prayer times
+desc: Islamic prayer times for the day.
+author: Austin Fonacier
+fileName: islamic_prayer.star
+packageName: islamicprayer
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - lifestyle
+  - clock
+  - utility
+published: '2022-05-10T00:35:54Z'
+updated: '2026-10-01T21:37:10Z'

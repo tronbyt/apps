@@ -1,0 +1,18 @@
+---
+id: iss-location
+name: ISS Location
+summary: 'Current ISS city/country '
+desc: Current city/country/ocean the ISS is flying over.
+author: carmineguida
+fileName: iss_location.star
+packageName: isslocation
+recommendedInterval: 5
+supports64x64: true
+category: science
+tags:
+  - space
+  - science
+  - local
+  - real-time
+published: '2023-05-12T16:16:30Z'
+updated: '2026-10-01T21:37:10Z'

@@ -1,0 +1,17 @@
+---
+id: github-stargazers
+name: GitHub Stargazers
+summary: Display GitHub repo stars
+desc: Display the GitHub stargazer count for a repo.
+author: fulghum
+fileName: github_stargazers.star
+packageName: githubstargazers
+recommendedInterval: 5
+supports64x64: true
+category: utilities
+tags:
+  - tech
+  - utility
+  - count
+published: '2022-12-05T16:21:13Z'
+updated: '2026-10-01T21:17:57Z'

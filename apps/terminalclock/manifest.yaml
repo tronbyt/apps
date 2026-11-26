@@ -1,0 +1,19 @@
+---
+id: terminal-clock
+name: Terminal Clock
+summary: A shell that types date
+desc: A cursor blinks behind a shell prompt, then the command date is typed letter by letter and the terminal prints the current date and time like GNU date does. Choose green, amber, white or bash colors and your own prompt.
+author: Sonic-79
+fileName: terminalclock.star
+packageName: terminalclock
+recommendedInterval: 0
+supports2x: true
+supports64x64: true
+category: clocks
+tags:
+  - time
+  - clock
+  - linux
+  - wide 2x support
+published: '2026-11-19T06:51:12Z'
+updated: '2026-11-19T06:51:12Z'

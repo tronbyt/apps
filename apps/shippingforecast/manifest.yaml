@@ -1,0 +1,14 @@
+---
+id: shipping-forecast
+name: Shipping Forecast
+summary: Bespoke shipping forecasts
+desc: Provides the weather for a location in a nice, pleasant, calming, shipping forecast style. All the vibes without the shortwave static. Displays wind, conditions, and visability.
+author: lumberbarons
+recommendedInterval: 5
+supports64x64: true
+category: weather
+tags:
+  - weather
+  - utility
+published: '2025-03-06T17:26:24Z'
+updated: '2026-10-01T22:41:51Z'

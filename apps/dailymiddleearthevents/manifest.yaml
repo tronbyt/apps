@@ -1,0 +1,17 @@
+---
+id: daily-middle-earth-events
+name: Third Age Events
+summary: Third Age events by date
+desc: Shows events from Middle-earth's Third Age (The Hobbit and The Lord of the Rings) that happened on today's date, each tagged by book. Shows one event per cycle or all of the day's events, and on days with no events plays an animated scene or shows "No Events". Uses the device's timezone; no setup needed.
+author: vhw46wpn4t-boop
+fileName: daily_middle_earth_events.star
+packageName: dailymiddleearthevents
+recommendedInterval: 15
+category: entertainment
+tags:
+  - books
+  - fantasy
+  - calendar
+  - animated
+published: '2026-11-14T20:11:42Z'
+updated: '2026-11-14T21:52:28Z'

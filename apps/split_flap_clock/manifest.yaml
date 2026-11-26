@@ -1,0 +1,16 @@
+---
+id: split-flap-clock
+name: Split Flap Clock
+summary: Mechanical flip clock
+desc: A mechanical split-flap clock that shuffles through characters to show the current date and time.
+author: Brombomb
+fileName: split_flap_clock.star
+packageName: splitflapclock
+recommendedInterval: 1
+supports2x: true
+category: clocks
+tags:
+  - retro
+  - clock
+published: '2026-05-15T19:01:04Z'
+updated: '2026-05-19T04:03:00Z'

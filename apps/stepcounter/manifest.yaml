@@ -1,0 +1,14 @@
+---
+id: step-counter
+name: Step Counter
+summary: Tracks Daily Step Progress
+desc: Fetches your Step Data from Google Fit, Reports progress versus daily goal.
+author: Matt-Pesce
+fileName: stepcounter.star
+packageName: stepcounter
+recommendedInterval: 5
+category: lifestyle
+tags:
+  - lifestyle
+published: '2022-04-27T14:36:15Z'
+updated: '2025-12-23T13:24:18Z'
