@@ -15,7 +15,7 @@ CAA_GROUP_URL = "https://coverartarchive.org/release-group/%s/front-250"
 MB_SEARCH_URL = "https://musicbrainz.org/ws/2/recording/"
 
 HEADERS = {
-    "User-Agent": "TidbytListenBrainz/1.0 (https://github.com/theli-ua/tidbyt-listenbrainz)",
+    "User-Agent": "TidbytListenBrainz/1.0 (https://github.com/tronbyt/apps)",
 }
 
 TRACK_FONT = "tom-thumb"
