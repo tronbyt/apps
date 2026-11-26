@@ -1,0 +1,14 @@
+---
+id: listenbrainz-now-playing
+name: ListenBrainz
+summary: ListenBrainz Now Playing
+desc: Shows the track, artist and album art currently playing for any ListenBrainz user. When nothing is playing, the app renders nothing and is hidden from rotation.
+author: theli-ua
+fileName: listenbrainz_now_playing.star
+packageName: listenbrainz
+recommendedInterval: 1
+category: entertainment
+tags:
+  - music
+published: '2026-11-26T01:00:11Z'
+updated: '2026-11-26T01:33:53Z'
